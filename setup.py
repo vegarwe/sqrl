@@ -3,7 +3,7 @@ try:
 except:
     from disutils.core import setup
 
-dependencies = ['docopt', 'ed25519', 'pyinotify']
+dependencies = ['docopt', 'ed25519', 'pyinotify', 'scrypt']
 
 setup(
     name='sqrl',

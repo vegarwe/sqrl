@@ -21,6 +21,11 @@ class MKM:
         if not os.path.exists(self.path):
             os.mkdir(self.path)
 
+    def _list_accounts(self):
+        # Collect a list of .skey files
+        # their name is the is the name of the account
+        pass
+
     def _create_key(self):
         sk, vk = ed25519.create_keypair()
         self._store_key(sk)
