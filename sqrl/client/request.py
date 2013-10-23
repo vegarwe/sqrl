@@ -55,7 +55,7 @@ class SQRLRequest():
                  self.key, self.url.domain, __sqrlver__)
 
         if response.status == 200:
-            msg = "Authentication Successful!"
+            msg = "===\nAuthentication Successful!"
             print msg
             return True, msg
         else:
