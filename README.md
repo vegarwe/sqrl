@@ -36,18 +36,18 @@ The this package requires **ed25519**, **docopt** and **pyinotify**
 
 Usage
 -----
-        Usage: sqrl [-d] [-n] [-l] [--id <AccountID>] [--create="<Name>"] [--path=<Dir>] [<SQRLURL>]
+    Usage: sqrl [-d] [-n] [-l] [--id <AccountID>] [--create="<Name>"] [--path=<Dir>] [<SQRLURL>]
 
-        Options:
-        -d               Debugging output
-        -l               List Accounts
-        -id              Set an account as Default
-        -c <Your Name>   Create Account
-        -n               Notify via libnotify (Gnome)
-        -p --path=<Dir>  Path for config and key storage
+    Options:
+    -d               Debugging output
+    -l               List Accounts
+    -id              Set an account as Default
+    -c <Your Name>   Create Account
+    -n               Notify via libnotify (Gnome)
+    -p --path=<Dir>  Path for config and key storage
 
-        Example:
-            sqrl "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
+    Example:
+        sqrl "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 
 You feed the sqrl URL provided by the authentication service to the script and
 it uses it to submit and authentication request on your behalf. Based on how
@@ -59,6 +59,7 @@ Features
 * **Debug** - Displays the content of the payload for your to veriy
 * **Notification** - Displays notifications on successful or fail auth attemps
   (Gnome Only)
+* **Account Management** - Create/Delete/Update Individual sqrl accounts
 
 Debug
 -----
