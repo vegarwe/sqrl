@@ -27,15 +27,18 @@ class Account:
         self._created = datetime.now()
         self._encrypted_key = ""
         self._modified = datetime.now()
+        self._active = True
 
     def _load(self, attr):
         self._name = attr['name']
         self._created = attr['created']
         self._encrypted_key = attr['key']
         self._modified = attr['modified']
+        self._active = attr['active']
 
     def store(self):
         attr = {'name': self._name,
+                'active': self._active,
                 'created': self._created,
                 'id': self._id,
                 'key': self._encrypted_key,
