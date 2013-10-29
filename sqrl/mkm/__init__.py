@@ -8,10 +8,11 @@ from datetime import datetime
 class MKM:
     """
     Master Key Manager
-    - Creates Keys
-    - Deletes Keys
-    - Stores Keys and Encrypts Storage
-    - Retrieves Stored Keys
+    - Create accounts
+    - Delete account
+    - List accounts
+    - Store accounts
+    - Maintain active account
     """
 
     def __init__(self, path):
