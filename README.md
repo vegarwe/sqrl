@@ -42,7 +42,7 @@ Usage
         -d                    Debugging output
         -l                    List Accounts
         -n                    Notify via libnotify (Gnome)
-        --id                   Set an account as Default
+        --id                  Set an account as Default
         -p --path=<Dir>       Path for config and key storage
         --create=<Your Name>  Create Account
 
