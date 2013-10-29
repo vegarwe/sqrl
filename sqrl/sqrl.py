@@ -99,6 +99,13 @@ def create_account(manager, name):
     sys.exit()
 
 
+def run(url, manager, debug, bool_notify=False):
+    accounts = manager.list_accounts()
+
+    if not accounts:
+        print "Please Create an Account first!"
+        name = raw_input("Please enter name of Account Owner: ")
+        create_account(manager, name)
 
     # Create sqrl client and submit request
     sqrlclient = Client(masterkey, url, bool_notify, debug)
