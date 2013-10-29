@@ -61,13 +61,19 @@ class MKM:
     def list_accounts(self):
         output = {}
         for k in self.accounts.keys():
-            output[k] = {'name': self.accounts[k]['name'],
-                         'id': k}
+            output[k] = {'active': self.accounts[k]['active'],
+                         'name': self.accounts[k]['name'], 'id': k}
         return output
 
     def set_account(self, account_id):
+        for k in self.accounts.keys():
+            self.accounts[k]['active'] = False
+
         if account_id in self.accounts:
+            self.accounts[account_id]['active'] = True
             self.account = self.accounts[account_id]
+
+        self._store()
 
     def get_key(self, password):
         account = Account(self.account['id'], self.account)
