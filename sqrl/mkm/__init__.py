@@ -14,8 +14,8 @@ class MKM:
 
     def __init__(self, path):
         self.path = path
-        self.storageFile = path + ".secret_key"
         self._create_key()
+        self.storageFile = path + "pysqrl.dat"
 
     def _init_dir(self):
         if not os.path.exists(self.path):
