@@ -5,10 +5,11 @@
 # TODO Add logging option
 
 """
-Usage: sqrl [-d] [-n] [-l] [--create="<Users Name>"] [--path=<Dir>] [<SQRLURL>]
+Usage: sqrl [-d] [-n] [-l] [--id <AccountID>] [--create="<Name>"] [--path=<Dir>] [<SQRLURL>]
 
 Options:
   -d               Debugging output
+  -id              Set an account as Default
   -l               List Accounts
   -c <Your Name>   Create Account
   -n               Notify via libnotify (Gnome)
@@ -46,6 +47,9 @@ def main():
 
     manager = MKM(path)
 
+    if account_id:
+        select_account(manager, account_id)
+
     if list:
         list_accounts(manager)
 
@@ -64,14 +68,28 @@ def list_accounts(manager):
     """
 
     accounts = manager.list_accounts()
+    output = []
     for k in accounts.keys():
-        print accounts[k]['id'] + " [Name: " + accounts[k]['name'] + "]"
+        if accounts[k]['active']:
+            output.insert(0, ("* " + accounts[k]['id'] +
+                              " [Name: " + accounts[k]['name'] + "]"))
+        else:
+            output.append("  " + accounts[k]['id'] + " [Name: "
+                          + accounts[k]['name'] + "]")
+    print "\n".join(output)
     sys.exit()
 
 
 def create_account(manager, name):
     password = raw_input("Please Enter Master Password: ")
     password_confirm = raw_input("Please Confirm Master Password: ")
+
+
+def select_account(manager, id):
+    manager.set_account(id)
+    list_accounts(manager)
+    sys.exit()
+
 
     if manager.create_account({'name': name},
                               password, password_confirm):
