@@ -24,6 +24,7 @@ import sys
 from .mkm import MKM
 from client import Client
 from docopt import docopt
+from getpass import getpass
 
 VERSION = "0.0.2"
 HOME = os.environ['HOME']
@@ -80,9 +81,6 @@ def list_accounts(manager):
     sys.exit()
 
 
-def create_account(manager, name):
-    password = raw_input("Please Enter Master Password: ")
-    password_confirm = raw_input("Please Confirm Master Password: ")
 
 
 def select_account(manager, id):
@@ -91,8 +89,10 @@ def select_account(manager, id):
     sys.exit()
 
 
-    if manager.create_account({'name': name},
-                              password, password_confirm):
+def create_account(manager, name):
+    pswd = getpass("Please Enter Master Password: ")
+    pswd_confirm = getpass("Please Confirm Master Password: ")
+    if manager.create_account({'name': name}, pswd, pswd_confirm):
         print "Account Created"
     else:
         print "Account NOT Created"
