@@ -8,15 +8,18 @@
 Usage: sqrl [-d] [-n] [-l] [--id <AccountID>] [--create="<Name>"] [--path=<Dir>] [<SQRLURL>]
 
 Options:
-  -d               Debugging output
-  -id              Set an account as Default
-  -l               List Accounts
-  -c <Your Name>   Create Account
-  -n               Notify via libnotify (Gnome)
-  -p --path=<Dir>  Path for config and key storage
+  -d                    Debugging output
+  -l                    List Accounts
+  -n                    Notify via libnotify (Gnome)
+  --id                   Set an account as Default
+  -p --path=<Dir>       Path for config and key storage
+  --create=<Your Name>  Create Account
 
 Example:
-    sqrl "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
+    sqrl -l
+    sqrl --id 2a9s8x
+    sqrl --create="John Doe"
+    sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
 import os
@@ -82,6 +85,12 @@ def list_accounts(manager):
     sys.exit()
 
 
+def export_key(manager, id):
+    pass
+
+
+def delete_account(manager, id):
+    pass
 
 
 def select_account(manager, id):
