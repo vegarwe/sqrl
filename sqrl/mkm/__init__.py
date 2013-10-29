@@ -21,10 +21,6 @@ class MKM:
         if not os.path.exists(self.path):
             os.mkdir(self.path)
 
-    def list_accounts(self):
-        # Collect a list of .skey files
-        # their name is the is the name of the account
-        pass
 
     def create_account(self, attr, password, password_confirm):
         account = Account("", attr)
@@ -36,6 +32,12 @@ class MKM:
             return False
 
 
+    def list_accounts(self):
+        output = {}
+        for k in self.accounts.keys():
+            output[k] = {'name': self.accounts[k]['name'],
+                         'id': k}
+        return output
 
 
     def get_key(self, password):
