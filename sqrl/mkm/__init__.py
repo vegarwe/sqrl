@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import os
+import pickle
+from account import Account
 
 
 class MKM:
@@ -17,8 +19,8 @@ class MKM:
 
     def __init__(self, path):
         self.path = path
-        self._create_key()
         self.storageFile = path + "pysqrl.dat"
+        self._init_dir()
 
     def _init_dir(self):
         if not os.path.exists(self.path):
@@ -53,6 +55,8 @@ class MKM:
         else:
             return False
 
+    def delete_account(self, account_id, password):
+        pass
 
     def list_accounts(self):
         output = {}
