@@ -37,6 +37,7 @@ def main():
 
     # Collecting arguments
     url = arguments.get('<SQRLURL>')
+    account_id = arguments.get('<AccountID>')
     create_acct = arguments.get('--create')
     bool_notify = arguments.get('-n')
     path = arguments.get('--path')
@@ -99,6 +100,11 @@ def create_account(manager, name):
     sys.exit()
 
 
+def unlock_account(manager):
+    password = getpass("Please Enter Master Password: ")
+    return manager.get_key(password)
+
+
 def run(url, manager, debug, bool_notify=False):
     accounts = manager.list_accounts()
 
@@ -107,9 +113,14 @@ def run(url, manager, debug, bool_notify=False):
         name = raw_input("Please enter name of Account Owner: ")
         create_account(manager, name)
 
-    # Create sqrl client and submit request
-    sqrlclient = Client(masterkey, url, bool_notify, debug)
-    sqrlclient.submit()
+    masterkey = unlock_account(manager)
+
+    if not masterkey == False:
+        # Create sqrl client and submit request
+        sqrlclient = Client(masterkey, url, bool_notify, debug)
+        sqrlclient.submit()
+    else:
+        print "Incorrect Password"
 
 if __name__ == "__main__":
     main()
