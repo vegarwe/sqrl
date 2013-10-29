@@ -61,6 +61,9 @@ class MKM:
                          'id': k}
         return output
 
+    def set_account(self, account_id):
+        if account_id in self.accounts:
+            self.account = self.accounts[account_id]
 
     def get_key(self, password):
         account = Account(self.account['id'], self.account)
