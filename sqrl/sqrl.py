@@ -5,14 +5,15 @@
 # TODO Add logging option
 
 """
-Usage: sqrl [-d] [-n] [-l] [--id <AccountID>] [--create="<Name>"] [--path=<Dir>] [<SQRLURL>]
+Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
+       sqrl [-l] [-s <AccountID>] [--create="<Name>"]
 
 Options:
   -d                    Debugging output
   -l                    List Accounts
   -n                    Notify via libnotify (Gnome)
-  --id                   Set an account as Default
-  -p --path=<Dir>       Path for config and key storage
+  -s                    Set an account as Default
+  --path=<Dir>          Path for config and key storage
   --create=<Your Name>  Create Account
 
 Example:
