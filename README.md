@@ -1,7 +1,7 @@
 pySQRL
 ====
 
-**Pyhton SQRL (Secure QR Login) Client**
+**Pyhton SQRL (Secure Quick Reliable Login) Client**
 
 
 What is SQRL?
