@@ -125,7 +125,7 @@ def run(url, manager, debug, bool_notify=False):
 
     masterkey = unlock_account(manager)
 
-    if not masterkey == False:
+    if masterkey is not False:
         # Create sqrl client and submit request
         sqrlclient = Client(masterkey, url, bool_notify, debug)
         sqrlclient.submit()
