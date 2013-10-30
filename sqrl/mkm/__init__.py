@@ -74,11 +74,10 @@ class MKM:
                 self.accounts[k]['active'] = False
             self.accounts[account_id]['active'] = True
             self.account = self.accounts[account_id]
+            self._store()
             return True
         else:
             return False
-
-        self._store()
 
     def get_key(self, password):
         account = Account(self.account['id'], self.account)
