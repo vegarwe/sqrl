@@ -119,7 +119,12 @@ def create_account(manager):
 
 def unlock_account(manager):
     password = getpass("Please Enter Master Password: ")
-    return manager.get_key(password)
+    key = manager.get_key(password)
+    if key:
+        return key
+    else:
+        print "Invalid Password"
+        return False
 
 
 def run(url, manager, debug, bool_notify=False):
@@ -134,8 +139,7 @@ def run(url, manager, debug, bool_notify=False):
         # Create sqrl client and submit request
         sqrlclient = Client(masterkey, url, bool_notify, debug)
         sqrlclient.submit()
-    else:
-        print "Incorrect Password"
+
 
 if __name__ == "__main__":
     main()
