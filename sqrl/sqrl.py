@@ -9,12 +9,12 @@ Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
        sqrl [-l] [-s <AccountID>] [--create]
 
 Options:
-  -d                    Debugging output
-  -l                    List Accounts
-  -n                    Notify via libnotify (Gnome)
-  -s                    Set an account as Default
-  --create              Create New Account
-  --path=<Dir>          Path for config and key storage
+  -d              Debugging output
+  -l              List Accounts
+  -n              Notify via libnotify (Gnome)
+  -s              Set an account as Default
+  --create        Create New Account
+  --path=<Dir>    Path for config and key storage
 
 Example:
     sqrl -l
