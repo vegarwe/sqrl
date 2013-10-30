@@ -37,7 +37,7 @@ The this package requires **ed25519**, **docopt** and **pyinotify**
 Usage
 -----
     Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
-        sqrl [-l] [-s <AccountID>] [--create="<Name>"]
+           sqrl [-l] [-s <AccountID>] [--create="<Name>"]
 
     Options:
     -d                    Debugging output
