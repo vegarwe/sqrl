@@ -6,15 +6,15 @@
 
 """
 Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
-       sqrl [-l] [-s <AccountID>] [--create="<Name>"]
+       sqrl [-l] [-s <AccountID>] [--create]
 
 Options:
   -d                    Debugging output
   -l                    List Accounts
   -n                    Notify via libnotify (Gnome)
   -s                    Set an account as Default
+  --create              Create New Account
   --path=<Dir>          Path for config and key storage
-  --create=<Your Name>  Create Account
 
 Example:
     sqrl -l
@@ -60,7 +60,7 @@ def main():
         list_accounts(manager)
 
     if create_acct:
-        create_account(manager, create_acct)
+        create_account(manager)
 
     if not debug:
         debug = False
@@ -71,18 +71,21 @@ def main():
 def list_accounts(manager):
     """
     List out ID and Name for each account
+    or
+    Create account is there are none
     """
-
     accounts = manager.list_accounts()
     output = []
-    for k in accounts.keys():
-        if accounts[k]['active']:
-            output.insert(0, ("* " + accounts[k]['id'] +
-                              " [Name: " + accounts[k]['name'] + "]"))
-        else:
-            output.append("  " + accounts[k]['id'] + " [Name: "
-                          + accounts[k]['name'] + "]")
-    print "\n".join(output)
+    if accounts:
+        for k in accounts.keys():
+            line = accounts[k]['id'] + " [Name: " + accounts[k]['name'] + "]"
+            if accounts[k]['active']:
+                output.append("* " + line)
+            else:
+                output.append("  " + line)
+        print "\n".join(output)
+    else:
+        create_account(manager)
     sys.exit()
 
 
@@ -95,17 +98,21 @@ def delete_account(manager, id):
 
 
 def select_account(manager, id):
-    manager.set_account(id)
-    list_accounts(manager)
+    if manager.set_account(id):
+        list_accounts(manager)
+    else:
+        print "Invalid Account ID"
     sys.exit()
 
 
-def create_account(manager, name):
-    pswd = getpass("Please Enter Master Password: ")
-    pswd_confirm = getpass("Please Confirm Master Password: ")
-    if manager.create_account({'name': name}, pswd, pswd_confirm):
-        print "Account Created"
-    else:
+def create_account(manager):
+    try:
+        name = raw_input("Please enter name of Account Owner: ")
+        pswd = getpass("Please Enter Master Password: ")
+        pswd_confirm = getpass("Please Confirm Master Password: ")
+        if manager.create_account({'name': name}, pswd, pswd_confirm):
+            print "Account Created"
+    except:
         print "Account NOT Created"
     sys.exit()
 
@@ -119,9 +126,7 @@ def run(url, manager, debug, bool_notify=False):
     accounts = manager.list_accounts()
 
     if not accounts:
-        print "Please Create an Account first!"
-        name = raw_input("Please enter name of Account Owner: ")
-        create_account(manager, name)
+        create_account(manager)
 
     masterkey = unlock_account(manager)
 

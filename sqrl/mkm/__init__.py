@@ -69,12 +69,14 @@ class MKM:
         return output
 
     def set_account(self, account_id):
-        for k in self.accounts.keys():
-            self.accounts[k]['active'] = False
-
         if account_id in self.accounts:
+            for k in self.accounts.keys():
+                self.accounts[k]['active'] = False
             self.accounts[account_id]['active'] = True
             self.account = self.accounts[account_id]
+            return True
+        else:
+            return False
 
         self._store()
 
