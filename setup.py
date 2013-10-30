@@ -7,7 +7,7 @@ dependencies = ['docopt', 'ed25519', 'scrypt', 'py-notify']
 
 setup(
     name='sqrl',
-    version='0.0.1',
+    version='0.1.0',
     description='Command line SQRL client',
     url='http://gitbub.com/bushxnyc/sqrl',
     author='Brian Pinkney',

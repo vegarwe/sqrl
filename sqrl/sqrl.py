@@ -30,7 +30,7 @@ from client import Client
 from docopt import docopt
 from getpass import getpass
 
-VERSION = "0.0.2"
+VERSION = "0.1.0"
 HOME = os.environ['HOME']
 CONFIG_DIR = '.config/sqrl/'
 WORKING_DIR = HOME + '/' + CONFIG_DIR
