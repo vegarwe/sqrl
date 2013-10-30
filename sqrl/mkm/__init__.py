@@ -34,6 +34,9 @@ class MKM:
         try:
             file = open(self.storageFile, "rb")
             self.accounts = pickle.load(file)
+            for k in self.accounts.keys():
+                if self.accounts[k]['active'] is True:
+                    self.set_account(self.accounts[k]['id'])
         except:
             # Raise FileNotFound on Error
             return False
