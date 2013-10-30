@@ -19,7 +19,7 @@ Options:
 Example:
     sqrl -l
     sqrl --id 2a9s8x
-    sqrl --create="John Doe"
+    sqrl --create
     sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
