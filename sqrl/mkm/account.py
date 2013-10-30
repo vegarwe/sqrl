@@ -53,8 +53,7 @@ class Account:
     def get_key(self, password):
         try:
             key = base64.b32decode(self._encrypted_key)
-            decrypted_key = scrypt.decrypt(key,
-                                           password)
+            decrypted_key = scrypt.decrypt(key, password)
             return decrypted_key
         except scrypt.error:
             return False
