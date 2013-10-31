@@ -116,12 +116,18 @@ def create_account(manager):
 
 
 def unlock_account(manager):
-    password = getpass("Please Enter Master Password: ")
+
+    if GNOME_ON:
+        password = gui_get_pass()
+    else:
+        password = getpass("Please Enter Master Password: ")
+
     key = manager.get_key(password)
     if key:
         return key
     else:
         print "Invalid Password"
+        notify("Invalid Password")
         return False
 
 
