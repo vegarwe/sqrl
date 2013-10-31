@@ -63,7 +63,10 @@ def main():
     if not debug:
         debug = False
 
-    run(url, manager, debug, bool_notify)
+    if url is not None:
+        run(url, manager, debug, bool_notify)
+    else:
+        print "Please supply valid SQRL URL"
 
 
 def list_accounts(manager):
