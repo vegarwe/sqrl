@@ -120,10 +120,15 @@ def create_account(manager):
 
 def unlock_account(manager):
 
-    if GNOME_ON:
-        password = gui_get_pass()
-    else:
-        password = getpass("Please Enter Master Password: ")
+    try:
+        if GNOME_ON:
+            name = manager.get_account_name()
+            value = "Enter Password for:\n" + name
+            password = gui_get_pass(value)
+        else:
+            password = getpass("Please Enter Master Password: ")
+    except:
+        sys.exit()
 
     key = manager.get_key(password)
     if key:
