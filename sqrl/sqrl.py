@@ -130,7 +130,6 @@ def unlock_account(manager):
         return key
     else:
         print "Invalid Password"
-        notify("Invalid Password")
         return False
 
 
