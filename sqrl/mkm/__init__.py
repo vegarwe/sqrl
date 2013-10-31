@@ -49,6 +49,9 @@ class MKM:
         except:
             return False
 
+    def get_account_name(self):
+        return self.account['name']
+
     def create_account(self, attr, password, password_confirm):
         account = Account("", attr)
         if account.create_key(password, password_confirm):
