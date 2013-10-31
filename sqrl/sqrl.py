@@ -23,17 +23,15 @@ Example:
     sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
-import os
 import sys
+from . import WORKING_DIR
+from . import VERSION
+from . import GNOME_ON
 from .mkm import MKM
 from client import Client
 from docopt import docopt
 from getpass import getpass
-
-VERSION = "0.1.0"
-HOME = os.environ['HOME']
-CONFIG_DIR = '.config/sqrl/'
-WORKING_DIR = HOME + '/' + CONFIG_DIR
+from sqrlgui import gui_get_pass
 
 
 def main():
