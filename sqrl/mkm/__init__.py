@@ -49,8 +49,24 @@ class MKM:
         except:
             return False
 
+    def _get_account(self):
+        return Account(self.account['id'], self.account)
+
+    def get_key(self, password):
+        account = self._get_account()
+        return account.get_key(password)
+
     def get_account_name(self):
         return self.account['name']
+
+    def change_password(self, old_pass, new_pass, pass_conf):
+        acct = self._get_account()
+        if acct.change_password(old_pass, new_pass, pass_conf):
+            self.accounts[acct._id] = acct.store()
+            self._store()
+            return True
+        else:
+            return False
 
     def create_account(self, attr, password, password_confirm):
         account = Account("", attr)
@@ -81,7 +97,3 @@ class MKM:
             return True
         else:
             return False
-
-    def get_key(self, password):
-        account = Account(self.account['id'], self.account)
-        return account.get_key(password)

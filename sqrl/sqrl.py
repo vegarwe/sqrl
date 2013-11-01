@@ -6,15 +6,16 @@
 
 """
 Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
-       sqrl [-l] [-s <AccountID>] [--create]
+       sqrl [-l] [-u] [--create] [-s <AccountID>]
 
 Options:
-  -d              Debugging output
-  -l              List Accounts
-  -n              Notify via libnotify (Gnome)
-  -s              Set an account as Default
-  --create        Create New Account
-  --path=<Dir>    Path for config and key storage
+  -d            Debugging output
+  -l            List Accounts
+  -n            Notify via libnotify (Gnome)
+  -s            Set an account as active
+  -u            Update password of active account
+  --create      Create New Account
+  --path=<Dir>  Path for config and key storage
 
 Example:
     sqrl -l
@@ -40,6 +41,7 @@ def main():
     bool_notify = arguments.get('-n')
     path = arguments.get('--path')
     debug = arguments.get('-d')
+    update_pass = arguments.get('-u')
     list = arguments.get('-l')
 
     if not path:

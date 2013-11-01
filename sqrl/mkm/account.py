@@ -1,9 +1,11 @@
-KEYLENGTH = 5
 import scrypt
 import ed25519
 import random
 import base64
 from datetime import datetime
+
+
+KEYLENGTH = 5
 
 
 class Account:
@@ -29,12 +31,29 @@ class Account:
         self._modified = datetime.now()
         self._active = True
 
+    def _set_key(self, key, password):
+        key = scrypt.encrypt(key, password, maxtime=1)
+        self._encrypted_key = base64.b32encode(key)
+
     def _load(self, attr):
         self._name = attr['name']
         self._created = attr['created']
         self._encrypted_key = attr['key']
         self._modified = attr['modified']
         self._active = attr['active']
+
+    def change_password(self, old_pass, new_pass, new_pass_conf):
+        if new_pass == new_pass_conf:
+            key = self.get_key(old_pass)
+            if key is not False:
+                self._set_key(key, new_pass)
+                return True
+            else:
+                print "Password Incorrect"
+                return False
+        else:
+            print "New Password Confirmation Doesnt Match"
+            return False
 
     def store(self):
         attr = {'name': self._name,
@@ -62,8 +81,7 @@ class Account:
         if password == password_confirm:
             key = self._new_key()
             key = base64.b32encode(key.sk_s)
-            key = scrypt.encrypt(key, password, maxtime=1)
-            self._encrypted_key = base64.b32encode(key)
+            self._set_key(key)
             return True
         else:
             return False
