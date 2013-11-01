@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# TODO Catch connection errors
 # TODO Catch sqrlurl format errors
 # TODO Add logging option
 
@@ -35,33 +34,39 @@ def main():
     arguments = docopt(__doc__, version=VERSION)
 
     # Collecting arguments
-    url = arguments.get('<SQRLURL>')
-    account_id = arguments.get('<AccountID>')
-    create_acct = arguments.get('--create')
-    bool_notify = arguments.get('-n')
-    path = arguments.get('--path')
-    debug = arguments.get('-d')
-    update_pass = arguments.get('-u')
-    list = arguments.get('-l')
+    args = {
+        'url': arguments.get('<SQRLURL>'),
+        'account_id': arguments.get('<AccountID>'),
+        'create_acct': arguments.get('--create'),
+        'bool_notify': arguments.get('-n'),
+        'path': arguments.get('--path'),
+        'debug': arguments.get('-d'),
+        'update_pass': arguments.get('-u'),
+        'list': arguments.get('-l')
+    }
 
-    if not path:
+    process(args)
+
+
+def process(manager, args):
+    if not args['path']:
         path = WORKING_DIR
 
     manager = MKM(path)
 
-    if update_pass:
+    if args['update_pass']:
         mkmCLI.update_password(manager)
-    elif account_id:
-        mkmCLI.select_account(manager, account_id)
+    elif args['account_id']:
+        mkmCLI.select_account(manager, args['account_id'])
     elif list:
         mkmCLI.list_accounts(manager)
-    elif create_acct:
+    elif args['create_acct']:
         mkmCLI.create_account(manager)
-    elif not debug:
-        debug = False
+    elif not args['debug']:
+        args['debug'] = False
 
-    if url is not None:
-        run(url, manager, debug, bool_notify)
+    if args['url'] is not None:
+        run(args['url'], manager, args['debug'], args['bool_notify'])
     else:
         print "Please supply valid SQRL URL"
 
