@@ -42,13 +42,13 @@ def main():
         'path': arguments.get('--path'),
         'debug': arguments.get('-d'),
         'update_pass': arguments.get('-u'),
-        'list': arguments.get('-l')
+        'account_list': arguments.get('-l')
     }
 
     process(args)
 
 
-def process(manager, args):
+def process(args):
     if not args['path']:
         path = WORKING_DIR
 
@@ -58,7 +58,7 @@ def process(manager, args):
         mkmCLI.update_password(manager)
     elif args['account_id']:
         mkmCLI.select_account(manager, args['account_id'])
-    elif list:
+    elif args['account_list']:
         mkmCLI.list_accounts(manager)
     elif args['create_acct']:
         mkmCLI.create_account(manager)
