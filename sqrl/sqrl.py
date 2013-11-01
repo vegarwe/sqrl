@@ -23,15 +23,11 @@ Example:
     sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
-import sys
-from . import WORKING_DIR
-from . import VERSION
-from . import GNOME_ON
-from .mkm import MKM
+from . import WORKING_DIR, VERSION
+from cli import mkmCLI
+from mkm import MKM
 from client import Client
 from docopt import docopt
-from getpass import getpass
-from sqrlgui import gui_get_pass
 
 
 def main():
@@ -51,16 +47,15 @@ def main():
 
     manager = MKM(path)
 
-    if account_id:
-        select_account(manager, account_id)
-
-    if list:
-        list_accounts(manager)
-
-    if create_acct:
-        create_account(manager)
-
-    if not debug:
+    if update_pass:
+        mkmCLI.update_password(manager)
+    elif account_id:
+        mkmCLI.select_account(manager, account_id)
+    elif list:
+        mkmCLI.list_accounts(manager)
+    elif create_acct:
+        mkmCLI.create_account(manager)
+    elif not debug:
         debug = False
 
     if url is not None:
@@ -69,82 +64,13 @@ def main():
         print "Please supply valid SQRL URL"
 
 
-def list_accounts(manager):
-    """
-    List out ID and Name for each account
-    or
-    Create account is there are none
-    """
-    accounts = manager.list_accounts()
-    output = []
-    if accounts:
-        for k in accounts.keys():
-            line = accounts[k]['id'] + " [Name: " + accounts[k]['name'] + "]"
-            if accounts[k]['active']:
-                output.append("* " + line)
-            else:
-                output.append("  " + line)
-        print "\n".join(output)
-    else:
-        create_account(manager)
-    sys.exit()
-
-
-def export_key(manager, id):
-    pass
-
-
-def delete_account(manager, id):
-    pass
-
-
-def select_account(manager, id):
-    if manager.set_account(id):
-        list_accounts(manager)
-    else:
-        print "Invalid Account ID"
-    sys.exit()
-
-
-def create_account(manager):
-    try:
-        name = raw_input("Please enter name of Account Owner: ")
-        pswd = getpass("Please Enter Master Password: ")
-        pswd_confirm = getpass("Please Confirm Master Password: ")
-        if manager.create_account({'name': name}, pswd, pswd_confirm):
-            print "Account Created"
-    except:
-        print "Account NOT Created"
-    sys.exit()
-
-
-def unlock_account(manager):
-
-    try:
-        if GNOME_ON:
-            name = manager.get_account_name()
-            value = "Enter Password for:\n" + name
-            password = gui_get_pass(value)
-        else:
-            password = getpass("Please Enter Master Password: ")
-    except:
-        sys.exit()
-
-    key = manager.get_key(password)
-    if key:
-        return key
-    else:
-        print "Invalid Password"
-        return False
-
-
 def run(url, manager, debug, bool_notify=False):
     accounts = manager.list_accounts()
 
     if not accounts:
-        create_account(manager)
+        mkmCLI.create_account(manager)
 
-    masterkey = unlock_account(manager)
+    masterkey = mkmCLI.unlock_account(manager)
 
     if masterkey is not False:
         # Create sqrl client and submit request
