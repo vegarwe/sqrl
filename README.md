@@ -20,7 +20,7 @@ you are trying to access. If the site were to be compromised yours and
 every other user's account information may be accessible; allowing the intruder
 to attempt to use you credentials with elsewhere. The best part about SQRL is
 that the site never has your login credentials. With SQRL you **_never_** send your
-**_"password"_**. The site authenticates you using by verifying your identity by 
+**_"password"_**. The site authenticates you using by verifying your identity by
 using a private / public key signatures. This ends up being vastly more secure.
 
 Details can be found here: https://www.grc.com/sqrl/sqrl.htm
@@ -36,21 +36,23 @@ The this package requires **ed25519**, **docopt** and **pyinotify**
 
 Usage
 -----
-    Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
-           sqrl [-l] [-s <AccountID>] [--create]
+    Usage: sqrl account ([list] | [create] | [password])
+        sqrl account <accountID>
+        sqrl [-d] [-n] [--path=<Dir>] <SQRLURL>
 
     Options:
-    -d                    Debugging output
-    -l                    List Accounts
-    -n                    Notify via libnotify (Gnome)
-    -s                    Set an account as Default
-    --path=<Dir>          Path for config and key storage
-    --create              Create New Account
+    -d            Debugging output
+    -n            Notify via libnotify (Gnome)
+    --path=<Dir>  Path for config and key storage
+    list          List Accounts
+    create        Create New Account
+    password      Update password of active account
+    <accountID>   Set an account as active
 
     Example:
-        sqrl -l
-        sqrl --id 2a9s8x
-        sqrl --create
+        sqrl account list
+        sqrl account create
+        sqrl account 2a9s8x
         sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 
 You feed the sqrl URL provided by the authentication service to the script and
