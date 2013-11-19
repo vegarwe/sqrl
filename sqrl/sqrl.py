@@ -18,9 +18,9 @@ Options:
   <accountID>   Set an account as active
 
 Example:
-    sqrl -l
-    sqrl --id 2a9s8x
-    sqrl --create
+    sqrl account list
+    sqrl account create
+    sqrl account 2a9s8x
     sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
