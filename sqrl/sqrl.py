@@ -4,22 +4,23 @@
 # TODO Add logging option
 
 """
-Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
-       sqrl [-l] [-u] [--create] [-s <AccountID>]
+Usage: sqrl account ([list] | [create] | [password])
+       sqrl account <accountID>
+       sqrl [-d] [-n] [--path=<Dir>] <SQRLURL>
 
 Options:
   -d            Debugging output
-  -l            List Accounts
   -n            Notify via libnotify (Gnome)
-  -s            Set an account as active
-  -u            Update password of active account
-  --create      Create New Account
   --path=<Dir>  Path for config and key storage
+  list          List Accounts
+  create        Create New Account
+  password      Update password of active account
+  <accountID>   Set an account as active
 
 Example:
-    sqrl -l
-    sqrl --id 2a9s8x
-    sqrl --create
+    sqrl account list
+    sqrl account create
+    sqrl account 2a9s8x
     sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
@@ -28,6 +29,7 @@ from cli import mkmCLI
 from mkm import MKM
 from client import Client
 from docopt import docopt
+import sys
 
 
 def main():
@@ -36,15 +38,15 @@ def main():
     # Collecting arguments
     args = {
         'url': arguments.get('<SQRLURL>'),
-        'account_id': arguments.get('<AccountID>'),
-        'create_acct': arguments.get('--create'),
+        'account_id': arguments.get('<accountID>'),
+        'create_acct': arguments.get('create'),
+        'account_mode': arguments.get('account'),
         'bool_notify': arguments.get('-n'),
         'path': arguments.get('--path'),
         'debug': arguments.get('-d'),
-        'update_pass': arguments.get('-u'),
-        'list': arguments.get('-l')
+        'update_pass': arguments.get('password'),
+        'account_list': arguments.get('list')
     }
-
     process(args)
 
 
@@ -54,15 +56,19 @@ def process(args):
 
     manager = MKM(path)
 
-    if args['update_pass']:
-        mkmCLI.update_password(manager)
-    elif args['account_id']:
-        mkmCLI.select_account(manager, args['account_id'])
-    elif args['list']:
-        mkmCLI.list_accounts(manager)
-    elif args['create_acct']:
-        mkmCLI.create_account(manager)
-    elif not args['debug']:
+    if args['account_mode']:
+        if args['update_pass']:
+            mkmCLI.update_password(manager)
+        elif args['account_id']:
+            mkmCLI.select_account(manager, args['account_id'])
+        elif args['account_list']:
+            mkmCLI.list_accounts(manager)
+        elif args['create_acct']:
+            mkmCLI.create_account(manager)
+        print "Account requires more options. sqrl -h"
+        sys.exit()
+
+    if not args['debug']:
         args['debug'] = False
 
     if args['url'] is not None:
