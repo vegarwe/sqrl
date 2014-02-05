@@ -31,6 +31,7 @@ from client import Client
 from docopt import docopt
 import sys
 
+
 def main():
     arguments = docopt(__doc__, version=VERSION)
 
