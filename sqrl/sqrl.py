@@ -9,13 +9,13 @@ Usage: sqrl account ([list] | [create] | [password])
        sqrl [-d] [-n] [--path=<Dir>] <SQRLURL>
 
 Options:
-  -d            Debugging output
-  -n            Notify via libnotify (Gnome)
-  --path=<Dir>  Path for config and key storage
-  list          List Accounts
-  create        Create New Account
-  password      Update password of active account
-  <accountID>   Set an account as active
+    -d            Debugging output
+    -n            Notify via libnotify (Gnome)
+    --path=<Dir>  Path for config and key storage
+    list          List Accounts
+    create        Create New Account
+    password      Update password of active account
+    <accountID>   Set an account as active
 
 Example:
     sqrl account list
