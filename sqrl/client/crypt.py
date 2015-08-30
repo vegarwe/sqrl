@@ -2,7 +2,7 @@
 
 import ed25519
 import hmac
-from sqrl.utils import baseconv
+import baseconv
 
 
 class Crypt:
