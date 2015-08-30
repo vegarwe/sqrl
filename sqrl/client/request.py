@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import httplib
-from sqrl.test import test
+import baseconv
+#from sqrl.test import test
 
 __sqrlver__ = "1"
 
@@ -13,13 +14,8 @@ class SQRLRequest():
     - Submits the SQRL reuqest
     """
 
-    def __init__(self, url, public_key):
+    def __init__(self, url):
         self.headers = SQRLHeader()
-
-        self.params = SQRLParams()
-        self.params.set_key(public_key)
-        self.params.set_ver(__sqrlver__)
-        self.key = public_key
 
         self.url = url
         if self.url.isSecure():
@@ -27,9 +23,23 @@ class SQRLRequest():
         else:
             self.http = httplib.HTTPConnection(self.url.netloc, timeout=9)
 
+    def get_signed_body(self, enc):
+        client  = "ver=1\r\n"
+        client += "cmd=query\r\n"
+        client += "idk=%s\r\n" % enc.getPublicKey(self.url.getDomain())
+        client += "opt=cps\r\n"
+        client += "url=https://www.grc.com/sqrl/diag.htm\r\n"
+        client = baseconv.encode(client)
+
+        server = self.url.orig_url
+        server = baseconv.encode(server)
+        ids = enc.sign(client + server)
+        #ids = baseconv.encode(ids)
+
+        return "client=%s&server=%s&ids=%s" % (client, server, ids)
+
     def _path(self):
-        res = [self.url.path, "?", self.url.query,
-               "&", self.params.get()]
+        res = [self.url.path, "?", self.url.query]
         return "".join(res)
 
     def get_url(self):
@@ -38,21 +48,21 @@ class SQRLRequest():
     def _body(self, body):
         return "sqrlsig=" + body
 
-    def send(self, body, debug):
+    def send(self, body):
         sigbody = self._body(body)
         path = self._path()
+
+        print "path", path
+        print "body", body
+        print "headers", self.headers.get()
+
         try:
-            self.http.request("POST", path, sigbody, self.headers.get())
+            self.http.request("POST", path, body, self.headers.get())
             response = self.http.getresponse()
         except Exception as e:
             code, msg = e
             print (msg)
             return False, msg
-
-        # Display debug info if set
-        if debug:
-            test(self.get_url(), body,
-                 self.key, self.url.domain, __sqrlver__)
 
         if response.status == 200:
             msg = "===\nAuthentication Successful!"

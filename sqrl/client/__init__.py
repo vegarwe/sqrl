@@ -6,22 +6,10 @@ from request import SQRLRequest
 
 
 class Client:
-    def __init__(self, masterkey, url, notice=False, debug=False):
+    def __init__(self, masterkey, url):
         self.parser = URLParser(url)
-        self.domain = self.parser.getDomain()
-        self.notice = notice
-        enc = Crypt(masterkey)
-        self.public_key = enc.getPublicKey(self.domain)
-        self.sqrlreq = SQRLRequest(self.parser, self.public_key)
-        unsigned_url = self.sqrlreq.get_url()
-        self.signed_url = enc.sign(unsigned_url)
-        self.debug = debug
-
-    def _notify(self, msg):
-        pass
+        self.sqrlreq = SQRLRequest(self.parser)
+        self.signed_body = self.sqrlreq.get_signed_body(Crypt(masterkey))
 
     def submit(self):
-        result, msg = self.sqrlreq.send(self.signed_url, self.debug)
-        msg = msg + " (" + self.domain + ")"
-        # notify of server response
-        self._notify(msg)
+        result, msg = self.sqrlreq.send(self.signed_body)
