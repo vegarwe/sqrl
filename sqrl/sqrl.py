@@ -25,7 +25,7 @@ Example:
 
 import os
 import sys
-from .mkm import MKM
+from mkm import MKM
 from client import Client
 from docopt import docopt
 from getpass import getpass
@@ -43,7 +43,6 @@ def main():
     url = arguments.get('<SQRLURL>')
     account_id = arguments.get('<AccountID>')
     create_acct = arguments.get('--create')
-    bool_notify = arguments.get('-n')
     path = arguments.get('--path')
     debug = arguments.get('-d')
     list = arguments.get('-l')
@@ -62,10 +61,7 @@ def main():
     if create_acct:
         create_account(manager)
 
-    if not debug:
-        debug = False
-
-    run(url, manager, debug, bool_notify)
+    run(url, manager)
 
 
 def list_accounts(manager):
@@ -127,7 +123,7 @@ def unlock_account(manager):
         return False
 
 
-def run(url, manager, debug, bool_notify=False):
+def run(url, manager):
     accounts = manager.list_accounts()
 
     if not accounts:
@@ -137,7 +133,7 @@ def run(url, manager, debug, bool_notify=False):
 
     if masterkey is not False:
         # Create sqrl client and submit request
-        sqrlclient = Client(masterkey, url, bool_notify, debug)
+        sqrlclient = Client(masterkey, url)
         sqrlclient.submit()
 
 
