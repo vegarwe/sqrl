@@ -7,8 +7,7 @@ from request import SQRLRequest
 
 class Client:
     def __init__(self, masterkey, url):
-        self.parser = URLParser(url)
-        self.sqrlreq = SQRLRequest(self.parser)
+        self.sqrlreq = SQRLRequest(URLParser(url))
         self.signed_body = self.sqrlreq.get_signed_body(Crypt(masterkey))
 
     def submit(self):
