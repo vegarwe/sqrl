@@ -26,7 +26,7 @@ Example:
 import os
 import sys
 from mkm import MKM
-from client import Client
+from client.client import Client
 from docopt import docopt
 from getpass import getpass
 
