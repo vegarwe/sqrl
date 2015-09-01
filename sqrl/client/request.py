@@ -14,58 +14,34 @@ class SQRLRequest():
     - Submits the SQRL reuqest
     """
 
-    def __init__(self, url):
+    def __init__(self):
         self.headers = {
                 "Content-type": "application/x-www-form-urlencoded",
                 "Accept": "text/plain"}
 
-        self.url = url
-        if self.url.isSecure():
-            self.http = httplib.HTTPSConnection(self.url.netloc, timeout=9)
+    def _path(self, url):
+        return url.path + "?" + url.query
+
+    def send(self, url, body):
+        if url.isSecure():
+            http = httplib.HTTPSConnection(url.netloc, timeout=9)
         else:
-            self.http = httplib.HTTPConnection(self.url.netloc, timeout=9)
+            http = httplib.HTTPConnection(url.netloc, timeout=9)
 
-    def get_signed_body(self, enc):
-        # TODO: Replace with SQRLBody or some other class later
-        client  = "ver=1\r\n"
-        client += "cmd=query\r\n"
-        client += "idk=%s\r\n" % enc.getPublicKey(self.url.getDomain())
-        client += "opt=cps\r\n"
-        client += "url=https://www.grc.com/sqrl/diag.htm\r\n"
-        client = baseconv.encode(client)
+        # TODO: Use try-catch
+        #try:
+        #    http.request("POST", self._path(url), body, self.headers)
+        #    response = http.getresponse()
+        #except Exception as e:
+        #    code, msg = e
+        #    return False, msg
 
-        server = self.url.orig_url
-        server = baseconv.encode(server)
-        ids = enc.sign(client + server)
-        #ids = baseconv.encode(ids)
+        #print "POST", self._path(url), body, self.headers
+        http.request("POST", self._path(url), body, self.headers)
+        response = http.getresponse()
 
-        return "client=%s&server=%s&ids=%s" % (client, server, ids)
-
-    def _path(self):
-        return self.url.path + "?" + self.url.query
-
-    def get_url(self):
-        return self.url.scheme + "://" + self.url.netloc + self._path()
-
-    def send(self, body):
-        try:
-            self.http.request("POST", self._path(), body, self.headers)
-            response = self.http.getresponse()
-        except Exception as e:
-            code, msg = e
-            print (msg)
-            return False, msg
-
-        blipp = response.read()
-        print "response:\n%r" % blipp
         if response.status == 200:
-            msg = "===\nAuthentication Successful!"
-            print msg
-            return True, msg
+            return True, response.read()
         else:
-            msg = "===\nAuthentication Failed!\n" + \
-                response.reason + " (Error: " + \
-                str(response.status) + ")"
-            print msg
-            return False, msg
+            return False, "%s (Error: %s)" % (response.reason, response.status)
 

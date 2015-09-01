@@ -132,9 +132,8 @@ def run(url, manager):
     masterkey = unlock_account(manager)
 
     if masterkey is not False:
-        # Create sqrl client and submit request
-        sqrlclient = Client(masterkey, url)
-        sqrlclient.submit()
+        sqrlclient = Client(masterkey)
+        sqrlclient.query(url)
 
 
 if __name__ == "__main__":
