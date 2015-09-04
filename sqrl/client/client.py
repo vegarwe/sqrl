@@ -1,25 +1,38 @@
-#!/usr/bin/env python
-
+import request
+import baseconv
 from crypt import Crypt
 from parser import URLParser
-from request import SQRLRequest
 
 
 class Client:
     def __init__(self, masterkey):
-        self.sqrlreq = SQRLRequest()
         self.enc = Crypt(masterkey)
 
 
-    def query(self, urlString):
+    def login(self, urlString, site_url=None):
         url = URLParser(urlString)
 
+        success, data = self.query(url, site_url)
 
+        if not success:
+            return False, "Auth failed. " + data
+
+        success, data = self.ident(url, data)
+        if not success:
+            return False, "Auth failed. " + data
+
+        resp = baseconv.decodeNameValue(data)
+        if not resp.has_key('url'):
+            return False, "Auth failed. No success url returned"
+
+        return True, resp['url']
+
+    def query(self, url, site_url):
         client  = "ver=1\r\n"
         client += "cmd=query\r\n"
         client += "idk=%s\r\n" % self.enc.getPublicKey(url.getDomain())
         client += "opt=cps\r\n"
-        client += "url=https://www.grc.com/sqrl/diag.htm\r\n" # TODO: Need to start hard coding this
+        #client += "url=https://www.grc.com/sqrl/diag.htm\r\n" # TODO: Need to start hard coding this
         client = baseconv.encode(client)
 
         server = url.orig_url
@@ -27,15 +40,9 @@ class Client:
 
         ids = self.enc.sign(client + server)
 
-        success, data = self.sqrlreq.send(url, "client=%s&server=%s&ids=%s" % (client, server, ids))
+        return request.post_form(url, "client=%s&server=%s&ids=%s" % (client, server, ids))
 
-        if success:
-            self._query_response(url, data)
-        else:
-            # TODO: How to report failure
-            print "Auth failed"
-
-    def _query_response(self, url, server):
+    def ident(self, url, server):
         resp = baseconv.decodeNameValue(server)
 
         client  = "ver=1\r\n"
@@ -50,6 +57,4 @@ class Client:
         ids = self.enc.sign(client + server)
 
         url = URLParser(url.scheme + "://" + url.netloc + resp['qry'])
-        success, data = self.sqrlreq.send(url, "client=%s&server=%s&ids=%s" % (client, server, ids))
-
-        resp = baseconv.decodeNameValue(data)
+        return request.post_form(url, "client=%s&server=%s&ids=%s" % (client, server, ids))
