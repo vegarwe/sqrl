@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 # TODO Catch connection errors
-# TODO Catch sqrlurl format errors
-# TODO Add logging option
+# TODO Catch sqrl_url format errors
 
 """
 Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
@@ -18,17 +17,19 @@ Options:
 
 Example:
     sqrl -l
-    sqrl --id 2a9s8x
     sqrl --create
     sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
 """
 
 import os
 import sys
-from mkm import MKM
-from client.client import Client
+import logging
 from docopt import docopt
 from getpass import getpass
+
+import log_setup
+from mkm import MKM
+from client.client import Client
 
 VERSION = "0.1.0"
 HOME = os.environ['HOME']
@@ -46,6 +47,8 @@ def main():
     path = arguments.get('--path')
     debug = arguments.get('-d')
     list = arguments.get('-l')
+
+    log_setup.log_setup(verbose=debug)
 
     if not path:
         path = WORKING_DIR
@@ -133,7 +136,13 @@ def run(url, manager):
 
     if masterkey is not False:
         sqrlclient = Client(masterkey)
-        sqrlclient.query(url)
+        success, data = sqrlclient.login(url)
+        if success:
+            print "Authenticated"
+            if data:
+                print "On Linux, run xdg-open %s" % data
+        else:
+            print "Authentication failed"
 
 
 if __name__ == "__main__":
