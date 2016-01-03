@@ -56,7 +56,7 @@ class Account:
             decrypted_key = scrypt.decrypt(key, password)
             return decrypted_key
         except scrypt.error:
-            return False
+            return None
 
     def create_key(self, password, password_confirm):
         if password == password_confirm:
