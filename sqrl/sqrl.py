@@ -2,29 +2,11 @@
 
 # TODO Catch connection errors
 # TODO Catch sqrl_url format errors
-
-"""
-Usage: sqrl [-d] [-n] [--path=<Dir>] [<SQRLURL>]
-       sqrl [-l] [-s <AccountID>] [--create]
-
-Options:
-  -d              Debugging output
-  -l              List Accounts
-  -n              Notify via libnotify (Gnome)
-  -s              Set an account as Default
-  --create        Create New Account
-  --path=<Dir>    Path for config and key storage
-
-Example:
-    sqrl -l
-    sqrl --create
-    sqrl -d "sqrl://example.com/login/sqrl?d=6&nut=a95fa8e88dc499758"
-"""
+# TODO Look at libnotify (Gnome)
 
 import os
-import sys
 import logging
-from docopt import docopt
+import argparse
 from getpass import getpass
 
 import log_setup
@@ -34,37 +16,37 @@ from client.client import Client
 VERSION = "0.1.0"
 HOME = os.environ['HOME']
 CONFIG_DIR = '.config/sqrl/'
-WORKING_DIR = HOME + '/' + CONFIG_DIR
+SQRL_DIR = HOME + '/' + CONFIG_DIR
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "--list",                                 help="List accounts")
+    parser.add_argument("-s", "--select",                   nargs=1,    help="Set an account as default")
+    parser.add_argument("--create",                action="store_true", help="Create new account")
+    parser.add_argument("--path",       default=SQRL_DIR,   nargs=1,    help="Path for config and key storage")
+    parser.add_argument("--cps",                   action="store_true", help="Client Provided Session")
+    parser.add_argument("-v", "--verbose",         action="store_true", help="DEBUG output in log")
+    parser.add_argument('sqrl_url',     metavar='SQRLURL',  nargs='?',  help='An SQRL url to authenticate')
+
+    return parser.parse_args()
 
 
 def main():
-    arguments = docopt(__doc__, version=VERSION)
+    args = parse_args()
 
-    # Collecting arguments
-    url = arguments.get('<SQRLURL>')
-    account_id = arguments.get('<AccountID>')
-    create_acct = arguments.get('--create')
-    path = arguments.get('--path')
-    debug = arguments.get('-d')
-    list = arguments.get('-l')
+    log_setup.log_setup(verbose=args.verbose)
 
-    log_setup.log_setup(verbose=debug)
+    manager = MKM(args.path)
 
-    if not path:
-        path = WORKING_DIR
-
-    manager = MKM(path)
-
-    if account_id:
-        select_account(manager, account_id)
-
-    if list:
+    if args.select:
+        select_account(manager, args.select[0])
+    elif args.list:
         list_accounts(manager)
-
-    if create_acct:
+    elif args.create:
         create_account(manager)
-
-    run(url, manager)
+    else:
+        run(manager, args.sqrl_url, args.cps)
 
 
 def list_accounts(manager):
@@ -85,7 +67,6 @@ def list_accounts(manager):
         print "\n".join(output)
     else:
         create_account(manager)
-    sys.exit()
 
 
 def export_key(manager, id):
@@ -101,7 +82,6 @@ def select_account(manager, id):
         list_accounts(manager)
     else:
         print "Invalid Account ID"
-    sys.exit()
 
 
 def create_account(manager):
@@ -113,36 +93,33 @@ def create_account(manager):
             print "Account Created"
     except:
         print "Account NOT Created"
-    sys.exit()
 
 
 def unlock_account(manager):
     password = getpass("Please Enter Master Password: ")
-    key = manager.get_key(password)
-    if key:
-        return key
-    else:
-        print "Invalid Password"
-        return False
+    return manager.get_key(password)
 
 
-def run(url, manager):
+def run(manager, url, cps):
     accounts = manager.list_accounts()
-
     if not accounts:
-        create_account(manager)
+        print "No account(s) found"
+        return
 
-    masterkey = unlock_account(manager)
+    #masterkey = unlock_account(manager)
+    masterkey = manager.get_key('f')
 
-    if masterkey is not False:
-        sqrlclient = Client(masterkey)
-        success, data = sqrlclient.login(url)
-        if success:
-            print "Authenticated"
-            if data:
-                print "On Linux, run xdg-open %s" % data
-        else:
-            print "Authentication failed"
+    if not masterkey:
+        print "Invalid Password"
+
+    sqrlclient = Client(masterkey, cps)
+    success, data = sqrlclient.login(url)
+    if success:
+        print "Authenticated"
+        if data:
+            print "On Linux, run xdg-open %s" % data
+    else:
+        print "Authentication failed"
 
 
 if __name__ == "__main__":
