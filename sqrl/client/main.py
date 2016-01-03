@@ -48,11 +48,7 @@ def main():
 
 
 def list_accounts(manager):
-    """
-    List out ID and Name for each account
-    or
-    Create account is there are none
-    """
+    """List out ID and Name for each account"""
     accounts = manager.list_accounts()
     output = []
     if accounts:
@@ -65,14 +61,6 @@ def list_accounts(manager):
         print "\n".join(output)
     else:
         create_account(manager)
-
-
-def export_key(manager, id):
-    pass
-
-
-def delete_account(manager, id):
-    pass
 
 
 def select_account(manager, id):
@@ -109,6 +97,7 @@ def run(manager, url, cps):
 
     if not masterkey:
         print "Invalid Password"
+        return
 
     sqrlclient = Client(masterkey, cps)
     success, data = sqrlclient.login(url)
