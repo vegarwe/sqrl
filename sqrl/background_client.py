@@ -3,7 +3,7 @@
 import os
 import sys
 from mkm import MKM
-from client.client import Client
+from client import client
 from client import baseconv
 
 VERSION = "0.1.0"
@@ -11,15 +11,13 @@ HOME = os.environ['HOME']
 CONFIG_DIR = '.config/sqrl/'
 WORKING_DIR = HOME + '/' + CONFIG_DIR
 
-manager = None
-def run(url):
-    global manager
-    if manager == None: return
+sqrlclient = None
+class Client(client.Client):
+    def __init__(self, masterkey):
+        client.Client.__init__(self, masterkey)
 
-    masterkey = manager.get_key('f')
-
-    sqrlclient = Client(masterkey)
-    return sqrlclient.login(url)
+    def run(url):
+        return login(url)
 
 
 import BaseHTTPServer
@@ -30,7 +28,7 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except:
             return
 
-        success, login = run(url)
+        success, login = client.login(url)
         if success:
             s.send_response(301)
             s.send_header("Location", login)
@@ -45,8 +43,12 @@ class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             s.wfile.write("</body></html>")
 
 def main():
-    global manager
+    global client
     manager = MKM(WORKING_DIR)
+
+    #password = getpass("Please Enter Master Password: ")
+    #sqrlclient = Client(manager.get_key(password))
+    sqrlclient = Client(manager.get_key('f'))
 
     server_class = BaseHTTPServer.HTTPServer
     httpd = server_class(('localhost', 25519), MyHandler)

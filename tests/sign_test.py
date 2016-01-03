@@ -1,5 +1,5 @@
 import ed25519
-from sqrl.client import baseconv
+from sqrl import baseconv
 
 #def test(url, signed_url, public_key, domain, version):
 #    """

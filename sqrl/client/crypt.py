@@ -2,7 +2,7 @@
 
 import ed25519
 import hmac
-import baseconv
+from .. import baseconv
 
 
 class Crypt:

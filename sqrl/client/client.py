@@ -1,9 +1,9 @@
 import httplib
 import logging
 
-import baseconv
-from crypt import Crypt
-from parser import URLParser
+from sqrl import baseconv
+from sqrl.client.crypt import Crypt
+from sqrl.client.parser import URLParser
 
 
 class Client:
@@ -35,8 +35,12 @@ class Client:
         ids = self.enc.sign(client + server)
 
         success, data = self._post_form(url, "client=%s&server=%s&ids=%s" % (client, server, ids))
-        logging.debug('  client %r', baseconv.decode(client))
-        logging.debug('  server %r', baseconv.decode(server))
+        logging.debug("client")
+        for param in baseconv.decode(client).rstrip('\r\n').split('\r\n'):
+            logging.debug('  %r', param)
+        logging.debug("server")
+        for param in baseconv.decode(server).rstrip('\r\n').split('\r\n'):
+            logging.debug('  %r', param)
         logging.debug('  ids    %r', ids)
 
         if success:
@@ -74,8 +78,12 @@ class Client:
 
         url = URLParser(url.scheme + "://" + url.netloc + resp['qry'])
         success, data = self._post_form(url, "client=%s&server=%s&ids=%s" % (client, server, ids))
-        logging.debug('  client %r', baseconv.decode(client))
-        logging.debug('  server %r', baseconv.decode(server))
+        logging.debug("client")
+        for param in baseconv.decode(client).rstrip('\r\n').split('\r\n'):
+            logging.debug('  %r', param)
+        logging.debug("server")
+        for param in baseconv.decode(server).rstrip('\r\n').split('\r\n'):
+            logging.debug('  %r', param)
         logging.debug('  ids    %r', ids)
 
         if success:

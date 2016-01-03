@@ -4,7 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import logging
 import unittest
 
-from sqrl.client import baseconv
+from sqrl import baseconv
 
 class TestNoPaddingBase64(unittest.TestCase):
 

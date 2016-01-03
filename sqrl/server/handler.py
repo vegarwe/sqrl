@@ -1,7 +1,17 @@
 import logging
+import random
+import string
 
-from sqrl.client import baseconv
-from sqrl.server import session
+from sqrl import baseconv
+
+
+def _id_generator(size=22, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+def get_nut():
+    return _id_generator()
+
 
 class SqrlCallback(object):
     def ident(self, session_id, idk, suk, vuk):
@@ -9,6 +19,7 @@ class SqrlCallback(object):
 
     def id_found(self, idk):
         raise NotImplementedError()
+
 
 class SqrlHandler(object):
     def _get_value(self, nameValuePair, name):
@@ -66,7 +77,7 @@ class SqrlHandler(object):
         else:
             tif ^= 10 # Not supported
 
-        new_nut = session.get_nut()
+        new_nut = get_nut()
         server  = "ver=1\r\n"
         server += "nut=%s\r\n" % new_nut
         server += "qry=/sqrl?nut=%s\r\n" % new_nut
