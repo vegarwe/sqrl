@@ -6,6 +6,7 @@ Uitility to encode and decode base64url to spec
 """
 
 def decode(data):
+    data = str(data) # To be able to handle u'Unicode strings'
     data += '=' * (4 - len(data) % 4)
     return base64.urlsafe_b64decode(data)
 

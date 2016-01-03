@@ -1,3 +1,7 @@
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+import logging
 import unittest
 
 from sqrl.client import baseconv
@@ -11,12 +15,18 @@ class TestNoPaddingBase64(unittest.TestCase):
         self.assertEqual(baseconv.encode("abcd"), 'YWJjZA')
         self.assertEqual(baseconv.encode("abcde"), 'YWJjZGU')
 
+    def test_encode_unicode(self):
+        self.assertEqual(baseconv.encode(u"abcd"), 'YWJjZA')
+
     def test_decode_no_padding(self):
         self.assertEqual(baseconv.decode("YWJj"), 'abc')
 
     def test_decode_padding_added_back(self):
         self.assertEqual(baseconv.decode("YWJjZA"), 'abcd')
         self.assertEqual(baseconv.decode("YWJjZGU"), 'abcde')
+
+    def test_decode_unicode(self):
+        self.assertEqual(baseconv.decode(u"YWJjZA"), 'abcd')
 
     def test_decodeNameValue_server_response(self):
         server = baseconv.decodeNameValue('dmVyPTENCm51dD1BaHZoZHk4U3hucy1QaXdhTUtBbG53DQp0aWY9NDI0DQpxcnk9L3Nxcmw_bnV0PUFodmhkeThTeG5zLVBpd2FNS0FsbncNCnNmbj1HUkMNCg')
@@ -35,3 +45,7 @@ class TestNoPaddingBase64(unittest.TestCase):
 
         server = baseconv.encodeNameValue({'nut': 'Ahvhdy8Sxns-PiwaMKAlnw', 'ver': '1'})
         self.assertEqual('dmVyPTENCm51dD1BaHZoZHk4U3hucy1QaXdhTUtBbG53DQo', server)
+
+if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.DEBUG)
+    unittest.main()
