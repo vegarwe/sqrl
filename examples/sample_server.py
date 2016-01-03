@@ -88,21 +88,41 @@ class SqrlHandler(tornado.web.RequestHandler):
                 sqrl_callback)
         self.write(baseconv.encode(server))
 
-class BaseRequestHandler(tornado.web.RequestHandler):
-    def get_argument(self, key, default):
-        argument = tornado.web.RequestHandler.get_argument(self, key, default)
-        if re.match(r'^[A-Za-z0-9_ +-]*$', argument):
-            return argument
-        logging.error("Input did not match! %r", argument)
-        return default
 
-    def writeln(self, text):
-        self.write(text)
-        self.write('\n')
+class IndexHandler(tornado.web.RequestHandler):
+    def get_style_css(self):
+        self.writeln("@-webkit-keyframes fadeIt {")
+        self.writeln("  0%  { text-shadow: 0 0 25px red; }")
+        self.writeln("}")
+        self.writeln("@-moz-keyframes    fadeIt {")
+        self.writeln("  0%  { text-shadow: 0 0 25px red; }")
+        self.writeln("}")
+        self.writeln("@-o-keyframes      fadeIt {")
+        self.writeln("  0%  { text-shadow: 0 0 25px red; }")
+        self.writeln("}")
+        self.writeln("@keyframes         fadeIt {")
+        self.writeln("  0%  { text-shadow: 0 0 25px red; }")
+        self.writeln("}")
+        self.writeln(".fadeShadow {")
+        self.writeln("    background-image:none !important;")
+        self.writeln("    -webkit-animation: fadeIt 3s linear;")
+        self.writeln("       -moz-animation: fadeIt 3s linear;")
+        self.writeln("         -o-animation: fadeIt 3s linear;")
+        self.writeln("            animation: fadeIt 3s linear;")
+        self.writeln("}")
 
+    def get(self, path):
+        logging.debug("path: %r", path)
+        if path == 'style.css':
+            self.get_style_css()
+        elif path.startswith('user'):
+            self.get_user()
+        elif path == '' or path == 'index.html':
+            self.get_index_html()
+        else:
+            self.send_error(404)
 
-class IndexHandler(BaseRequestHandler):
-    def get(self):
+    def get_index_html(self):
         nut      = handler.get_nut()
         sqrl_url = 'qrl://%s/sqrl?nut=%s&sfn=%s' % (URL, nut, baseconv.encode("Fisken"))
 
@@ -131,24 +151,19 @@ class IndexHandler(BaseRequestHandler):
         self.writeln("  <br/>")
         self.writeln("</body></html>")
 
-
-class UserHandler(BaseRequestHandler):
-    def post(self):
-        session_id = self.get_argument('session_id', None)
-        username = self.get_argument('blapp', None)
-        user = sqrl_callback._sessions[session_id]
-        user.username = username
-        self.redirect('/user?session_id=%s&msg=User+updated' % session_id)
-
-    def get(self):
+    def get_user(self):
         session_id = self.get_argument('session_id', None)
         user = sqrl_callback._sessions[session_id]
         msg = self.get_argument('msg', None)
 
-        self.writeln("<html><head><title>Title goes here.</title></head>")
+        self.writeln("<html>")
+        self.writeln("  <head>")
+        self.writeln("    <title>Title goes here.</title></head>")
+        self.writeln('    <link href="/style.css" rel="stylesheet" type="text/css"/>')
+        self.writeln("  </head>")
         self.writeln("<body>")
         self.writeln("  <p>Blipp fisken</p>")
-        self.writeln("  <p>%s</p>" % msg)
+        self.writeln("  <p class='fadeShadow'>%s</p>" % msg)
         self.writeln("  <p>Session: %s</p>" % (session_id))
         self.writeln("  <p>IDK: %s</p>" % (user.idk))
         self.writeln("  <form method=post>")
@@ -160,12 +175,29 @@ class UserHandler(BaseRequestHandler):
         self.writeln("  </form>")
         self.writeln("</body></html>")
 
+    def post(self, path):
+        session_id = self.get_argument('session_id', None)
+        username = self.get_argument('blapp', None)
+        user = sqrl_callback._sessions[session_id]
+        user.username = username
+        self.redirect('/user?session_id=%s&msg=User+updated' % session_id)
+
+    def get_argument(self, key, default):
+        argument = tornado.web.RequestHandler.get_argument(self, key, default)
+        if re.match(r'^[A-Za-z0-9_ +-]*$', argument):
+            return argument
+        logging.error("Input did not match! %r", argument)
+        return default
+
+    def writeln(self, text):
+        self.write(text)
+        self.write('\n')
+
 
 application = tornado.web.Application([
-    (r"/", IndexHandler),
     (r'/ws', SocketHandler),
     (r"/sqrl", SqrlHandler),
-    (r"/user", UserHandler),
+    (r"/(.*)", IndexHandler),
 ])
 
 if __name__ == "__main__":
