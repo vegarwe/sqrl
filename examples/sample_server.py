@@ -4,6 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import json
 import logging
 import re
+import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 import tornado.websocket
@@ -12,8 +13,8 @@ from sqrl import log_setup
 from sqrl import baseconv
 from sqrl.server import handler
 
-PORT = 8888
-URL = "192.168.1.7:%i" % PORT
+PORT = 443
+URL = "https://raiom.no:%i" % PORT
 
 class User(object):
     def __init__(self, idk, username=None):
@@ -36,7 +37,7 @@ class SqrlCallback(handler.SqrlCallback):
             # TODO: Reauthenticating a session?
             self._sessions[session_id] = self._idks[idk]
 
-        redirect_url = 'http://%s/user?session_id=%s&msg=Session+authenticated' % (URL, session_id)
+        redirect_url = '%s/user?session_id=%s&msg=Session+authenticated' % (URL, session_id)
         for ws in self._websockets:
             if ws._session_id == session_id:
                 ws.redirect_socket_endpoint(redirect_url)
@@ -89,7 +90,7 @@ class SqrlHandler(tornado.web.RequestHandler):
         self.write(baseconv.encode(server))
 
 
-class IndexHandler(tornado.web.RequestHandler):
+class HtmlHandler(tornado.web.RequestHandler):
     def get_style_css(self):
         self.writeln("@-webkit-keyframes fadeIt {")
         self.writeln("  0%  { text-shadow: 0 0 25px red; }")
@@ -124,14 +125,19 @@ class IndexHandler(tornado.web.RequestHandler):
 
     def get_index_html(self):
         nut      = handler.get_nut()
-        sqrl_url = 'qrl://%s/sqrl?nut=%s&sfn=%s' % (URL, nut, baseconv.encode("Fisken"))
+        if URL.startswith('https'):
+            sqrl_url = URL.replace('https', 'sqrl')
+        else:
+            sqrl_url = URL.replace('http', 'qrl')
+        sqrl_url = '%s/sqrl?nut=%s&sfn=%s' % (sqrl_url, nut, baseconv.encode("Fisken"))
+        ws_url = URL.replace('http', 'ws')
 
         self.writeln("<html><head><title>Title goes here.</title></head>")
         self.writeln("<body>")
         self.writeln("  <p>Blipp fisken</p>")
         self.writeln("  <a href='%s'>login</a>" % (sqrl_url))
         self.writeln('  <script>')
-        self.writeln('    var ws = new WebSocket("ws://%s/ws");' % (URL))
+        self.writeln('    var ws = new WebSocket("%s/ws");' % (ws_url))
         self.writeln('    ws.onopen = function(){')
         self.writeln('      console.log("onopen");')
         self.writeln('      ws.send("{\\\"session_id\\\": \\\"%s\\\"}");' % (nut))
@@ -194,14 +200,18 @@ class IndexHandler(tornado.web.RequestHandler):
         self.write('\n')
 
 
-application = tornado.web.Application([
-    (r'/ws', SocketHandler),
-    (r"/sqrl", SqrlHandler),
-    (r"/(.*)", IndexHandler),
-])
-
 if __name__ == "__main__":
     log_setup.log_setup(verbose=True)
 
-    application.listen(PORT)
+    application = tornado.web.Application([
+        (r'/ws', SocketHandler),
+        (r"/sqrl", SqrlHandler),
+        (r"/(.*)", HtmlHandler),
+    ])
+    http_server = tornado.httpserver.HTTPServer(application, ssl_options = {
+        "certfile": os.path.join(os.path.dirname(__file__), "ssl", "signed.crt"),
+        "keyfile": os.path.join(os.path.dirname(__file__),  "ssl", "domain.key"),
+    })
+
+    http_server.listen(4443)
     tornado.ioloop.IOLoop.current().start()
