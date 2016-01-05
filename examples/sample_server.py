@@ -1,9 +1,11 @@
 import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+__dir__ = os.path.dirname(__file__)
+sys.path.append(os.path.join(__dir__, '..'))
 
 import json
 import logging
 import re
+import sqlite3
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
@@ -14,7 +16,11 @@ from sqrl import baseconv
 from sqrl.server import handler
 
 PORT = 443
-URL = "https://raiom.no:%i" % PORT
+SCHEME = 'https'
+if PORT in (80, 443):
+    URL = "%s://raiom.no" % (SCHEME)
+else:
+    URL = "%s://raiom.no:%i" % (SCHEME, PORT)
 
 class User(object):
     def __init__(self, idk, username=None):
@@ -24,18 +30,29 @@ class User(object):
 class SqrlCallback(handler.SqrlCallback):
     def __init__(self):
         self._websockets = []
-        self._idks = {}
+        self._conn = sqlite3.connect(os.path.join(__dir__, 'sample_server.sqlite'))
+        self._conn.row_factory = sqlite3.Row
+        self._db = self._conn.cursor()
+        try:
+            self._db.execute('select count(*) from sqrl_user')
+        except sqlite3.OperationalError:
+            #print 'idk', len('kPz91zMYfXI7z9pQ-Gu4KjWddIRCw-VAHGTJZMkGr-w'), 43
+            self._db.execute("""create table sqrl_user (id INT, username TEXT, idk TEXT)""")
         self._sessions = {}
 
+    def close(self):
+        logging.info("closing db")
+        self._db.close()
+        self._conn.close()
+
     def ident(self, session_id, idk, suk, vuk):
-        if idk not in self._idks:
-            self._idks[idk] = User(idk)
-        if session_id not in self._sessions:
-            self._sessions[session_id] = self._idks[idk]
-        else:
-            logging.error("Ehhh, what?")
+        if not self.id_found(idk):
+            self._db.execute("insert into sqrl_user (idk) values(?)", [str(idk)])
+            self._conn.commit()
+        if session_id in self._sessions:
             # TODO: Reauthenticating a session?
-            self._sessions[session_id] = self._idks[idk]
+            logging.error("Ehhh, what?")
+        self._sessions[session_id] = idk
 
         redirect_url = '%s/user?session_id=%s&msg=Session+authenticated' % (URL, session_id)
         for ws in self._websockets:
@@ -43,8 +60,14 @@ class SqrlCallback(handler.SqrlCallback):
                 ws.redirect_socket_endpoint(redirect_url)
 
     def id_found(self, idk):
-        logging.info('%r', self._idks)
-        return idk in self._idks
+        return self.get_user(idk) is not None
+
+    def get_user(self, idk):
+        return self._db.execute("select * from sqrl_user where idk = ?", [idk]).fetchone()
+
+    def update_user(self, idk, username):
+        self._db.execute("update sqrl_user set username = ? where idk = ?", [username, idk])
+        self._conn.commit()
 
     def add_ws(self, ws):
         self._websockets.append(ws)
@@ -53,7 +76,7 @@ class SqrlCallback(handler.SqrlCallback):
         if ws in self._websockets:
             self._websockets.remove(ws)
 
-sqrl_callback = SqrlCallback()
+sqrl_callback = None
 
 class SocketHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, application, request, **kwargs):
@@ -159,7 +182,8 @@ class HtmlHandler(tornado.web.RequestHandler):
 
     def get_user(self):
         session_id = self.get_argument('session_id', None)
-        user = sqrl_callback._sessions[session_id]
+        idk = sqrl_callback._sessions[session_id]
+        user = sqrl_callback.get_user(idk)
         msg = self.get_argument('msg', None)
 
         self.writeln("<html>")
@@ -171,11 +195,11 @@ class HtmlHandler(tornado.web.RequestHandler):
         self.writeln("  <p>Blipp fisken</p>")
         self.writeln("  <p class='fadeShadow'>%s</p>" % msg)
         self.writeln("  <p>Session: %s</p>" % (session_id))
-        self.writeln("  <p>IDK: %s</p>" % (user.idk))
+        self.writeln("  <p>IDK: %s</p>" % (user['idk']))
         self.writeln("  <form method=post>")
         self.writeln("    <input type='hidden' name='session_id' value='%s'>" % (session_id))
         self.writeln("    <label for='blapp'>Display name:")
-        self.writeln("      <input type='text' name='blapp' value='%s'>" % (user.username if user.username else ''))
+        self.writeln("      <input type='text' name='blapp' value='%s'>" % (user['username'] if user['username'] else ''))
         self.writeln("    </label>")
         self.writeln("    <input type='submit' value='submit'>")
         self.writeln("  </form>")
@@ -184,8 +208,8 @@ class HtmlHandler(tornado.web.RequestHandler):
     def post(self, path):
         session_id = self.get_argument('session_id', None)
         username = self.get_argument('blapp', None)
-        user = sqrl_callback._sessions[session_id]
-        user.username = username
+        idk = sqrl_callback._sessions[session_id]
+        sqrl_callback.update_user(idk, username)
         self.redirect('/user?session_id=%s&msg=User+updated' % session_id)
 
     def get_argument(self, key, default):
@@ -203,15 +227,23 @@ class HtmlHandler(tornado.web.RequestHandler):
 if __name__ == "__main__":
     log_setup.log_setup(verbose=True)
 
+    sqrl_callback = SqrlCallback()
+
     application = tornado.web.Application([
         (r'/ws', SocketHandler),
         (r"/sqrl", SqrlHandler),
         (r"/(.*)", HtmlHandler),
     ])
-    http_server = tornado.httpserver.HTTPServer(application, ssl_options = {
-        "certfile": os.path.join(os.path.dirname(__file__), "ssl", "signed.crt"),
-        "keyfile": os.path.join(os.path.dirname(__file__),  "ssl", "domain.key"),
-    })
+    ssl_options = None
+    if SCHEME == 'https':
+        ssl_options = {
+                "certfile": os.path.join(__dir__, "ssl", "signed.crt"),
+                "keyfile": os.path.join(__dir__,  "ssl", "domain.key"),
+                }
+    http_server = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options)
 
-    http_server.listen(4443)
-    tornado.ioloop.IOLoop.current().start()
+    http_server.listen(PORT)
+    try:
+        tornado.ioloop.IOLoop.current().start()
+    except KeyboardInterrupt:
+        sqrl_callback.close()
