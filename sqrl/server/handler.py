@@ -1,3 +1,4 @@
+import ed25519
 import logging
 import random
 import string
@@ -40,7 +41,19 @@ class SqrlHandler(object):
             url = url[:find_index]
         return url
 
+    def _check_signature(self, idk, client, server, ids):
+        return False
+        verifying_key = ed25519.VerifyingKey(baseconv.decode(idk))
+
+        try:
+            verifying_key.verify(baseconv.decode(ids), str(client + server))
+            return True
+        except ed25519.BadSignatureError:
+            return False
+
     def post(self, client_str, server_str, ids, sqrl_callback):
+        client_str = str(client_str) # TODO(vw): Do we want to support u'nicode' or just convert?
+        server_str = str(server_str) # TODO(vw): Do we want to support u'nicode' or just convert?
         client = baseconv.decodeNameValue(client_str)
         server = baseconv.decodeNameValue(server_str)
         cmd    = self._get_value(client, 'cmd')
@@ -57,10 +70,13 @@ class SqrlHandler(object):
         logging.debug("  %r", ids)
 
         tif = 0
-        # TODO: Verify ids
         tif ^= 4 # TODO: Check if IP matches
+        session_id = None
 
-        if cmd == 'query':
+        if not self._check_signature(idk, client_str, server_str, ids):
+            logging.warn("signature failed")
+            tif ^= 80 # We always included a session_id, so something has gone wrong
+        elif cmd == 'query':
             session_id = self._get_url_nut(baseconv.decode(server_str))
             if sqrl_callback.id_found(idk):
                 tif ^= 1
@@ -82,9 +98,10 @@ class SqrlHandler(object):
         server += "nut=%s\r\n" % new_nut
         server += "qry=/sqrl?nut=%s\r\n" % new_nut
         server += "tif=%x\r\n" % tif
-        server += "session_id=%s\r\n" % session_id
+        if session_id:
+            server += "session_id=%s\r\n" % session_id
         logging.debug('response')
-        for param in server.split('\r\n'):
+        for param in server.split('\r\n')[:-1]:
             logging.debug('  %r', param)
         return server
 
