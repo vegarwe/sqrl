@@ -42,7 +42,6 @@ class SqrlHandler(object):
         return url
 
     def _check_signature(self, idk, client, server, ids):
-        return False
         verifying_key = ed25519.VerifyingKey(baseconv.decode(idk))
 
         try:
@@ -87,7 +86,7 @@ class SqrlHandler(object):
             else:
                 if sqrl_callback.id_found(idk):
                     tif ^= 1
-                suk = self._get_value(server, 'suk')
+                suk = self._get_value(server, 'suk') # TODO: Can be ''
                 vuk = self._get_value(server, 'vuk')
                 sqrl_callback.ident(session_id, idk, suk, vuk)
         else:
