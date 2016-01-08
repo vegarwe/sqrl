@@ -24,6 +24,7 @@ def parse_args():
     parser.add_argument("--create",                action="store_true", help="Create new account")
     parser.add_argument("--path",       default=SQRL_DIR,   nargs=1,    help="Path for config and key storage")
     parser.add_argument("--cps",                   action="store_true", help="Client Provided Session")
+    parser.add_argument("-d", "--disable",         action="store_true", help="Disable account at given url")
     parser.add_argument("-v", "--verbose",         action="store_true", help="DEBUG output in log")
     parser.add_argument('sqrl_url',     metavar='SQRLURL',  nargs='?',  help='An SQRL url to authenticate')
 
@@ -43,6 +44,8 @@ def main():
         list_accounts(manager)
     elif args.create:
         create_account(manager)
+    elif args.disable:
+        disable(manager, args.sqrl_url)
     else:
         run(manager, args.sqrl_url, args.cps)
 
@@ -106,4 +109,10 @@ def run(manager, url, cps):
         if data:
             print "On Linux, run xdg-open %s" % data
     else:
-        print "Authentication failed"
+        print "Authentication failed", data
+
+def disable(manager, url):
+    masterkey = manager.get_key('f')
+    sqrlclient = Client(masterkey)
+    success, data = sqrlclient.disable_account(url)
+    print success, data
