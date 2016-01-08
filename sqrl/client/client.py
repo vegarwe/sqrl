@@ -77,7 +77,6 @@ class Client:
 
     def ident(self, url, server):
         resp = baseconv.decodeNameValue(server)
-
         tif = int(resp['tif'], 16)
 
         client  = "ver=1\r\n"
@@ -122,6 +121,7 @@ class Client:
 
     def disable(self, url, server):
         resp = baseconv.decodeNameValue(server)
+        tif = int(resp['tif'], 16)
 
         client  = "ver=1\r\n"
         client += "cmd=disable\r\n"
