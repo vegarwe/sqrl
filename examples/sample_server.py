@@ -15,9 +15,12 @@ from sqrl import log_setup
 from sqrl import baseconv
 from sqrl.server import handler
 
-PORT = 443
-SCHEME = 'https'
-if PORT in (80, 443):
+PORT = 8080
+SCHEME = 'http'
+if PORT == 443:
+    SCHEME = 'https'
+    URL = "%s://raiom.no" % (SCHEME)
+elif PORT == 80:
     URL = "%s://raiom.no" % (SCHEME)
 else:
     URL = "%s://raiom.no:%i" % (SCHEME, PORT)
