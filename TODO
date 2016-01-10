@@ -1,0 +1,45 @@
+Server
+- Support disable
+- Support 'opt=cps'
+  server += "url=http://localhost:8888/?session_id=%s" % session_id
+- Support enable
+- (done) Add callbacks for storing keys permanently
+- (void) Use 0x400 Suppress SFN Confirmation
+- (done) Create sample (tornado) web site
+- (done) Add a POST handler
+  - client and server parameters must be appended in the same order as they are received from the client before
+    validating signtatures
+- (done) Verify signature
+- (done) fjas.no
+  - Setup environment
+  - Add SQLite db
+  - Add SSL
+
+Client
+- React to tif (no point in sending ident if 0x80 is set...)
+- Add tests for sqrl-url to key generation (ignoreing port and other stuff)
+- Should send a Host: header (see https://www.grc.com/sqrl/protocol.htm)
+  - username:password@ shoulg go in the Authentication: header
+- Should add user agent header
+- Only provide keys (suk, vuk) based upon tif status
+- Switch to requests.py
+- (done) Make sure we use the new SQRL query for subsequent calls
+- (done) Support disable
+
+
+Discussion points:
+
+Transaction #1
+Server is not key/value pair
+
+To check a signature of client=123&server=567
+- Split and join into 1234567.... Bad business
+
+This localhost:9999
+- Seems like such a kludge
+
+What about pids2, pids3, pids4 (I loose my identity a lot)
+
+0x100: Bad ID Association:
+- Information leakage?
+
