@@ -55,10 +55,8 @@ class SqrlHandler(object):
         server_str = str(server_str) # TODO(vw): Do we want to support u'nicode' or just convert?
         client = baseconv.decodeNameValue(client_str)
         server = baseconv.decodeNameValue(server_str)
-        cmd    = self._get_value(client, 'cmd')
         idk    = self._get_value(client, 'idk')
 
-        logging.info("cmd: %r", cmd)
         logging.debug('client:')
         for key, value in client.iteritems():
             logging.debug("  %r: %r", key, value)
@@ -68,37 +66,53 @@ class SqrlHandler(object):
         logging.debug('ids:')
         logging.debug("  %r", ids)
 
+        signature_ok = self._check_signature(idk, client_str, server_str, ids)
+
+        # Handle post request
         tif = 0
         tif ^= 4 # TODO: Check if IP matches
         session_id = None
+        suk = None
+        sin = None
+        url = None
 
-        if not self._check_signature(idk, client_str, server_str, ids):
+        cmd    = self._get_value(client, 'cmd')
+        logging.info("cmd: %r", cmd)
+        if not signature_ok:
             logging.warn("signature failed")
-            tif ^= 80 # We always included a session_id, so something has gone wrong
+            tif ^= 80
         elif cmd == 'query':
             session_id = self._get_url_nut(baseconv.decode(server_str))
-            if sqrl_callback.id_found(idk):
-                tif ^= 1
+            #if sqrl_callback.id_found(idk):
+            #    tif ^= 1
+            sin = 0
         elif cmd == 'ident':
             session_id  = self._get_value(server, 'session_id')
             if not session_id:
                 tif ^= 80 # We always included a session_id, so something has gone wrong
             else:
-                if sqrl_callback.id_found(idk):
-                    tif ^= 1
-                suk = self._get_value(server, 'suk') # TODO: Can be ''
-                vuk = self._get_value(server, 'vuk')
+                #if sqrl_callback.id_found(idk):
+                #    tif ^= 1
+                suk = self._get_value(client, 'suk') # TODO: Can be ''
+                vuk = self._get_value(client, 'vuk')
                 sqrl_callback.ident(session_id, idk, suk, vuk)
+            url = 'https://kanskje.de/sqrl/success?session_id=%s' % session_id
         else:
             tif ^= 10 # Not supported
 
         new_nut = get_nut()
         server  = "ver=1\r\n"
         server += "nut=%s\r\n" % new_nut
-        server += "qry=/sqrl?nut=%s\r\n" % new_nut
         server += "tif=%x\r\n" % tif
+        server += "qry=/sqrl/sqrl?nut=%s\r\n" % new_nut
+        if suk is not None:
+            server += "suk=%s\r\n" % suk
+        if sin is not None:
+            server += "sin=%s\r\n" % sin
         if session_id:
             server += "session_id=%s\r\n" % session_id
+        if url:
+            server += "url=%s\r\n" % url
         logging.debug('response')
         for param in server.split('\r\n')[:-1]:
             logging.debug('  %r', param)
