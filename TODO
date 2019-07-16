@@ -2,9 +2,9 @@ Server
 ======
 - Verify the return server part and verify it again what was sent
 - Support disable
+- Support enable
 - Support 'opt=cps'
   server += "url=http://localhost:8888/?session_id=%s" % session_id
-- Support enable
 - (done) Add callbacks for storing keys permanently
 - (void) Use 0x400 Suppress SFN Confirmation
 - (done) Create sample (tornado) web site
@@ -19,6 +19,8 @@ Server
 
 Client
 ======
+- Get rid of output printing (maybe have a --verbose?)
+- Can we run withoug a black window popping up?
 
 
 Discussion points:
