@@ -1,7 +1,7 @@
 import struct
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-from sqrl_crypto import *
+from .sqrl_crypto import *
 
 class Identity():
     def __init__(self, sqrlbinary):

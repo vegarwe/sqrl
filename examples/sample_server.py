@@ -1,6 +1,6 @@
 import sys, os
-__dir__ = os.path.dirname(__file__)
-sys.path.append(os.path.join(__dir__, '..'))
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(SCRIPT_DIR, '..'))
 
 import json
 import logging
@@ -32,7 +32,7 @@ sqrl_callback = None # TODO: Come up with a better apprach than global variable.
 class SqrlCallbackHandler(SqrlHandler):
     def __init__(self):
         self._websockets = []
-        self._conn = sqlite3.connect(os.path.join(__dir__, 'sample_server.sqlite'))
+        self._conn = sqlite3.connect(os.path.join(SCRIPT_DIR, 'sample_server.sqlite'))
         self._conn.row_factory = sqlite3.Row
         self._db = self._conn.cursor()
         try:

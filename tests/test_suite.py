@@ -1,8 +1,13 @@
+import sys, os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(SCRIPT_DIR, '..'))
+
 import sys
 import binascii
-from sqrl_s4 import Identity
-from sqrl_url import SqrlUrl
-from sqrl_crypto import *
+from sqrl.sqrl_s4 import Identity
+from sqrl.sqrl_url import SqrlUrl
+from sqrl.sqrl_crypto import *
+from sqrl import sqrl_conv
 
 def main():
     # Documents/SQRL/vegarwe_test5.sqrl
@@ -48,11 +53,11 @@ def main():
     assert binascii.hexlify(bytes(idk)) == b'cd9f76fdcdbfb99a72c3f64abd318bbebbac7d2c730906369499f0b8c6bb64dd'
 
     # Test recreating ursk and vuk from suk
-    suk = sqrl_base64_decode('YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0') # From diagnostics page
+    suk = sqrl_conv.base64_decode('YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0') # From diagnostics page
     ursk, vuk = sqrl_get_unlock_request_signing_key(suk, iuk)
     print('vuk ', binascii.hexlify(vuk))
     print('ursk', binascii.hexlify(ursk))
-    assert vuk == sqrl_base64_decode('369S6x9Yl2sX4cCAGQ03F4DdcUuOgtpPquUJ0WfW4qU') # From diagnostics page
+    assert vuk == sqrl_conv.base64_decode('369S6x9Yl2sX4cCAGQ03F4DdcUuOgtpPquUJ0WfW4qU') # From diagnostics page
 
     # Generate new suk and vuk (for new user registration)
     print('Create new keys')

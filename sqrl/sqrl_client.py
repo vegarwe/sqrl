@@ -2,9 +2,9 @@ import requests
 import sys
 import time
 
-import sqrl_conv
-from sqrl_url import SqrlUrl
-from sqrl_crypto import *
+import .sqrl_conv
+from .sqrl_url import SqrlUrl
+from .sqrl_crypto import *
 
 # Computer\HKEY_CURRENT_USER\Software\Classes\sqrl\shell\open\command
 
