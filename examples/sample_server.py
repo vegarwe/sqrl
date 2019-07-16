@@ -11,9 +11,8 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-from sqrl import log_setup
-from sqrl import baseconv
-from sqrl.server import handler
+from sqrl import sqrl_conv
+from sqrl.server import SqrlHandler
 
 #PORT = 8080
 #SCHEME = 'http'
@@ -28,7 +27,9 @@ PORT = 8080
 SCHEME = 'http'
 URL = "https://kanskje.de/sqrl"
 
-class SqrlCallback(handler.SqrlCallback):
+sqrl_callback = None # TODO: Come up with a better apprach than global variable...?
+
+class SqrlCallbackHandler(SqrlHandler):
     def __init__(self):
         self._websockets = []
         self._conn = sqlite3.connect(os.path.join(__dir__, 'sample_server.sqlite'))
@@ -37,7 +38,6 @@ class SqrlCallback(handler.SqrlCallback):
         try:
             self._db.execute('select count(*) from sqrl_user')
         except sqlite3.OperationalError:
-            #print 'idk', len('kPz91zMYfXI7z9pQ-Gu4KjWddIRCw-VAHGTJZMkGr-w'), 43
             self._db.execute("""create table sqrl_user (id INT, username TEXT, idk TEXT, suk TEXT, vuk TEXT)""")
         self._sessions = {}
 
@@ -49,7 +49,6 @@ class SqrlCallback(handler.SqrlCallback):
     def ident(self, session_id, idk, suk, vuk):
         if not self.id_found(idk):
             pass
-            print("insert into sqrl_user (idk, suk, vuk) values(%s, %s, %s)" % (str(idk), str(suk), str(vuk)))
             self._db.execute("insert into sqrl_user (idk, suk, vuk) values(?, ?, ?)", [str(idk), str(suk), str(vuk)])
             self._conn.commit()
         if session_id in self._sessions:
@@ -61,6 +60,7 @@ class SqrlCallback(handler.SqrlCallback):
         for ws in self._websockets:
             if ws._session_id == session_id:
                 ws.redirect_socket_endpoint(redirect_url)
+        return redirect_url
 
     def id_found(self, idk):
         return self.get_user(idk) is not None
@@ -78,8 +78,6 @@ class SqrlCallback(handler.SqrlCallback):
     def remove_ws(self, ws):
         if ws in self._websockets:
             self._websockets.remove(ws)
-
-sqrl_callback = None
 
 class SocketHandler(tornado.websocket.WebSocketHandler):
     def __init__(self, application, request, **kwargs):
@@ -106,14 +104,13 @@ class SocketHandler(tornado.websocket.WebSocketHandler):
     def redirect_socket_endpoint(self, url):
         self.write_message('{"url": "%s"}' % url)
 
-class SqrlHandler(tornado.web.RequestHandler):
+class SqrlRequestHandler(tornado.web.RequestHandler):
     def post(self):
-        server = handler.SqrlHandler().post(
+        server = sqrl_callback.post(
                 self.get_argument('client', ""),
                 self.get_argument('server', ""),
-                self.get_argument('ids', ""),
-                sqrl_callback)
-        self.write(baseconv.encode(server))
+                self.get_argument('ids', ""))
+        self.write(sqrl_conv.base64_encode(server))
 
 
 class HtmlHandler(tornado.web.RequestHandler):
@@ -137,6 +134,7 @@ class HtmlHandler(tornado.web.RequestHandler):
         self.writeln("         -o-animation: fadeIt 3s linear;")
         self.writeln("            animation: fadeIt 3s linear;")
         self.writeln("}")
+        self.set_header('Content-Type', 'text/css')
 
     def get(self, path):
         logging.debug("path: %r", path)
@@ -152,16 +150,16 @@ class HtmlHandler(tornado.web.RequestHandler):
             self.send_error(404)
 
     def get_index_html(self):
-        nut     = handler.get_nut()
+        nut     = sqrl_callback.get_nut()
         ws_url  = URL.replace('http', 'ws')
         if URL.startswith('https'):
             sqrl_url = URL.replace('https', 'sqrl')
         else:
             sqrl_url = URL.replace('http', 'qrl')
         sqrl_url = '%s/sqrl?nut=%s&sfn=%s&can=%s' % (sqrl_url,
-                nut, baseconv.encode("Fisken"),
-                baseconv.encode(URL + '/cancel'))
-        localhost_url = 'http://localhost:25519/' + baseconv.encode(sqrl_url)
+                nut, sqrl_conv.base64_encode("Fisken").decode(),
+                sqrl_conv.base64_encode(URL + '/cancel').decode())
+        localhost_url = 'http://localhost:25519/' + sqrl_conv.base64_encode(sqrl_url).decode()
 
         self.writeln("<html><head><title>Title goes here.</title></head>")
         self.writeln("<body>")
@@ -191,7 +189,10 @@ class HtmlHandler(tornado.web.RequestHandler):
 
     def get_user(self):
         session_id = self.get_argument('session_id', None)
-        idk = sqrl_callback._sessions[session_id]
+        try:
+            idk = sqrl_callback._sessions[session_id]
+        except KeyError:
+            return self.redirect('/sqrl')
         user = sqrl_callback.get_user(idk)
         msg = self.get_argument('msg', None)
 
@@ -228,7 +229,10 @@ class HtmlHandler(tornado.web.RequestHandler):
     def post(self, path):
         session_id = self.get_argument('session_id', None)
         username = self.get_argument('blapp', None)
-        idk = sqrl_callback._sessions[session_id]
+        try:
+            idk = sqrl_callback._sessions[session_id]
+        except KeyError:
+            return self.redirect('/sqrl')
         sqrl_callback.update_user(idk, username)
         self.redirect('/sqrl/user?session_id=%s&msg=User+updated' % session_id)
 
@@ -244,16 +248,39 @@ class HtmlHandler(tornado.web.RequestHandler):
         self.write('\n')
 
 
-if __name__ == "__main__":
-    log_setup.log_setup(verbose=True)
+def log_setup(verbose=False, logfilename=None, name=None):
+    formatter = logging.Formatter('%(asctime)s %(levelname)8s: %(message)s')
+    console = logging.StreamHandler()
+    console.setFormatter(formatter)
+    console.setLevel(logging.ERROR)
+    if verbose:
+        console.setLevel(logging.DEBUG)
 
-    sqrl_callback = SqrlCallback()
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(console)
+
+    if logfilename is None:
+        return
+    logfile = logging.FileHandler(logfilename)
+    logfile.setFormatter(formatter)
+    logfile.setLevel(logging.INFO)
+    if verbose:
+        logfile.setLevel(logging.DEBUG)
+    logger.addHandler(logfile)
+
+
+if __name__ == "__main__":
+    log_setup(verbose=True)
+
+    sqrl_callback = SqrlCallbackHandler()
 
     application = tornado.web.Application([
-        (r'/ws', SocketHandler),
-        (r"/sqrl", SqrlHandler),
-        (r"/(.*)", HtmlHandler),
+        (r'/ws',    SocketHandler),
+        (r"/sqrl",  SqrlRequestHandler),
+        (r"/(.*)",  HtmlHandler),
     ])
+
     ssl_options = None
     if SCHEME == 'https':
         ssl_options = {
