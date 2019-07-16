@@ -1,4 +1,6 @@
 Server
+======
+- Verify the return server part and verify it again what was sent
 - Support disable
 - Support 'opt=cps'
   server += "url=http://localhost:8888/?session_id=%s" % session_id
@@ -16,30 +18,23 @@ Server
   - Add SSL
 
 Client
-- React to tif (no point in sending ident if 0x80 is set...)
-- Add tests for sqrl-url to key generation (ignoreing port and other stuff)
-- Should send a Host: header (see https://www.grc.com/sqrl/protocol.htm)
-  - username:password@ shoulg go in the Authentication: header
-- Should add user agent header
-- Only provide keys (suk, vuk) based upon tif status
-- Switch to requests.py
-- (done) Make sure we use the new SQRL query for subsequent calls
-- (done) Support disable
+======
 
 
 Discussion points:
+=================
 
 Transaction #1
-Server is not key/value pair
+- Server is not key/value pair
 
 To check a signature of client=123&server=567
 - Split and join into 1234567.... Bad business
 
-This localhost:9999
+This localhost:25519
 - Seems like such a kludge
-
-What about pids2, pids3, pids4 (I loose my identity a lot)
 
 0x100: Bad ID Association:
 - Information leakage?
+
+(solved) What about pids2, pids3, pids4 (I loose my identity a lot)
 
