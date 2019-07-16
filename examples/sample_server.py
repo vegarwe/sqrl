@@ -15,20 +15,18 @@ from sqrl import log_setup
 from sqrl import baseconv
 from sqrl.server import handler
 
+#PORT = 8080
+#SCHEME = 'http'
+#if PORT == 443:
+#    SCHEME = 'https'
+#    URL = "%s://raiom.no" % (SCHEME)
+#elif PORT == 80:
+#    URL = "%s://raiom.no" % (SCHEME)
+#else:
+#    URL = "%s://raiom.no:%i" % (SCHEME, PORT)
 PORT = 8080
 SCHEME = 'http'
-if PORT == 443:
-    SCHEME = 'https'
-    URL = "%s://raiom.no" % (SCHEME)
-elif PORT == 80:
-    URL = "%s://raiom.no" % (SCHEME)
-else:
-    URL = "%s://raiom.no:%i" % (SCHEME, PORT)
-
-class User(object):
-    def __init__(self, idk, username=None):
-        self.idk = idk
-        self.username = username
+URL = "https://kanskje.de/sqrl"
 
 class SqrlCallback(handler.SqrlCallback):
     def __init__(self):
@@ -40,7 +38,7 @@ class SqrlCallback(handler.SqrlCallback):
             self._db.execute('select count(*) from sqrl_user')
         except sqlite3.OperationalError:
             #print 'idk', len('kPz91zMYfXI7z9pQ-Gu4KjWddIRCw-VAHGTJZMkGr-w'), 43
-            self._db.execute("""create table sqrl_user (id INT, username TEXT, idk TEXT)""")
+            self._db.execute("""create table sqrl_user (id INT, username TEXT, idk TEXT, suk TEXT, vuk TEXT)""")
         self._sessions = {}
 
     def close(self):
@@ -50,7 +48,9 @@ class SqrlCallback(handler.SqrlCallback):
 
     def ident(self, session_id, idk, suk, vuk):
         if not self.id_found(idk):
-            self._db.execute("insert into sqrl_user (idk) values(?)", [str(idk)])
+            pass
+            print("insert into sqrl_user (idk, suk, vuk) values(%s, %s, %s)" % (str(idk), str(suk), str(vuk)))
+            self._db.execute("insert into sqrl_user (idk, suk, vuk) values(?, ?, ?)", [str(idk), str(suk), str(vuk)])
             self._conn.commit()
         if session_id in self._sessions:
             # TODO: Reauthenticating a session?
@@ -144,24 +144,30 @@ class HtmlHandler(tornado.web.RequestHandler):
             self.get_style_css()
         elif path.startswith('user'):
             self.get_user()
+        elif path.startswith('cancel'):
+            self.get_cancel()
         elif path == '' or path == 'index.html':
             self.get_index_html()
         else:
             self.send_error(404)
 
     def get_index_html(self):
-        nut      = handler.get_nut()
+        nut     = handler.get_nut()
+        ws_url  = URL.replace('http', 'ws')
         if URL.startswith('https'):
             sqrl_url = URL.replace('https', 'sqrl')
         else:
             sqrl_url = URL.replace('http', 'qrl')
-        sqrl_url = '%s/sqrl?nut=%s&sfn=%s' % (sqrl_url, nut, baseconv.encode("Fisken"))
-        ws_url = URL.replace('http', 'ws')
+        sqrl_url = '%s/sqrl?nut=%s&sfn=%s&can=%s' % (sqrl_url,
+                nut, baseconv.encode("Fisken"),
+                baseconv.encode(URL + '/cancel'))
+        localhost_url = 'http://localhost:25519/' + baseconv.encode(sqrl_url)
 
         self.writeln("<html><head><title>Title goes here.</title></head>")
         self.writeln("<body>")
         self.writeln("  <p>Blipp fisken</p>")
         self.writeln("  <a href='%s'>login</a>" % (sqrl_url))
+        self.writeln("  <a href='%s'>localhost</a>" % (localhost_url))
         self.writeln('  <script>')
         self.writeln('    var ws = new WebSocket("%s/ws");' % (ws_url))
         self.writeln('    ws.onopen = function(){')
@@ -192,14 +198,16 @@ class HtmlHandler(tornado.web.RequestHandler):
         self.writeln("<html>")
         self.writeln("  <head>")
         self.writeln("    <title>Title goes here.</title></head>")
-        self.writeln('    <link href="/style.css" rel="stylesheet" type="text/css"/>')
+        self.writeln('    <link href="/sqrl/style.css" rel="stylesheet" type="text/css"/>')
         self.writeln("  </head>")
         self.writeln("<body>")
         self.writeln("  <p>Blipp fisken</p>")
         self.writeln("  <p class='fadeShadow'>%s</p>" % msg)
         self.writeln("  <p>Session: %s</p>" % (session_id))
-        self.writeln("  <p>IDK: %s</p>" % (user['idk']))
-        self.writeln("  <form method=post>")
+        self.writeln("  <p>idk: %s</p>" % (user['idk']))
+        self.writeln("  <p>suk: %s</p>" % (user['suk']))
+        self.writeln("  <p>vuk: %s</p>" % (user['vuk']))
+        self.writeln("  <form method='post'>")
         self.writeln("    <input type='hidden' name='session_id' value='%s'>" % (session_id))
         self.writeln("    <label for='blapp'>Display name:")
         self.writeln("      <input type='text' name='blapp' value='%s'>" % (user['username'] if user['username'] else ''))
@@ -208,12 +216,21 @@ class HtmlHandler(tornado.web.RequestHandler):
         self.writeln("  </form>")
         self.writeln("</body></html>")
 
+    def get_cancel(self):
+        self.writeln("<html>")
+        self.writeln("  <head>")
+        self.writeln("    <title>Title goes here.</title></head>")
+        self.writeln("  </head>")
+        self.writeln("<body>")
+        self.writeln("  <p>Authentication process was cancelled</p>")
+        self.writeln("</body></html>")
+
     def post(self, path):
         session_id = self.get_argument('session_id', None)
         username = self.get_argument('blapp', None)
         idk = sqrl_callback._sessions[session_id]
         sqrl_callback.update_user(idk, username)
-        self.redirect('/user?session_id=%s&msg=User+updated' % session_id)
+        self.redirect('/sqrl/user?session_id=%s&msg=User+updated' % session_id)
 
     def get_argument(self, key, default):
         argument = tornado.web.RequestHandler.get_argument(self, key, default)
