@@ -21,6 +21,7 @@ class SqrlHandler(object):
 
 
     def get_nut(self):
+        # TODO: Keep track of recently used nut's and issue tif=E1 when approriate
         return _id_generator()
 
 
