@@ -52,6 +52,9 @@ def sqrl_hmac(key, msg):
         msg = msg.encode()
     return hmac.new(key, msg, hashlib.sha256).digest()
 
+def sqrl_get_ins_from_sin(ssk, sin):
+    return sqrl_hmac(EnHash(ssk[:32]), sin)
+
 def sqrl_keypair(raw_sign_key):
     verify, sign = nacl.bindings.crypto_sign_seed_keypair(raw_sign_key)
     # TODO: Is raw_sign_key == sign[:32] always true?

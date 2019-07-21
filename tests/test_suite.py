@@ -65,6 +65,7 @@ def main():
     print('idk ', binascii.hexlify(idk))
     assert binascii.hexlify(ssk) == b'a9f02ccd2ef61146a0f4c9101f4dbf285059d9687cba62b136b9a188623943d4cd9f76fdcdbfb99a72c3f64abd318bbebbac7d2c730906369499f0b8c6bb64dd'
     assert binascii.hexlify(idk) == b'cd9f76fdcdbfb99a72c3f64abd318bbebbac7d2c730906369499f0b8c6bb64dd'
+    assert                  idk  == sqrl_conv.base64_decode('zZ92_c2_uZpyw_ZKvTGLvrusfSxzCQY2lJnwuMa7ZN0') # From diagnostics page
 
     # Test recreating ursk and vuk from suk
     suk = sqrl_conv.base64_decode('YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0') # From diagnostics page
@@ -85,6 +86,13 @@ def main():
     ursk, vuk = sqrl_get_unlock_request_signing_key(suk, iuk)
     print('vuk ', binascii.hexlify(vuk))
     print('ursk', binascii.hexlify(ursk))
+
+    # Create ins from sin
+    sin = '0'
+    ins = sqrl_get_ins_from_sin(ssk, sin)
+    #ins = sqrl_hmac(EnHash(ssk[:32]), sin)
+    print('ins ', binascii.hexlify(ins))
+    assert ins == sqrl_conv.base64_decode('1DiYNEJ8ACngkZNoqg50T4W_EVfWfvVZhB_j21Lum5M')
 
 if __name__ == "__main__":
     main()
