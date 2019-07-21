@@ -1,10 +1,11 @@
+import binascii
 import requests
 import sys
 import time
 
-import .sqrl_conv
-from .sqrl_url import SqrlUrl
-from .sqrl_crypto import *
+import sqrl_conv
+from sqrl_url import SqrlUrl
+from sqrl_crypto import *
 
 # Computer\HKEY_CURRENT_USER\Software\Classes\sqrl\shell\open\command
 
@@ -15,48 +16,50 @@ def split_response(resp):
         records[key] = value
     return records
 
-def transaction_1(url, ssk, idk):
+def transaction_1(imk, sks, server):
+    # Get site specific keys
+    idk, ssk = sqrl_get_idk_for_site(imk, sks)
+
     client  =  b'ver=1\r\n'
     client  += b'cmd=query\r\n'
-    client  += b'idk=%s\r\n' % sqrl_conv.base64_encode(bytes(idk))
+    client  += b'idk=%s\r\n' % sqrl_conv.base64_encode(idk)
     client  += b'opt=cps~suk\r\n'
     print('client', client)
     client  = sqrl_conv.base64_encode(client)
 
-    server  =  bytes(url)
     print('server', server)
     server  = sqrl_conv.base64_encode(server)
 
-    ids     = ssk.sign(client + server)
+    ids     = sqrl_sign(ssk, client + server)
     form    = {'client': client,
                'server': server,
-               'ids':    sqrl_conv.base64_encode(ids.signature)}
-    return requests.post(url.get_http_url(), data=form)
+               'ids':    sqrl_conv.base64_encode(ids)}
+    return form
 
 
-def transaction_2(url, server, ssk, idk, ilk):
-    records = split_response(sqrl_conv.base64_decode(server))
-    print('url records', records)
+def transaction_2(ilk, imk, sks, server, sin, create_suk):
+    # Get site specific keys
+    idk, ssk = sqrl_get_idk_for_site(imk, sks)
 
     client  =  b'ver=1\r\n'
     client  += b'cmd=ident\r\n'
-    client  += b'idk=%s\r\n' % sqrl_conv.base64_encode(bytes(idk))
-    if b'sin' in records:
-        ins = sqrl_hmac(EnHash(bytes(ssk)), records[b'sin'])
+    client  += b'idk=%s\r\n' % sqrl_conv.base64_encode(idk)
+    if sin:
+        ins = sqrl_hmac(EnHash(ssk), sin)
         client  += b'ins=%s\r\n' % sqrl_conv.base64_encode(ins)
-    if b'suk' not in records:
+    if create_suk:
         suk, vuk = sqrl_idlock_keys(ilk)
         client  += b'suk=%s\r\n' % sqrl_conv.base64_encode(suk)
         client  += b'vuk=%s\r\n' % sqrl_conv.base64_encode(vuk)
-    client  += b'opt=cps~suk\r\n'
+    client  += b'opt=cps~suk\r\n' # TODO: Not always true?
     print('client', client)
     client  = sqrl_conv.base64_encode(client)
 
-    ids     = ssk.sign(client + server)
+    ids     = sqrl_sign(ssk, client + server)
     form    = {'client': client,
                'server': server,
-               'ids':    sqrl_conv.base64_encode(ids.signature)}
-    return requests.post(url.get_resp_query_path(records[b'qry']), data=form)
+               'ids':    sqrl_conv.base64_encode(ids)}
+    return form
 
 def login_procedure(url_str):
     # Parse input parameter
@@ -68,24 +71,31 @@ def login_procedure(url_str):
     sys.stdout.flush()
 
     # Hard code identity (for now)
-    imk = b'\xf3\xb78B\xda\x12E\xf3\xe7\xb2\xb8\xa1\x14/r\xbb\xc8\x97\xf8\xdd\xbaY\x83b\xb4\x93\r\xe2\xbbF\x0f\x1f'
-    ilk = b'\xaa\xbdl*\xeei>\x81\xb2:Y;6\xa3\xb4\x96\xa6\xfa\x86\xfdhy~\xa2\xe4\xaf\x8d3\xd1\x9038'
-    print('imk', imk)
-    print('ilk', ilk)
-
-    # Get site specific keys
-    ssk, idk = sqrl_get_idk_for_site(imk, url.get_sks())
+    #imk = binascii.unhexlify(b'f3b73842da1245f3e7b2b8a1142f72bbc897f8ddba598362b4930de2bb460f1f') # vegarwe-testing
+    #ilk = binascii.unhexlify(b'aabd6c2aee693e81b23a593b36a3b496a6fa86fd68797ea2e4af8d33d1903338') # vegarwe-testing
+    imk = binascii.unhexlify(b'21d70894575e6b6efe991fb86a9868a49f3a72040e88252d82be5a3ac6c3aa23') # vegarwe_test5
+    ilk = binascii.unhexlify(b'00d3a56b500bca7908eb89a6f5fe0931388797d42930798d2ffe88d436c94878') # vegarwe_test5
+    #print('imk', binascii.hexlify(imk))
+    #print('ilk', binascii.hexlify(ilk))
 
     # Transaction #1
+    form = transaction_1(imk, url.get_sks(), bytes(url))
     t1 = time.time()
-    r = transaction_1(url, ssk, idk)
+    r = requests.post(url.get_http_url(), data=form)
     print(r, 'time', time.time() - t1)
     # TODO: Check r.code == 200
     sys.stdout.flush()
 
     # Transaction #2
+    server = bytes(r.text, encoding='utf-8')
+    # TODO: Check for for tif=E*
+    records = split_response(sqrl_conv.base64_decode(server))
+    print('server records', records)
+
+    form = transaction_2(ilk, imk, url.get_sks(), server,
+            records.get(b'sin', None), b'suk' not in records)
     t1 = time.time()
-    r = transaction_2(url, bytes(r.text, encoding='utf-8'), ssk, idk, ilk)
+    r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
     print(r, 'time', time.time() - t1)
     print(r.text)
     sys.stdout.flush()
@@ -103,12 +113,12 @@ def login_procedure(url_str):
     return redirect
 
 
-import os
 import http.server
 import socketserver
 from urllib.parse import urlparse
 #from urllib.parse import parse_qs
 
+import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class Handler(http.server.SimpleHTTPRequestHandler):
@@ -125,7 +135,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Connection', 'close')
             self.send_header('Sqrl-Process', '12345')
             self.end_headers()
-            self.wfile.write(open('onepixel.gif', 'rb').read())
+            self.wfile.write(open(os.path.join(SCRIPT_DIR, '..', 'onepixel.gif'), 'rb').read())
             return
 
         if self.path in [ '/sqrl.ico', '/favicon.ico']:
@@ -134,7 +144,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'image/x-icon')
             self.send_header('Connection', 'close')
             self.end_headers()
-            self.wfile.write(open(self.path[1:], 'rb').read())
+            self.wfile.write(open(os.path.join(SCRIPT_DIR, '..', 'favicon.ico'), 'rb').read())
             return
 
         #'/c3FybDovL3d3dy5ncmMuY29tL3Nxcmw_bnV0PVdUVjBOZjZBajlQRjdrUDZzdEF6MHcmY2FuPWFIUjBjSE02THk5M2QzY3VaM0pqTG1OdmJTOXpjWEpzTDJScFlXY3VhSFJ0'
@@ -188,7 +198,9 @@ def main():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         print(login_procedure(sys.argv[1]))
+    elif len(sys.argv) > 1:
+        pass
     else:
         main()

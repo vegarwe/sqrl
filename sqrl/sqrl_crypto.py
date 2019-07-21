@@ -53,27 +53,25 @@ def sqrl_hmac(key, msg):
     return hmac.new(key, msg, hashlib.sha256).digest()
 
 def sqrl_keypair(raw_sign_key):
-    prv = nacl.signing.SigningKey(raw_sign_key)
-    return prv, prv.verify_key
+    verify, sign = nacl.bindings.crypto_sign_seed_keypair(raw_sign_key)
+    # TODO: Is raw_sign_key == sign[:32] always true?
+    return verify, sign
 
 def sqrl_make_public(priv):
     return nacl.bindings.crypto_scalarmult_base(priv)
 
 def sqrl_idlock_keys(ilk):
-    #rlk = secrets.token_bytes(nbytes=32)
     rlk = nacl.utils.random(size=32)
     suk = sqrl_make_public(rlk)
     dhka = nacl.bindings.crypto_scalarmult(rlk, ilk)
-    vuk, ursk_vuk = nacl.bindings.crypto_sign_seed_keypair(dhka)
-    ursk = ursk_vuk[:32]
+    vuk, ursk = sqrl_keypair(dhka)
     return suk, vuk
 
 def sqrl_get_unlock_request_signing_key(suk, iuk):
     dhka = nacl.bindings.crypto_scalarmult(iuk, suk)
-    vuk, ursk_vuk = nacl.bindings.crypto_sign_seed_keypair(dhka)
-    ursk = ursk_vuk[:32]
-    # Todo: Is dhka == ursk always true?
-
+    vuk, ursk = sqrl_keypair(dhka)
+    # TODO: Is dhka == ursk always true?
+    # TODO: Don't really need to return vuk...
     return ursk, vuk
 
 def sqrl_get_imk_from_iuk(iuk):
@@ -83,7 +81,9 @@ def sqrl_get_ilk_from_iuk(iuk):
     return sqrl_make_public(iuk)
 
 def sqrl_get_idk_for_site(imk, sks):
-    tmp = sqrl_hmac(imk, sks)
-    idkprv, idk = sqrl_keypair(tmp)
-    return idkprv, idk
+    idk, ssk = sqrl_keypair(sqrl_hmac(imk, sks))
+    return idk, ssk
 
+def sqrl_sign(signing_key, message):
+    raw_signed = nacl.bindings.crypto_sign(message, signing_key)
+    return raw_signed[:nacl.bindings.crypto_sign_BYTES]
