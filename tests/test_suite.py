@@ -90,9 +90,13 @@ def main():
     # Create ins from sin
     sin = '0'
     ins = sqrl_get_ins_from_sin(ssk, sin)
-    #ins = sqrl_hmac(EnHash(ssk[:32]), sin)
     print('ins ', binascii.hexlify(ins))
     assert ins == sqrl_conv.base64_decode('1DiYNEJ8ACngkZNoqg50T4W_EVfWfvVZhB_j21Lum5M')
+
+    # Test base64
+    b64 = sqrl_conv.base64_encode(binascii.unhexlify(b'60781341b43630fb6d214d20ed4bf877afed40f37c871c061389bcb7d0bee42d'))
+    print('b64 ', b64)
+    assert b64 == b'YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0'
 
 if __name__ == "__main__":
     main()

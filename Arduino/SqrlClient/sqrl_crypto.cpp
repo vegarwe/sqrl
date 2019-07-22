@@ -85,3 +85,8 @@ void EnHash(uint8_t digest[32], const char* data, size_t data_len)
 
     free(tmp_data);
 }
+
+void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], char* sin) {
+    EnHash(ins, (char*) ssk, 32);
+    sqrl_hmac(ins, ins, sin, strlen(sin)); // Note: reusing ins here is safe... :-)
+}

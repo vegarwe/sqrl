@@ -7,3 +7,4 @@ bool sqrl_get_unlock_request_signing_key(uint8_t ursk[32], uint8_t vuk[32], cons
 void sqrl_hmac(uint8_t digest[32], const uint8_t key[32], const char* msg, size_t msg_len);
 bool sqrl_get_idk_for_site(uint8_t idk[32], uint8_t ssk[32], const uint8_t imk[32], const char* sks);
 void EnHash(uint8_t digest[32], const char* data, size_t data_len);
+void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], char* sin);

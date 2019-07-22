@@ -40,8 +40,11 @@ g++ -o TestCurve25519 SqrlClient/sqrl_crypto.cpp                    \
 
 #include <string.h>
 #include <stdio.h>
+#include <string>
 
 #include "sqrl_crypto.h"
+#include "sqrl_conv.h"
+#include "sqrl_client.h"
 
 
 void printNumber(const char *name, const uint8_t *x)
@@ -94,10 +97,21 @@ void sqrl_test_suite()
     printf("ursk0793d0e4c49ea722e7d59b6c874f2a0198ccb53bd465c4022ab5019c14737050a\n");
 
     // Test EnHash by creating ins from sin
-    uint8_t tmp[32];
-    EnHash(tmp, (char*) ssk, 32);
-    printNumber("tmp        ", tmp);
-    printf("EnHash(ssk) 38ce2f61fb17f9007ba24f8ab83e42833194e852cfbdf0fe475bed46b18b1b2d\n");
+    char sin[] = "0";
+    uint8_t ins[32];
+    sqrl_get_ins_from_sin(ins, ssk, sin);
+    printNumber("ins ", ins);
+    printf("ins0 d4389834427c0029e0919368aa0e744f85bf1157d67ef559841fe3db52ee9b93\n");
+
+    // Test url safe base64 encode
+    unsigned char somedata[] = {0x60,0x78,0x13,0x41,0xb4,0x36,0x30,0xfb,0x6d,0x21,0x4d,0x20,0xed,0x4b,0xf8,0x77,0xaf,0xed,0x40,0xf3,0x7c,0x87,0x1c,0x06,0x13,0x89,0xbc,0xb7,0xd0,0xbe,0xe4,0x2d};
+    std::string encoded = sqrl_base64_encode(std::string((char*) somedata, sizeof(somedata)));
+    printf("b64  %s\n", encoded.c_str());
+    printf("b640 YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0\n");
+
+    // Test transaction_1
+    ClientResponse resp = sqrl_query(imk, sks, "sqrl://www.grc.com/sqrl?nut=oGXEUEmTkPG0z0Eka3pHJQ");
+    printf("client: %s\n", resp.client.c_str());
 }
 
 int main()
