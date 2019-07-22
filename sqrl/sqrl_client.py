@@ -17,6 +17,7 @@ def sqrl_query(imk, sks, server):
     server  = sqrl_base64_encode(server)
 
     ids     = sqrl_sign(ssk, client + server)
+    print('ids', ids)
     form    = {'client': client,
                'server': server,
                'ids':    sqrl_base64_encode(ids)}
@@ -38,7 +39,6 @@ def sqrl_ident(ilk, imk, sks, server, sin, create_suk):
         client  += b'suk=%s\r\n' % sqrl_base64_encode(suk)
         client  += b'vuk=%s\r\n' % sqrl_base64_encode(vuk)
     client  += b'opt=cps~suk\r\n' # TODO: Not always true?
-    print('client', client)
     client  = sqrl_base64_encode(client)
 
     ids     = sqrl_sign(ssk, client + server)

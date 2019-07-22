@@ -8,6 +8,7 @@ from sqrl.sqrl_s4 import Identity
 from sqrl.sqrl_url import SqrlUrl
 from sqrl.sqrl_crypto import *
 from sqrl.sqrl_conv import sqrl_base64_encode, sqrl_base64_decode
+from sqrl.sqrl_client import sqrl_query, sqrl_ident
 
 def get_keys_from_binary_data():
     # Documents/SQRL/vegarwe_test5.sqrl
@@ -97,6 +98,12 @@ def main():
     b64 = sqrl_base64_encode(binascii.unhexlify(b'60781341b43630fb6d214d20ed4bf877afed40f37c871c061389bcb7d0bee42d'))
     print('b64 ', b64)
     assert b64 == b'YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0'
+
+    # Test query command
+    form = sqrl_query(imk, url.get_sks(), bytes(url))
+    print(form)
+    print(binascii.hexlify(sqrl_base64_decode(form['server'])))
+    print(binascii.hexlify(sqrl_base64_decode(form['ids'])))
 
 if __name__ == "__main__":
     main()
