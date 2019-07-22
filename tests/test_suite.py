@@ -7,7 +7,7 @@ import binascii
 from sqrl.sqrl_s4 import Identity
 from sqrl.sqrl_url import SqrlUrl
 from sqrl.sqrl_crypto import *
-from sqrl import sqrl_conv
+from sqrl.sqrl_conv import sqrl_base64_encode, sqrl_base64_decode
 
 def get_keys_from_binary_data():
     # Documents/SQRL/vegarwe_test5.sqrl
@@ -65,15 +65,15 @@ def main():
     print('idk ', binascii.hexlify(idk))
     assert binascii.hexlify(ssk) == b'a9f02ccd2ef61146a0f4c9101f4dbf285059d9687cba62b136b9a188623943d4cd9f76fdcdbfb99a72c3f64abd318bbebbac7d2c730906369499f0b8c6bb64dd'
     assert binascii.hexlify(idk) == b'cd9f76fdcdbfb99a72c3f64abd318bbebbac7d2c730906369499f0b8c6bb64dd'
-    assert                  idk  == sqrl_conv.base64_decode('zZ92_c2_uZpyw_ZKvTGLvrusfSxzCQY2lJnwuMa7ZN0') # From diagnostics page
+    assert                  idk  == sqrl_base64_decode('zZ92_c2_uZpyw_ZKvTGLvrusfSxzCQY2lJnwuMa7ZN0') # From diagnostics page
 
     # Test recreating ursk and vuk from suk
-    suk = sqrl_conv.base64_decode('YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0') # From diagnostics page
+    suk = sqrl_base64_decode('YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0') # From diagnostics page
     ursk, vuk = sqrl_get_unlock_request_signing_key(suk, iuk)
     print('suk ', binascii.hexlify(suk))
     print('vuk ', binascii.hexlify(vuk))
     print('ursk', binascii.hexlify(ursk))
-    assert vuk == sqrl_conv.base64_decode('369S6x9Yl2sX4cCAGQ03F4DdcUuOgtpPquUJ0WfW4qU') # From diagnostics page
+    assert vuk == sqrl_base64_decode('369S6x9Yl2sX4cCAGQ03F4DdcUuOgtpPquUJ0WfW4qU') # From diagnostics page
     assert binascii.hexlify(ursk) == b'eb18a00f1a1919e3e593be9289cfa403590097e6a84094d90d074fdb3acaf751dfaf52eb1f58976b17e1c080190d371780dd714b8e82da4faae509d167d6e2a5'
 
     # Generate new suk and vuk (for new user registration)
@@ -91,10 +91,10 @@ def main():
     sin = '0'
     ins = sqrl_get_ins_from_sin(ssk, sin)
     print('ins ', binascii.hexlify(ins))
-    assert ins == sqrl_conv.base64_decode('1DiYNEJ8ACngkZNoqg50T4W_EVfWfvVZhB_j21Lum5M')
+    assert ins == sqrl_base64_decode('1DiYNEJ8ACngkZNoqg50T4W_EVfWfvVZhB_j21Lum5M')
 
     # Test base64
-    b64 = sqrl_conv.base64_encode(binascii.unhexlify(b'60781341b43630fb6d214d20ed4bf877afed40f37c871c061389bcb7d0bee42d'))
+    b64 = sqrl_base64_encode(binascii.unhexlify(b'60781341b43630fb6d214d20ed4bf877afed40f37c871c061389bcb7d0bee42d'))
     print('b64 ', b64)
     assert b64 == b'YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0'
 

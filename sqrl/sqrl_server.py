@@ -3,8 +3,7 @@ import logging
 import random
 import string
 
-from sqrl import sqrl_conv
-#from sqrl import sqrl_crypto
+from sqrl_conv import sqrl_decode_response, sqrl_base64_encode, sqrl_base64_decode
 
 
 def _id_generator(size=22, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
@@ -42,17 +41,17 @@ class SqrlHandler(object):
 
 
     def _check_signature(self, idk, client, server, ids):
-        verifying_key = ed25519.VerifyingKey(sqrl_conv.base64_decode(idk))
+        verifying_key = ed25519.VerifyingKey(sqrl_base64_decode(idk))
 
         try:
-            verifying_key.verify(sqrl_conv.base64_decode(ids), client + server)
+            verifying_key.verify(sqrl_base64_decode(ids), client + server)
             return True
         except ed25519.BadSignatureError:
             return False
 
     def post(self, client_str, server_str, ids):
-        client = sqrl_conv.decode_response(client_str)
-        server = sqrl_conv.decode_response(server_str)
+        client = sqrl_decode_response(client_str)
+        server = sqrl_decode_response(server_str)
         idk    = client.get('idk')
 
         logging.debug('client:')
@@ -80,7 +79,7 @@ class SqrlHandler(object):
             logging.warn("signature failed")
             tif ^= 80
         elif cmd == 'query':
-            session_id = self._get_url_nut(sqrl_conv.base64_decode(server_str))
+            session_id = self._get_url_nut(sqrl_base64_decode(server_str))
             if self.id_found(idk):
                 tif ^= 1
             sin = 0
