@@ -86,7 +86,18 @@ void EnHash(uint8_t digest[32], const char* data, size_t data_len)
     free(tmp_data);
 }
 
-void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], char* sin) {
+
+void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], const char* sin)
+{
     EnHash(ins, (char*) ssk, 32);
     sqrl_hmac(ins, ins, sin, strlen(sin)); // Note: reusing ins here is safe... :-)
+}
+
+
+void sqrl_idlock_keys(uint8_t suk[32], uint8_t vuk[32], uint8_t rlk[32], uint8_t ilk[32])
+{
+    uint8_t dhka[32];
+    sqrl_make_public(suk, rlk);
+    sqrl_scalar_mult(dhka, rlk, ilk);
+    Ed25519::derivePublicKey(vuk, dhka);
 }

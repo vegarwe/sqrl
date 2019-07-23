@@ -105,5 +105,14 @@ def main():
     print(binascii.hexlify(sqrl_base64_decode(form['server'])))
     print(binascii.hexlify(sqrl_base64_decode(form['ids'])))
 
+    # Test ident command
+    print('\n\n')
+    #form = sqrl_ident(imk, url.get_sks(), bytes(url))
+    #print(form)
+    #print(binascii.hexlify(sqrl_base64_decode(form['server'])))
+    #print(binascii.hexlify(sqrl_base64_decode(form['ids'])))
+
+    print(sqrl_base64_decode('dmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K'))
+
 if __name__ == "__main__":
     main()

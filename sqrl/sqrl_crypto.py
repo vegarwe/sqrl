@@ -65,6 +65,7 @@ def sqrl_make_public(priv):
 
 def sqrl_idlock_keys(ilk):
     rlk = nacl.utils.random(size=32)
+    print('rlk', rlk)
     suk = sqrl_make_public(rlk)
     dhka = nacl.bindings.crypto_scalarmult(rlk, ilk)
     vuk, ursk = sqrl_keypair(dhka)

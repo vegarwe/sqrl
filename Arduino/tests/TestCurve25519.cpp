@@ -121,6 +121,50 @@ void sqrl_test_suite()
     printf("server0 c3FybDovL3d3dy5ncmMuY29tL3Nxcmw_bnV0PW9HWEVVRW1Ua1BHMHowRWthM3BISlE\n");
     printf("ids:    %s\n", resp.ids.c_str());
     printf("ids0    3Y2fcPZx6d9CuHol8b48fbHQ11tCtIiiLXqj0ZXj87J-in4kYT8RtwmTsYF5Ws5bBONah5udn5JvcKHnKMMrCQ\n");
+
+    // Test query
+    printf("\n\n");
+    // TODO: Create random 32 bytes
+    uint8_t rlk[32] = {0xca,0x5a,0x7b,0x6e,0xa8,0xbc,0x75,0xb3,0x94,0xd1,0xdf,0x20,0xbc,0xd9,0xcf,0x4d,0x31,0x1d,0xb0,0x67,0xd8,0x77,0xd9,0xb6,0xa7,0xda,0x74,0xd6,0x1b,0x6a,0x8d,0x69};
+    char* server = (char*) "dmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K";
+    resp = sqrl_ident(ilk, imk, sks, rlk, server, "0", true);
+    printf("client: %s\n", resp.client.c_str());
+    /*
+    Create new keys
+    rlk b'\xcaZ{n\xa8\xbcu\xb3\x94\xd1\xdf \xbc\xd9\xcfM1\x1d\xb0g\xd8w\xd9\xb6\xa7\xdat\xd6\x1bj\x8di'
+    suk  b'85307f5ae1f9e9f4f6a0f0cb21ebec4b7dc66a3b50515f4a919e1f44bd7c8909'
+    vuk  b'39467eef78a2717df02f06cfbb1e170768820c308d96ec98c2fa6ffb8c70e453'
+    vuk  b'39467eef78a2717df02f06cfbb1e170768820c308d96ec98c2fa6ffb8c70e453'
+    ursk b'68c79dc66187569c3edb14fb9ca51bb3d33c17650b74507999fc5b7123136f0039467eef78a2717df02f06cfbb1e170768820c308d96ec98c2fa6ffb8c70e453'
+    ins  b'd4389834427c0029e0919368aa0e744f85bf1157d67ef559841fe3db52ee9b93'
+    b64  b'YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0'
+    client b'ver=1\r\ncmd=query\r\nidk=zZ92_c2_uZpyw_ZKvTGLvrusfSxzCQY2lJnwuMa7ZN0\r\nopt=cps~suk\r\n'
+    server b'sqrl://www.grc.com/sqrl?nut=oGXEUEmTkPG0z0Eka3pHJQ'
+    ids b'\xdd\x8d\x9fp\xf6q\xe9\xdfB\xb8z%\xf1\xbe<}\xb1\xd0\xd7[B\xb4\x88\xa2-z\xa3\xd1\x95\xe3\xf3\xb2~\x8a~$a?\x11\xb7\t\x93\xb1\x81yZ\xce[\x04\xe3Z\x87\x9b\x9d\x9f\x92op\xa1\xe7(\xc3+\t'
+    {'client': b'dmVyPTENCmNtZD1xdWVyeQ0KaWRrPXpaOTJfYzJfdVpweXdfWkt2VEdMdnJ1c2ZTeHpDUVkybEpud3VNYTdaTjANCm9wdD1jcHN-c3VrDQo', 'server': b'c3FybDovL3d3dy5ncmMuY29tL3Nxcmw_bnV0PW9HWEVVRW1Ua1BHMHowRWthM3BISlE', 'ids': b'3Y2fcPZx6d9CuHol8b48fbHQ11tCtIiiLXqj0ZXj87J-in4kYT8RtwmTsYF5Ws5bBONah5udn5JvcKHnKMMrCQ'}
+    b'7371726c3a2f2f7777772e6772632e636f6d2f7371726c3f6e75743d6f47584555456d546b5047307a30456b613370484a51'
+    b'dd8d9f70f671e9df42b87a25f1be3c7db1d0d75b42b488a22d7aa3d195e3f3b27e8a7e24613f11b70993b181795ace5b04e35a879b9d9f926f70a1e728c32b09'
+    */
+    printf("client0 dmVyPTENCmNtZD1xdWVyeQ0KaWRrPXpaOTJfYzJfdVpweXdfWkt2VEdMdnJ1c2ZTeHpDUVkybEpud3VNYTdaTjANCmlucz0xRGlZTkVKOEFDbmdrWk5vcWc1MFQ0V19FVmZXZnZWWmhCX2oyMUx1bTVNDQpzdWs9aFRCX1d1SDU2ZlQyb1BETElldnNTMzNHYWp0UVVWOUtrWjRmUkwxOGlRaw0KdnVrPU9VWi03M2lpY1gzd0x3YlB1eDRYQjJpQ0REQ05sdXlZd3Zwdi00eHc1Rk0NCm9wdD1jcHN-c3VrDQo\n");
+
+
+/*
+url       SqrlUrl(sqrl://www.grc.com/sqrl?nut=bh3VxN8YCAjU3bWF_3gdnA)
+domain    www.grc.com
+sks       www.grc.com
+nut       ['bh3VxN8YCAjU3bWF_3gdnA']
+client b'ver=1\r\ncmd=query\r\nidk=zZ92_c2_uZpyw_ZKvTGLvrusfSxzCQY2lJnwuMa7ZN0\r\nopt=cps~suk\r\n'
+server b'sqrl://www.grc.com/sqrl?nut=bh3VxN8YCAjU3bWF_3gdnA'
+ids b'\x8d\xf1\x9c\nnp4x\xa76\x84d\xcc\xb8\x93\x8e\x9f\xee\xe5tX\x7fq\xab[\xfe\x1a\xb9\nK\xa2\x1f\xcc%\x14E\xb0\xa9e\xc1\xbf\xf3\x98+s\x998\xfd\xae\xf3\xf1\xc4N\x80_\tBy\xef\xf0Z\xa9\xd0\x03'
+<Response [200]> time 0.9843771457672119
+server records {b'ver': b'1', b'nut': b'C-KgFwOHQZV2bk3GyGHg3w', b'tif': b'5', b'qry': b'/sqrl?nut=C-KgFwOHQZV2bk3GyGHg3w', b'suk': b'PBFufQ6dvzh-apwuMm_4z2arnfMv4CULUE4VeUEagV8', b'sin': b'0'}
+<Response [200]> time 0.9843780994415283
+dmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K
+server b'dmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K'
+url records {b'ver': b'1', b'nut': b'_Qxn6RpQRFdy94tbzIe7oQ', b'tif': b'5', b'qry': b'/sqrl?nut=_Qxn6RpQRFdy94tbzIe7oQ', b'suk': b'PBFufQ6dvzh-apwuMm_4z2arnfMv4CULUE4VeUEagV8', b'url': b'https://www.grc.com/sqrl/diag.htm?_Qxn6RpQRFdy94tbzIe7oQ', b'sin': b'0'}
+redirect 'https://www.grc.com/sqrl/diag.htm?_Qxn6RpQRFdy94tbzIe7oQ'
+https://www.grc.com/sqrl/diag.htm?_Qxn6RpQRFdy94tbzIe7oQ
+*/
 }
 
 int main()

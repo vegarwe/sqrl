@@ -38,23 +38,49 @@ ClientResponse sqrl_query(const uint8_t imk[32], const char* sks, char* server)
 
     return resp;
 }
-//    # Get site specific keys
-//    idk, ssk = sqrl_get_idk_for_site(imk, sks)
-//
-//    client  =  b'ver=1\r\n'
-//    client  += b'cmd=query\r\n'
-//    client  += b'idk=%s\r\n' % sqrl_conv.base64_encode(idk)
-//    client  += b'opt=cps~suk\r\n'
-//    print('client', client)
-//    client  = sqrl_conv.base64_encode(client)
-//
-//    print('server', server)
-//    server  = sqrl_conv.base64_encode(server)
-//
-//    ids     = sqrl_sign(ssk, client + server)
-//    form    = {'client': client,
-//               'server': server,
-//               'ids':    sqrl_conv.base64_encode(ids)}
-//    return form
+
+
+ClientResponse sqrl_ident(const uint8_t ilk[32], const uint8_t imk[32],
+        const char* sks, const char* server,
+        const char* sin, bool create_suk)
+{
+    uint8_t idk[32];
+    uint8_t ssk[32];
+    sqrl_get_idk_for_site(idk, ssk, imk, sks);
+
+    std::string client("ver=1\r\n");
+    client  += "cmd=query\r\n";
+    client  += "idk=" + sqrl_base64_encode(std::string((char*) idk, 32)) + "\r\n";
+
+    if (sin) {
+        uint8_t ins[32];
+        sqrl_get_ins_from_sin(ins, ssk, sin);
+        client += "ins=" + sqrl_base64_encode(std::string((char*) ins, 32)) + "\r\n";
+    }
+
+    if (create_suk) {
+        uint8_t suk[32];
+        uint8_t vuk[32];
+        sqrl_idlock_keys(suk, vuk, rlk, ilk);
+        client += "suk=" + sqrl_base64_encode(std::string((char*) suk, 32)) + "\r\n";
+        client += "vuk=" + sqrl_base64_encode(std::string((char*) vuk, 32)) + "\r\n";
+    }
+
+    client  += "opt=cps~suk\r\n"; // TODO: Always cps and suk?
+
+    ClientResponse resp;
+    resp.client = sqrl_base64_encode(client);
+    resp.server = server;
+
+    uint8_t signature[64];
+    std::string toSign(resp.client);
+    toSign += resp.server;
+    Ed25519::sign(signature, ssk, idk, toSign.data(), toSign.size());
+
+    resp.ids = sqrl_base64_encode(std::string((char*)signature, sizeof(signature)));
+
+    return resp;
+}
+
 
 #endif//_SQRL_CLIENT_H
