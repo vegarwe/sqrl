@@ -18,7 +18,7 @@ from sqrl.sqrl_client import sqrl_query, sqrl_ident
 
 com_port = None
 
-def login_procedure(url_str):
+def login_procedure(url_str, com=None):
     # Parse input parameter
     url = SqrlUrl(url_str)
     print('url      ', url)
@@ -27,19 +27,31 @@ def login_procedure(url_str):
     print('nut      ', url.get_nut())
     sys.stdout.flush()
 
-    # Hard code identity (for now)
-    #imk = binascii.unhexlify(b'f3b73842da1245f3e7b2b8a1142f72bbc897f8ddba598362b4930de2bb460f1f') # vegarwe-testing
-    #ilk = binascii.unhexlify(b'aabd6c2aee693e81b23a593b36a3b496a6fa86fd68797ea2e4af8d33d1903338') # vegarwe-testing
-    imk = binascii.unhexlify(b'21d70894575e6b6efe991fb86a9868a49f3a72040e88252d82be5a3ac6c3aa23') # vegarwe_test5
-    ilk = binascii.unhexlify(b'00d3a56b500bca7908eb89a6f5fe0931388797d42930798d2ffe88d436c94878') # vegarwe_test5
-    #print('imk', binascii.hexlify(imk))
-    #print('ilk', binascii.hexlify(ilk))
-
     # Transaction #1
-    form = sqrl_query(imk, url.get_sks(), bytes(url))
+    t1 = time.time()
+    if com:
+        command = json.dumps({'cmd': "query", 'sks': url.get_sks(), 'server': sqrl_base64_encode(bytes(url)).decode()})
+        com.write(command.encode())
+        com.write(b'\n')
+
+        form_line = com.readline()
+        print('form_line', repr(form_line))
+        form = json.loads(form_line)
+    else:
+        # Hard code identity (for now)
+        #imk = binascii.unhexlify(b'f3b73842da1245f3e7b2b8a1142f72bbc897f8ddba598362b4930de2bb460f1f') # vegarwe-testing
+        #ilk = binascii.unhexlify(b'aabd6c2aee693e81b23a593b36a3b496a6fa86fd68797ea2e4af8d33d1903338') # vegarwe-testing
+        imk = binascii.unhexlify(b'21d70894575e6b6efe991fb86a9868a49f3a72040e88252d82be5a3ac6c3aa23') # vegarwe_test5
+        ilk = binascii.unhexlify(b'00d3a56b500bca7908eb89a6f5fe0931388797d42930798d2ffe88d436c94878') # vegarwe_test5
+        #print('imk', binascii.hexlify(imk))
+        #print('ilk', binascii.hexlify(ilk))
+
+        form = sqrl_query(imk, url.get_sks(), bytes(url))
+    print('time', time.time() - t1, form)
+
     t1 = time.time()
     r = requests.post(url.get_http_url(), data=form)
-    print(r, 'time', time.time() - t1)
+    print('time', time.time() - t1, r)
     # TODO: Check r.code == 200
     sys.stdout.flush()
 
@@ -49,81 +61,28 @@ def login_procedure(url_str):
     records = sqrl_decode_response(server)
     print('server records', records)
 
-    form = sqrl_ident(ilk, imk, url.get_sks(), server,
-            records.get(b'sin', None), b'suk' not in records)
     t1 = time.time()
-    r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
-    print(r, 'time', time.time() - t1)
-    print(r.text)
-    sys.stdout.flush()
-    # TODO: Check r.code == 200
+    if com:
+        cmd_dict = {'cmd': "ident", 'sks': url.get_sks(),
+                    'server': server.decode(),
+                    "sin": records.get(b'sin', None).decode(),
+                    "create_suk": b'suk' not in records}
+        print('cmd_dict', cmd_dict)
+        command = json.dumps(cmd_dict)
+        com.write(command.encode())
+        com.write(b'\n')
 
-    # Transaction #3
-    server = bytes(r.text, encoding='utf-8')
-    print('server', server)
-    records = sqrl_decode_response(server)
-    print('url records', records)
-
-    redirect = records[b'url'].decode('utf-8')
-    print('redirect', repr(redirect))
-    sys.stdout.flush()
-    return redirect
-
-def login_procedure_uart(url_str, com):
-    # Parse input parameter
-    url = SqrlUrl(url_str)
-    print('url      ', url)
-    print('domain   ', url.domain)
-    print('sks      ', url.get_sks())
-    print('nut      ', url.get_nut())
-    sys.stdout.flush()
-
-    # Transaction #1
-    #form = sqrl_query(imk, url.get_sks(), bytes(url))
-    t1 = time.time()
-    command = json.dumps({'cmd': "query", 'sks': url.get_sks(), 'server': sqrl_base64_encode(bytes(url)).decode()})
-    com.write(command.encode())
-    com.write(b'\n')
-
-    form_line = com.readline()
-    print('form_line', repr(form_line))
-    form = json.loads(form_line)
-    print(form, 'time', time.time() - t1)
-
-    t1 = time.time()
-    r = requests.post(url.get_http_url(), data=form)
-    print(r, 'time', time.time() - t1)
-    ## TODO: Check r.code == 200
-    print(r.text)
-    #sys.stdout.flush()
-
-    ## Transaction #2
-    server = bytes(r.text, encoding='utf-8')
-    # TODO: Check for for tif=E*
-    records = sqrl_decode_response(server)
-    print('server records', records)
-
-    #form = sqrl_ident(ilk, imk, url.get_sks(), server,
-    #        records.get(b'sin', None), b'suk' not in records)
-
-    t1 = time.time()
-    cmd_dict = {'cmd': "ident", 'sks': url.get_sks(),
-                'server': server.decode(),
-                "sin": records.get(b'sin', None).decode(),
-                "create_suk": b'suk' not in records}
-    print('cmd_dict', cmd_dict)
-    command = json.dumps(cmd_dict)
-    com.write(command.encode())
-    com.write(b'\n')
-
-    form_line = com.readline()
-    print('form_line', repr(form_line))
-    form = json.loads(form_line)
-    print(form, 'time', time.time() - t1)
+        form_line = com.readline()
+        print('form_line', repr(form_line))
+        form = json.loads(form_line)
+    else:
+        form = sqrl_ident(ilk, imk, url.get_sks(), server,
+                records.get(b'sin', None), b'suk' not in records)
+    print('time', time.time() - t1form)
 
     t1 = time.time()
     r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
-    print(r, 'time', time.time() - t1)
+    print('time', time.time() - t1, r)
     print(r.text)
     sys.stdout.flush()
     # TODO: Check r.code == 200
@@ -187,10 +146,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             sys.stdout.flush()
             return
 
-        if com_port:
-            redirect = login_procedure_uart(url_str, com_port)
-        else:
-            redirect = login_procedure(url_str)
+        redirect = login_procedure(url_str, com_port)
 
         self.send_response(302)
         self.send_header('Location', redirect)
@@ -232,7 +188,7 @@ if __name__ == "__main__":
         with serial.Serial('com22', baudrate=115200, timeout=1) as com:
             com.write(b'hello\n')
             print('flush', repr(com.readline()))
-            print(login_procedure_uart(sys.argv[1], com))
+            print(login_procedure(sys.argv[1], com))
     elif len(sys.argv) > 1:
         pass
     else:
