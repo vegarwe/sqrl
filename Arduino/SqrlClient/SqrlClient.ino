@@ -13,7 +13,8 @@ HardwareSerial* inStream;
 //TransistorNoiseSource noise(A1);
 //RingOscillatorNoiseSource noise;
 
-String buffer;
+char buffer[1024];
+size_t buffer_idx = 0;
 
 uint8_t iuk[] = {0xa2,0x43,0xbf,0xb0,0xed,0x04,0x56,0x5d,0x04,0x61,0xa7,0x73,0x1a,0x8f,0xad,0x18,0xde,0x4b,0xdd,0xf8,0xe3,0x83,0x38,0x53,0x92,0x6c,0xcf,0xaf,0x2e,0x2e,0x04,0xa6};
 uint8_t imk[] = {0x21,0xd7,0x08,0x94,0x57,0x5e,0x6b,0x6e,0xfe,0x99,0x1f,0xb8,0x6a,0x98,0x68,0xa4,0x9f,0x3a,0x72,0x04,0x0e,0x88,0x25,0x2d,0x82,0xbe,0x5a,0x3a,0xc6,0xc3,0xaa,0x23};
@@ -48,15 +49,23 @@ void loop() {
 	if (inStream->available())
 	{
 		char newByte = inStream->read();
-        buffer += newByte;
+        buffer[buffer_idx] = newByte;
+        buffer_idx++;
+
+        //if (debugger) debugger->print("Got byte: '");
+        //if (debugger) debugger->print(newByte);
+        //if (debugger) debugger->println("'");
 
 		if (newByte == '\n')
         {
             if (debugger) debugger->print("Got line: ");
-            if (debugger) debugger->print(buffer);
+            for (int i = 0; i < buffer_idx; i++) {
+                if (debugger) debugger->print(buffer[i]);
+            }
 
             DynamicJsonDocument doc(1024);
-            DeserializationError error = deserializeJson(doc, buffer);
+            DeserializationError error = deserializeJson(doc, buffer, buffer_idx);
+            buffer_idx = 0;
             if (error)
             {
                 if (debugger) debugger->print(F("deserializeJson() failed: "));
@@ -97,14 +106,14 @@ void loop() {
             doc["server"] = resp.server.c_str();
             doc["ids"] = resp.ids.c_str();
 
-            buffer = "";
-            serializeJson(doc, buffer);
+            serializeJson(doc, buffer, sizeof(buffer));
             inStream->println(buffer);
-            buffer = "";
+            buffer_idx = 0;
+            memset(buffer, 0, sizeof(buffer));
         }
 	}
-    else
-    {
-        delay(100);
-    }
+    //else
+    //{
+    //    delay(100);
+    //}
 }

@@ -80,12 +80,15 @@ def login_procedure_uart(url_str, com):
 
     # Transaction #1
     #form = sqrl_query(imk, url.get_sks(), bytes(url))
+    t1 = time.time()
     command = json.dumps({'cmd': "query", 'sks': url.get_sks(), 'server': sqrl_base64_encode(bytes(url)).decode()})
     com.write(command.encode())
     com.write(b'\n')
 
-    form = json.loads(com.readline())
-    print(form)
+    form_line = com.readline()
+    print('form_line', repr(form_line))
+    form = json.loads(form_line)
+    print(form, 'time', time.time() - t1)
 
     t1 = time.time()
     r = requests.post(url.get_http_url(), data=form)
@@ -103,6 +106,7 @@ def login_procedure_uart(url_str, com):
     #form = sqrl_ident(ilk, imk, url.get_sks(), server,
     #        records.get(b'sin', None), b'suk' not in records)
 
+    t1 = time.time()
     cmd_dict = {'cmd': "ident", 'sks': url.get_sks(),
                 'server': server.decode(),
                 "sin": records.get(b'sin', None).decode(),
@@ -112,8 +116,10 @@ def login_procedure_uart(url_str, com):
     com.write(command.encode())
     com.write(b'\n')
 
-    form = json.loads(com.readline())
-    print(form)
+    form_line = com.readline()
+    print('form_line', repr(form_line))
+    form = json.loads(form_line)
+    print(form, 'time', time.time() - t1)
 
     t1 = time.time()
     r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
@@ -224,9 +230,11 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         #print(login_procedure(sys.argv[1]))
         with serial.Serial('com22', baudrate=115200, timeout=1) as com:
-            print(login_procedure(sys.argv[1], com))
+            com.write(b'hello\n')
+            print('flush', repr(com.readline()))
+            print(login_procedure_uart(sys.argv[1], com))
     elif len(sys.argv) > 1:
         pass
     else:
-        #com_port = serial.Serial('com22', baudrate=115200, timeout=1)
+        com_port = serial.Serial('com22', baudrate=115200, timeout=1)
         main()
