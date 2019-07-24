@@ -93,11 +93,9 @@ void loop() {
 
                 String sks = doc["sks"];
                 String server = doc["server"];
-                // TODO: if "sin" not in doc...
-                String sin_ = doc["sin"];
+                const char* sin_ = doc["sin"];
                 bool create_suk = doc["create_suk"];
-                resp = sqrl_ident(ilk, imk, rlk,
-                        sks.c_str(), server.c_str(), sin_.c_str(), create_suk);
+                resp = sqrl_ident(ilk, imk, rlk, sks.c_str(), server.c_str(), sin_, create_suk);
                 if (debugger) debugger->println("Done...");
             }
 

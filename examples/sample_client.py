@@ -63,10 +63,10 @@ def login_procedure(url_str, com=None):
 
     t1 = time.time()
     if com:
-        cmd_dict = {'cmd': "ident", 'sks': url.get_sks(),
-                    'server': server.decode(),
-                    "sin": records.get(b'sin', None).decode(),
-                    "create_suk": b'suk' not in records}
+        sin = records.get(b'sin', None)
+        if sin: sin = sin.decode()
+        cmd_dict = {'cmd': "ident", 'sks': url.get_sks(), 'server': server.decode(),
+                    'sin': sin, "create_suk": b'suk' not in records}
         print('cmd_dict', cmd_dict)
         command = json.dumps(cmd_dict)
         com.write(command.encode())
@@ -78,7 +78,7 @@ def login_procedure(url_str, com=None):
     else:
         form = sqrl_ident(ilk, imk, url.get_sks(), server,
                 records.get(b'sin', None), b'suk' not in records)
-    print('time', time.time() - t1form)
+    print('time', time.time() - t1, form)
 
     t1 = time.time()
     r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
