@@ -94,7 +94,7 @@ void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], const char* s
 }
 
 
-void sqrl_idlock_keys(uint8_t suk[32], uint8_t vuk[32], uint8_t rlk[32], uint8_t ilk[32])
+void sqrl_idlock_keys(uint8_t suk[32], uint8_t vuk[32], const uint8_t rlk[32], const uint8_t ilk[32])
 {
     uint8_t dhka[32];
     sqrl_make_public(suk, rlk);

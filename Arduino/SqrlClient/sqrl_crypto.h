@@ -8,4 +8,5 @@ void sqrl_hmac(uint8_t digest[32], const uint8_t key[32], const char* msg, size_
 bool sqrl_get_idk_for_site(uint8_t idk[32], uint8_t ssk[32], const uint8_t imk[32], const char* sks);
 void EnHash(uint8_t digest[32], const char* data, size_t data_len);
 void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], const char* sin);
-void sqrl_idlock_keys(uint8_t suk[32], uint8_t vuk[32], uint8_t rlk[32], uint8_t ilk[32]);
+void sqrl_idlock_keys(uint8_t suk[32], uint8_t vuk[32], const uint8_t rlk[32], const uint8_t ilk[32]);
+

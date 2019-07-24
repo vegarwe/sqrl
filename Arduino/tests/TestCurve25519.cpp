@@ -112,7 +112,7 @@ void sqrl_test_suite()
     printf("b64  %s\n", encoded.c_str());
     printf("b640 YHgTQbQ2MPttIU0g7Uv4d6_tQPN8hxwGE4m8t9C-5C0\n");
 
-    // Test ident
+    // Test query
     printf("\n\n");
     ClientResponse resp = sqrl_query(imk, sks, (char*) "c3FybDovL3d3dy5ncmMuY29tL3Nxcmw_bnV0PW9HWEVVRW1Ua1BHMHowRWthM3BISlE");
     printf("client: %s\n", resp.client.c_str());
@@ -122,12 +122,12 @@ void sqrl_test_suite()
     printf("ids:    %s\n", resp.ids.c_str());
     printf("ids0    3Y2fcPZx6d9CuHol8b48fbHQ11tCtIiiLXqj0ZXj87J-in4kYT8RtwmTsYF5Ws5bBONah5udn5JvcKHnKMMrCQ\n");
 
-    // Test query
+    // Test ident
     printf("\n\n");
     // TODO: Create random 32 bytes
     uint8_t rlk[32] = {0xca,0x5a,0x7b,0x6e,0xa8,0xbc,0x75,0xb3,0x94,0xd1,0xdf,0x20,0xbc,0xd9,0xcf,0x4d,0x31,0x1d,0xb0,0x67,0xd8,0x77,0xd9,0xb6,0xa7,0xda,0x74,0xd6,0x1b,0x6a,0x8d,0x69};
     char* server = (char*) "dmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K";
-    resp = sqrl_ident(ilk, imk, sks, rlk, server, "0", true);
+    resp = sqrl_ident(ilk, imk, rlk, sks, server, "0", true);
     printf("client: %s\n", resp.client.c_str());
     /*
     Create new keys
@@ -147,7 +147,7 @@ void sqrl_test_suite()
     */
     printf("client0 dmVyPTENCmNtZD1xdWVyeQ0KaWRrPXpaOTJfYzJfdVpweXdfWkt2VEdMdnJ1c2ZTeHpDUVkybEpud3VNYTdaTjANCmlucz0xRGlZTkVKOEFDbmdrWk5vcWc1MFQ0V19FVmZXZnZWWmhCX2oyMUx1bTVNDQpzdWs9aFRCX1d1SDU2ZlQyb1BETElldnNTMzNHYWp0UVVWOUtrWjRmUkwxOGlRaw0KdnVrPU9VWi03M2lpY1gzd0x3YlB1eDRYQjJpQ0REQ05sdXlZd3Zwdi00eHc1Rk0NCm9wdD1jcHN-c3VrDQo\n");
 
-
+    // Test somwthing else
 /*
 url       SqrlUrl(sqrl://www.grc.com/sqrl?nut=bh3VxN8YCAjU3bWF_3gdnA)
 domain    www.grc.com

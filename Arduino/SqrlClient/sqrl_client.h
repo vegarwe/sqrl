@@ -5,6 +5,8 @@
 
 #include "base64.hpp"
 #include "Ed25519.h"
+#include "sqrl_crypto.h"
+#include "sqrl_conv.h"
 
 
 struct ClientResponse {
@@ -14,7 +16,7 @@ struct ClientResponse {
 };
 
 
-ClientResponse sqrl_query(const uint8_t imk[32], const char* sks, char* server)
+ClientResponse sqrl_query(const uint8_t imk[32], const char* sks, const char* server)
 {
     uint8_t idk[32];
     uint8_t ssk[32];
@@ -40,7 +42,7 @@ ClientResponse sqrl_query(const uint8_t imk[32], const char* sks, char* server)
 }
 
 
-ClientResponse sqrl_ident(const uint8_t ilk[32], const uint8_t imk[32],
+ClientResponse sqrl_ident(const uint8_t ilk[32], const uint8_t imk[32], const uint8_t rlk[32],
         const char* sks, const char* server,
         const char* sin, bool create_suk)
 {
@@ -49,7 +51,7 @@ ClientResponse sqrl_ident(const uint8_t ilk[32], const uint8_t imk[32],
     sqrl_get_idk_for_site(idk, ssk, imk, sks);
 
     std::string client("ver=1\r\n");
-    client  += "cmd=query\r\n";
+    client  += "cmd=ident\r\n";
     client  += "idk=" + sqrl_base64_encode(std::string((char*) idk, 32)) + "\r\n";
 
     if (sin) {
