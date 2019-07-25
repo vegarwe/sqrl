@@ -11,7 +11,7 @@ sys.path.append(os.path.join(SCRIPT_DIR, '..'))
 
 from sqrl.sqrl_conv import sqrl_decode_response, sqrl_base64_decode, sqrl_base64_encode
 from sqrl.sqrl_url import SqrlUrl
-from sqrl.sqrl_client import sqrl_query, sqrl_ident
+from sqrl.sqrl_client import sqrl_query, sqrl_ident, sqrl_disable
 
 # Computer\HKEY_CURRENT_USER\Software\Classes\sqrl\shell\open\command
 # "C:\Program Files\Python37\pythonw.exe" "C:\Users\vegar.westerlund\devel\sqrl\examples\sample_client.py" "%1"
@@ -87,13 +87,12 @@ def login_procedure(url_str, com=None):
     t1 = time.time()
     r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
     print('time', time.time() - t1, r)
-    print(r.text)
     sys.stdout.flush()
     # TODO: Check r.code == 200
 
     # Parse and redirect
     server = bytes(r.text, encoding='utf-8')
-    print('server', server)
+    #print('server', server)
     records = sqrl_decode_response(server)
     print('url records', records)
 
@@ -124,6 +123,8 @@ def disable_procedure(url_str, com=None):
     if com:
         raise NotImplemented("No support for disable (yet)")
     else:
+        # TODO: Not possible if suk not in records, right? Or not possible to unlock after?
+        #       Or is this the 'last' opertunity to provide a suk?
         form = sqrl_disable(ilk, imk, url.get_sks(), server,
                 records.get(b'sin', None), b'suk' not in records)
     print('time', time.time() - t1, form)
@@ -131,9 +132,19 @@ def disable_procedure(url_str, com=None):
     t1 = time.time()
     r = requests.post(url.get_resp_query_path(records[b'qry']), data=form)
     print('time', time.time() - t1, r)
-    print(r.text)
     sys.stdout.flush()
     # TODO: Check r.code == 200
+
+    # Parse and handle
+    server = bytes(r.text, encoding='utf-8')
+    #print('server', server)
+    records = sqrl_decode_response(server)
+    print('url records', records)
+
+    redirect = records[b'url'].decode('utf-8')
+    print('redirect', repr(redirect))
+    sys.stdout.flush()
+    return redirect
 
 
 import http.server
@@ -223,8 +234,9 @@ def main():
 if __name__ == "__main__":
     if len(sys.argv) > 2:
         #print(login_procedure(sys.argv[1]))
-        with serial.Serial('com22', baudrate=115200, timeout=1) as com:
-            print(login_procedure(sys.argv[1], com))
+        #with serial.Serial('com22', baudrate=115200, timeout=1) as com:
+        #    print(login_procedure(sys.argv[1], com))
+        print(disable_procedure(sys.argv[1]))
     elif len(sys.argv) > 1:
         pass
     else:
