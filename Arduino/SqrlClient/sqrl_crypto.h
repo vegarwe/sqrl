@@ -1,4 +1,7 @@
+#ifndef _SQRL_CRYPTO_H
+#define _SQRL_CRYPTO_H
 #include <stdint.h>
+
 
 bool sqrl_make_public(uint8_t publ[32], const uint8_t priv[32]);
 bool sqrl_scalar_mult(uint8_t res[32], const uint8_t priv[32], const uint8_t publ[32]);
@@ -10,3 +13,5 @@ void EnHash(uint8_t digest[32], const char* data, size_t data_len);
 void sqrl_get_ins_from_sin(uint8_t ins[32], const uint8_t ssk[32], const char* sin);
 void sqrl_idlock_keys(uint8_t suk[32], uint8_t vuk[32], const uint8_t rlk[32], const uint8_t ilk[32]);
 
+
+#endif//_SQRL_CRYPTO_H

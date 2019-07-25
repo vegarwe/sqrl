@@ -91,11 +91,11 @@ void loop() {
                 }
                 RNG.rand(rlk, sizeof(rlk));
 
-                String sks = doc["sks"];
-                String server = doc["server"];
+                const char* sks = doc["sks"];
+                const char* server = doc["server"];
                 const char* sin_ = doc["sin"];
                 bool create_suk = doc["create_suk"];
-                resp = sqrl_ident(ilk, imk, rlk, sks.c_str(), server.c_str(), sin_, create_suk);
+                resp = sqrl_ident(ilk, imk, rlk, sks, server, sin_, create_suk);
                 if (debugger) debugger->println("Done...");
             }
 
