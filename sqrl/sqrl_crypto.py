@@ -85,6 +85,8 @@ def sqrl_get_ilk_from_iuk(iuk):
     return sqrl_make_public(iuk)
 
 def sqrl_get_idk_for_site(imk, sks):
+    import binascii
+    print('sqrl_hmac', imk, sks, binascii.hexlify(sqrl_hmac(imk, sks)))
     idk, ssk = sqrl_keypair(sqrl_hmac(imk, sks))
     return idk, ssk
 

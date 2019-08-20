@@ -240,5 +240,5 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1:
         pass
     else:
-        com_port = serial.Serial('com22', baudrate=115200, timeout=1)
+        #com_port = serial.Serial('com22', baudrate=115200, timeout=1)
         main()

@@ -58,7 +58,7 @@ void sqrl_hmac(uint8_t digest[32], const uint8_t key[32], const char* data, size
 }
 
 
-bool sqrl_get_idk_for_site(uint8_t idk[32], uint8_t ssk[32], const uint8_t imk[32], const char* sks)
+void sqrl_get_idk_for_site(uint8_t idk[32], uint8_t ssk[32], const uint8_t imk[32], const char* sks)
 {
     sqrl_hmac(ssk, imk, sks, strlen(sks));
     Ed25519::derivePublicKey(idk, ssk);

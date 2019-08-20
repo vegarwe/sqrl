@@ -112,7 +112,11 @@ def main():
     #print(binascii.hexlify(sqrl_base64_decode(form['server'])))
     #print(binascii.hexlify(sqrl_base64_decode(form['ids'])))
 
-    print(sqrl_base64_decode('dmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K'))
+    # Test playground
+    sks = url.get_sks()
+    print('sqrl_hmac', imk, sks, binascii.hexlify(sqrl_hmac(imk, sks)))
+    imk = imk[::-1]
+    print('sqrl_hmac', imk, sks, binascii.hexlify(sqrl_hmac(imk, sks)))
 
 if __name__ == "__main__":
     main()
