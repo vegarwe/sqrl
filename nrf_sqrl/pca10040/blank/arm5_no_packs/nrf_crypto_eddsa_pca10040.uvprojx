@@ -390,6 +390,11 @@
               <FileType>5</FileType>
               <FilePath>..\config\sdk_config.h</FilePath>
             </File>
+            <File>
+              <FileName>sqrl_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_comm.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
