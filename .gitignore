@@ -4,3 +4,10 @@ build/
 *.pyc
 sqrl.egg-info/
 *.sqlite
+
+*.exe
+EventRecorderStub.scvd
+JLinkLog.txt
+JLinkSettings.ini
+_build/
+*.uvguix.*
