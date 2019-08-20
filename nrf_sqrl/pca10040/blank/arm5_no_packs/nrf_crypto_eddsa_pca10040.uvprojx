@@ -395,6 +395,21 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\sqrl_comm.c</FilePath>
             </File>
+            <File>
+              <FileName>sqrl_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_conv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_conv.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_crypto.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_crypto.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

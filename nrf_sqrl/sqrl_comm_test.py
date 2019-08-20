@@ -1,0 +1,46 @@
+import serial
+import time
+import sys
+
+serial_port = sys.argv[1]
+
+with serial.Serial(port=serial_port, baudrate=115200, timeout=.3) as ser:
+    print(ser)
+    ser.write(b"garbage\x02query\x1ewww.grc.com\x1ec3FybDovL3d3dy5ncmMuY29tL3Nxcmw_bnV0PW9HWEVVRW1Ua1BHMHowRWthM3BISlE\x03more Garbage!")
+    #ser.write(b"\x02ident\x1ewww.grc.com\x1edmVyPTENCm51dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQp0aWY9NQ0KcXJ5PS9zcXJsP251dD1fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzdWs9UEJGdWZRNmR2emgtYXB3dU1tXzR6MmFybmZNdjRDVUxVRTRWZVVFYWdWOA0KdXJsPWh0dHBzOi8vd3d3LmdyYy5jb20vc3FybC9kaWFnLmh0bT9fUXhuNlJwUVJGZHk5NHRiekllN29RDQpzaW49MA0K\x1e0\x1etrue\x03")
+
+    i = 3
+    resp = None
+    while i > 0:
+        a = ser.read(1)
+        if a == b'':
+            print("i =", i)
+            sys.stdout.flush()
+            i -=1
+            continue
+        else:
+            i = 3
+
+        if a == b'\x02':
+            resp = a
+        elif a == b'\x03':
+            resp += a
+            resp_parts = resp[1:-1].split(b'\x1e')
+            if resp_parts[0] == b'log':
+                log = b' '.join(resp_parts[1:]).strip()
+                print('log:', log.decode())
+            elif resp_parts[0] == b'resp':
+                print('Found command response')
+                print('  cmd    ', resp_parts[1])
+                print('  client ', resp_parts[2])
+                print('  server ', resp_parts[3])
+                print('  ids    ', resp_parts[4])
+            else:
+                print('err: unknown resp: ', repr(resp.decode()))
+            resp = None
+        elif resp:
+            resp += a
+        else:
+            if a != b'\n':
+                print('garbage: %r' % a.decode())
+

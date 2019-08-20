@@ -6,7 +6,7 @@
 #define STX '\x02' // Start of text
 #define ETX '\x03' // End of text
 #define NAK '\x15' // Negative acknowledge
-#define RS  '\x1e' // Record seperator
+#define RS  '\x1E' // Record seperator
 
 #define MAX_TOKENS 15
 
