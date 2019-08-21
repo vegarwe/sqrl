@@ -3,6 +3,7 @@
 
 #include "base64.hpp"
 
+
 std::string sqrl_base64_encode(const std::string& data)
 {
     size_t encoded_len = encode_base64_length(data.size());
@@ -25,5 +26,6 @@ std::string sqrl_base64_encode(const std::string& data)
 
     return std::string((char*) encoded, encoded_len);
 }
+
 
 #endif//_SQRL_CONV_H
