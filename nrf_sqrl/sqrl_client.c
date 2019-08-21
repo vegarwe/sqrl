@@ -78,7 +78,7 @@ void sqrl_ident(client_response_t* resp, sqrl_cmd_t* p_cmd,
     idx += encoded_len;
     idx += append_string(&client[idx], "\r\n");
 
-    if (p_cmd->sin) {
+    if (p_cmd->sin && strlen(p_cmd->sin) > 0) {
         uint8_t ins[32];
         sqrl_get_ins_from_sin(ins, ssk, p_cmd->sin);
 
