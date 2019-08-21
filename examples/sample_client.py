@@ -26,16 +26,54 @@ ilk = binascii.unhexlify(b'00d3a56b500bca7908eb89a6f5fe0931388797d42930798d2ffe8
 #print('imk', binascii.hexlify(imk))
 #print('ilk', binascii.hexlify(ilk))
 
+def readCommand(ser):
+    i = 3
+    resp = None
+    while i > 0:
+        a = ser.read(1)
+        if a == b'':
+            print("i =", i)
+            sys.stdout.flush()
+            i -=1
+            continue
+        else:
+            i = 3
+
+        if a == b'\x02':
+            resp = a
+        elif a == b'\x03':
+            resp += a
+            resp_parts = resp[1:-1].split(b'\x1e')
+            if resp_parts[0] == b'log':
+                log = b' '.join(resp_parts[1:]).strip()
+                print('log:', log.decode())
+            elif resp_parts[0] == b'resp':
+                print('Found command response')
+                print('  cmd    ', resp_parts[1])
+                print('  client ', resp_parts[2])
+                print('  server ', resp_parts[3])
+                print('  ids    ', resp_parts[4])
+                form = {'client': resp_parts[2],
+                        'server': resp_parts[3],
+                        'ids':    resp_parts[4]}
+                return form
+            else:
+                print('err: unknown resp: ', repr(resp.decode()))
+            resp = None
+        elif resp:
+            resp += a
+        else:
+            if a != b'\n':
+                print('garbage: %r' % a.decode())
+
+
 def query_cmd(url, com=None):
     t1 = time.time()
     if com:
-        command = json.dumps({'cmd': "query", 'sks': url.get_sks(), 'server': sqrl_base64_encode(bytes(url)).decode()})
+        command = "\x02query\x1e%s\x1e%s\x03" % (url.get_sks(), sqrl_base64_encode(bytes(url)).decode())
         com.write(command.encode())
-        com.write(b'\n')
 
-        form_line = com.readline()
-        print('form_line', repr(form_line))
-        form = json.loads(form_line)
+        form = readCommand(com)
     else:
         form = sqrl_query(imk, url.get_sks(), bytes(url))
     print('time', time.time() - t1, form)
@@ -67,18 +105,13 @@ def login_procedure(url_str, com=None):
 
     t1 = time.time()
     if com:
-        sin = records.get(b'sin', None)
-        if sin: sin = sin.decode()
-        cmd_dict = {'cmd': "ident", 'sks': url.get_sks(), 'server': server.decode(),
-                    'sin': sin, "create_suk": b'suk' not in records}
-        print('cmd_dict', cmd_dict)
-        command = json.dumps(cmd_dict)
+        command = "\x02ident\x1e%s\x1e%s\x1e%s\x1e%s\x03" % (
+                url.get_sks(), server.decode(),
+                records.get(b'sin', "").decode(),
+                'true' if b'suk' not in records else 'false')
         com.write(command.encode())
-        com.write(b'\n')
 
-        form_line = com.readline()
-        print('form_line', repr(form_line))
-        form = json.loads(form_line)
+        form = readCommand(com)
     else:
         form = sqrl_ident(ilk, imk, url.get_sks(), server,
                 records.get(b'sin', None), b'suk' not in records)
@@ -150,7 +183,6 @@ def disable_procedure(url_str, com=None):
 import http.server
 import socketserver
 from urllib.parse import urlparse
-#from urllib.parse import parse_qs
 
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -203,16 +235,6 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         print('done')
         sys.stdout.flush()
 
-        #pprint (vars(self))
-        #pprint (vars(self.headers))
-        #pprint (dir(self))
-        #pprint (self.connection)
-        #pprint (self.request)
-        #pprint (self.path)
-        #pprint (self.rfile)
-        #pprint (vars(self.server))
-        #pprint (self.wfile)
-
 class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     # Ctrl-C will cleanly kill all spawned threads
     daemon_threads = True
@@ -240,5 +262,5 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1:
         pass
     else:
-        #com_port = serial.Serial('com22', baudrate=115200, timeout=1)
+        com_port = serial.Serial('com9', baudrate=115200, timeout=1)
         main()
