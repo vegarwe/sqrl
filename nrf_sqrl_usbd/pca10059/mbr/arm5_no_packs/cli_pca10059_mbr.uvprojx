@@ -381,14 +381,14 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\main.c</FilePath>
-            </File>
-            <File>
               <FileName>sdk_config.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\config\sdk_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>main_usbd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\main_usbd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1119,14 +1119,14 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\main.c</FilePath>
-            </File>
-            <File>
               <FileName>sdk_config.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\config\sdk_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>main_usbd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\main_usbd.c</FilePath>
             </File>
           </Files>
         </Group>
