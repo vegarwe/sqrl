@@ -45,15 +45,12 @@
 #include "nrf_drv_clock.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
+#include "nrf_queue.h"
 
 #include "app_timer.h"
 #include "fds.h"
 #include "app_error.h"
 #include "app_util.h"
-
-#include "nrf_cli.h"
-#include "nrf_cli_rtt.h"
-#include "nrf_cli_types.h"
 
 #include "boards.h"
 
@@ -66,40 +63,14 @@
 #include "nrf_mpu_lib.h"
 #include "nrf_stack_guard.h"
 
-#if defined(APP_USBD_ENABLED) && APP_USBD_ENABLED
-#define CLI_OVER_USB_CDC_ACM 0
-#else
-#define CLI_OVER_USB_CDC_ACM 0
-#endif
-
-#include "nrf_cli_cdc_acm.h"
 #include "nrf_drv_usbd.h"
 #include "app_usbd_core.h"
 #include "app_usbd.h"
 #include "app_usbd_string_desc.h"
 #include "app_usbd_cdc_acm.h"
-#if CLI_OVER_USB_CDC_ACM
-#endif //CLI_OVER_USB_CDC_ACM
-
-#if defined(TX_PIN_NUMBER) && defined(RX_PIN_NUMBER)
-#define CLI_OVER_UART 1
-#else
-#define CLI_OVER_UART 0
-#endif
-
-#if CLI_OVER_UART
-#include "nrf_cli_uart.h"
-#endif
 
 /* If enabled then CYCCNT (high resolution) timestamp is used for the logger. */
 #define USE_CYCCNT_TIMESTAMP_FOR_LOG 0
-
-/**@file
- * @defgroup CLI_example main.c
- *
- * @{
- *
- */
 
 #if NRF_LOG_BACKEND_FLASHLOG_ENABLED
 NRF_LOG_BACKEND_FLASHLOG_DEF(m_flash_log_backend);
@@ -111,10 +82,6 @@ NRF_LOG_BACKEND_CRASHLOG_DEF(m_crash_log_backend);
 
 /* Counter timer. */
 APP_TIMER_DEF(m_timer_0);
-
-/* Declared in demo_cli.c */
-//extern uint32_t m_counter;
-//extern bool m_counter_active;
 
 
 /**
@@ -151,40 +118,14 @@ static void usbd_user_ev_handler(app_usbd_event_type_t event)
     }
 }
 
-#if CLI_OVER_USB_CDC_ACM
-#endif //CLI_OVER_USB_CDC_ACM
-
-/**
- * @brief Command line interface instance
- * */
-#define CLI_EXAMPLE_LOG_QUEUE_SIZE  (4)
-
-//#if CLI_OVER_USB_CDC_ACM
-//NRF_CLI_CDC_ACM_DEF(m_cli_cdc_acm_transport);
-//NRF_CLI_DEF(m_cli_cdc_acm,
-//            "usb_cli:~$ ",
-//            &m_cli_cdc_acm_transport.transport,
-//            '\r',
-//            CLI_EXAMPLE_LOG_QUEUE_SIZE);
-//#endif //CLI_OVER_USB_CDC_ACM
-
-#if CLI_OVER_UART
-NRF_CLI_UART_DEF(m_cli_uart_transport, 0, 64, 16);
-NRF_CLI_DEF(m_cli_uart,
-            "uart_cli:~$ ",
-            &m_cli_uart_transport.transport,
-            '\r',
-            CLI_EXAMPLE_LOG_QUEUE_SIZE);
-#endif
-
-NRF_CLI_RTT_DEF(m_cli_rtt_transport);
-NRF_CLI_DEF(m_cli_rtt,
-            "rtt_cli:~$ ",
-            &m_cli_rtt_transport.transport,
-            '\n',
-            CLI_EXAMPLE_LOG_QUEUE_SIZE);
 
 
+
+#define SQRL_CDC_ACM_COMM_INTERFACE 0
+#define SQRL_CDC_ACM_DATA_INTERFACE 1
+#define SQRL_CDC_ACM_COMM_EPIN NRF_DRV_USBD_EPIN2
+#define SQRL_CDC_ACM_DATA_EPIN NRF_DRV_USBD_EPIN1
+#define SQRL_CDC_ACM_DATA_EPOUT NRF_DRV_USBD_EPOUT1
 
 
 NRF_QUEUE_DEF(uint8_t,
@@ -199,13 +140,13 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
 /**
  * @brief CDC_ACM class instance.
  * */
-APP_USBD_CDC_ACM_GLOBAL_DEF(nrf_cli_cdc_acm,
+APP_USBD_CDC_ACM_GLOBAL_DEF(m_cdc_acm,
                             cdc_acm_user_ev_handler,
-                            NRF_CLI_CDC_ACM_COMM_INTERFACE,
-                            NRF_CLI_CDC_ACM_DATA_INTERFACE,
-                            NRF_CLI_CDC_ACM_COMM_EPIN,
-                            NRF_CLI_CDC_ACM_DATA_EPIN,
-                            NRF_CLI_CDC_ACM_DATA_EPOUT,
+                            SQRL_CDC_ACM_COMM_INTERFACE,
+                            SQRL_CDC_ACM_DATA_INTERFACE,
+                            SQRL_CDC_ACM_COMM_EPIN,
+                            SQRL_CDC_ACM_DATA_EPIN,
+                            SQRL_CDC_ACM_DATA_EPOUT,
                             APP_USBD_CDC_COMM_PROTOCOL_AT_V250
 );
 
@@ -225,7 +166,7 @@ static void cdc_acm_process_and_prepare_buffer(app_usbd_cdc_acm_t const * p_cdc_
         {
             //mp_internal->p_cb->handler(NRF_CLI_TRANSPORT_EVT_RX_RDY, mp_internal->p_cb->p_context);
         }
-        ret_code_t ret = app_usbd_cdc_acm_read_any(&nrf_cli_cdc_acm,
+        ret_code_t ret = app_usbd_cdc_acm_read_any(&m_cdc_acm,
                                                    m_rx_buffer,
                                                    sizeof(m_rx_buffer));
         if (ret == NRF_SUCCESS)
@@ -286,16 +227,12 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
     }
 }
 
-static ret_code_t cli_cdc_acm_write(nrf_cli_transport_t const * p_transport,
-                                    void const *                p_data,
-                                    size_t                      length,
-                                    size_t *                    p_cnt)
+static ret_code_t cdc_acm_write(void const* p_data, size_t length, size_t* p_cnt)
 {
     ASSERT(p_cnt);
-    UNUSED_PARAMETER(p_transport);
     ret_code_t ret;
 
-    ret = app_usbd_cdc_acm_write(&nrf_cli_cdc_acm, p_data, length);
+    ret = app_usbd_cdc_acm_write(&m_cdc_acm, p_data, length);
     if (ret == NRF_SUCCESS || ret == NRF_ERROR_INVALID_STATE)
     {
         *p_cnt = length;
@@ -328,47 +265,6 @@ static void timer_handle(void * p_context)
     //}
 }
 
-static void cli_start(void)
-{
-    ret_code_t ret;
-
-//#if CLI_OVER_USB_CDC_ACM
-//    ret = nrf_cli_start(&m_cli_cdc_acm);
-//    APP_ERROR_CHECK(ret);
-//#endif
-
-#if CLI_OVER_UART
-    ret = nrf_cli_start(&m_cli_uart);
-    APP_ERROR_CHECK(ret);
-#endif
-
-    ret = nrf_cli_start(&m_cli_rtt);
-    APP_ERROR_CHECK(ret);
-}
-
-static void cli_init(void)
-{
-    ret_code_t ret;
-
-//#if CLI_OVER_USB_CDC_ACM
-//    ret = nrf_cli_init(&m_cli_cdc_acm, NULL, true, true, NRF_LOG_SEVERITY_INFO);
-//    APP_ERROR_CHECK(ret);
-//#endif
-
-#if CLI_OVER_UART
-    nrf_drv_uart_config_t uart_config = NRF_DRV_UART_DEFAULT_CONFIG;
-    uart_config.pseltxd = TX_PIN_NUMBER;
-    uart_config.pselrxd = RX_PIN_NUMBER;
-    uart_config.hwfc    = NRF_UART_HWFC_DISABLED;
-    ret = nrf_cli_init(&m_cli_uart, &uart_config, true, true, NRF_LOG_SEVERITY_INFO);
-    APP_ERROR_CHECK(ret);
-#endif
-
-    ret = nrf_cli_init(&m_cli_rtt, NULL, true, true, NRF_LOG_SEVERITY_INFO);
-    APP_ERROR_CHECK(ret);
-}
-
-
 static void usbd_init(void)
 {
     ret_code_t ret;
@@ -380,7 +276,7 @@ static void usbd_init(void)
     APP_ERROR_CHECK(ret);
 
     app_usbd_class_inst_t const * class_cdc_acm =
-            app_usbd_cdc_acm_class_inst_get(&nrf_cli_cdc_acm);
+            app_usbd_cdc_acm_class_inst_get(&m_cdc_acm);
     ret = app_usbd_class_append(class_cdc_acm);
     APP_ERROR_CHECK(ret);
 
@@ -399,22 +295,6 @@ static void usbd_init(void)
 
     /* Give some time for the host to enumerate and connect to the USB CDC port */
     nrf_delay_ms(1000);
-#if CLI_OVER_USB_CDC_ACM
-#endif
-}
-
-
-static void cli_process(void)
-{
-//#if CLI_OVER_USB_CDC_ACM
-//    nrf_cli_process(&m_cli_cdc_acm);
-//#endif
-
-#if CLI_OVER_UART
-    nrf_cli_process(&m_cli_uart);
-#endif
-
-    nrf_cli_process(&m_cli_rtt);
 }
 
 
@@ -481,8 +361,6 @@ int main(void)
     ret = app_timer_start(m_timer_0, APP_TIMER_TICKS(1000), NULL);
     APP_ERROR_CHECK(ret);
 
-    cli_init();
-
     usbd_init();
 
     ret = fds_init();
@@ -490,8 +368,6 @@ int main(void)
 
 
     UNUSED_RETURN_VALUE(nrf_log_config_load());
-
-    cli_start();
 
     flashlog_init();
 
@@ -503,18 +379,17 @@ int main(void)
     while (true)
     {
         UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
-#if CLI_OVER_USB_CDC_ACM && APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
+#if APP_USBD_CONFIG_EVENT_QUEUE_ENABLE
         while (app_usbd_event_queue_process())
         {
             /* Nothing to do */
         }
 #endif
-        cli_process();
 
         char fisken[] = "ab";
         size_t cnt;
-        cli_cdc_acm_write(NULL, fisken, sizeof(fisken) - 1, &cnt);
+        cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
+        nrf_delay_ms(500);
     }
 }
 
-/** @} */

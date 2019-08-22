@@ -1514,7 +1514,7 @@
  
 
 #ifndef NRF_BALLOC_CLI_CMDS
-#define NRF_BALLOC_CLI_CMDS 1
+#define NRF_BALLOC_CLI_CMDS 0
 #endif
 
 // </e>
@@ -1524,7 +1524,7 @@
 // <e> NRF_CLI_RTT_ENABLED - nrf_cli_rtt - RTT command line interface transport
 //==========================================================
 #ifndef NRF_CLI_RTT_ENABLED
-#define NRF_CLI_RTT_ENABLED 1
+#define NRF_CLI_RTT_ENABLED 0
 #endif
 // <o> NRF_CLI_RTT_TERMINAL_ID - RTT terminal ID for CLI. 
 #ifndef NRF_CLI_RTT_TERMINAL_ID
@@ -1553,7 +1553,7 @@
  
 
 #ifndef NRF_CLI_UART_ENABLED
-#define NRF_CLI_UART_ENABLED 1
+#define NRF_CLI_UART_ENABLED 0
 #endif
 
 // <e> NRF_FSTORAGE_ENABLED - nrf_fstorage - Flash abstraction library
@@ -1752,7 +1752,7 @@
  
 
 #ifndef NRF_QUEUE_CLI_CMDS
-#define NRF_QUEUE_CLI_CMDS 1
+#define NRF_QUEUE_CLI_CMDS 0
 #endif
 
 // </e>
@@ -1828,7 +1828,7 @@
  
 
 #ifndef NRF_CLI_ENABLED
-#define NRF_CLI_ENABLED 1
+#define NRF_CLI_ENABLED 0
 #endif
 
 // <o> NRF_CLI_ARGC_MAX - Maximum number of parameters passed to the command handler. 
@@ -1995,7 +1995,7 @@
  
 
 #ifndef NRF_LOG_BACKEND_FLASH_CLI_CMDS
-#define NRF_LOG_BACKEND_FLASH_CLI_CMDS 1
+#define NRF_LOG_BACKEND_FLASH_CLI_CMDS 0
 #endif
 
 // <e> NRF_LOG_BACKEND_FLASHLOG_ENABLED - Enable flashlog backend.
@@ -2200,7 +2200,7 @@
  
 
 #ifndef NRF_LOG_CLI_CMDS
-#define NRF_LOG_CLI_CMDS 1
+#define NRF_LOG_CLI_CMDS 0
 #endif
 
 // <o> NRF_LOG_DEFAULT_LEVEL  - Default Severity level

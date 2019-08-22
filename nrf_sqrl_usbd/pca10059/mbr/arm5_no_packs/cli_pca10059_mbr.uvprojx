@@ -381,11 +381,6 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>demo_cli_cmds.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\demo_cli_cmds.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\main.c</FilePath>
@@ -576,11 +571,6 @@
               <FilePath>..\..\..\..\..\..\components\libraries\util\app_util_platform.c</FilePath>
             </File>
             <File>
-              <FileName>cli_utils_cmds.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\cli_utils_cmds.c</FilePath>
-            </File>
-            <File>
               <FileName>crc16.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\libraries\crc16\crc16.c</FilePath>
@@ -629,26 +619,6 @@
               <FileName>nrf_balloc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\libraries\balloc\nrf_balloc.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\nrf_cli.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli_cdc_acm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\cdc_acm\nrf_cli_cdc_acm.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli_rtt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\rtt\nrf_cli_rtt.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\uart\nrf_cli_uart.c</FilePath>
             </File>
             <File>
               <FileName>nrf_fprintf.c</FileName>
@@ -1149,11 +1119,6 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>demo_cli_cmds.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\demo_cli_cmds.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\main.c</FilePath>
@@ -1344,11 +1309,6 @@
               <FilePath>..\..\..\..\..\..\components\libraries\util\app_util_platform.c</FilePath>
             </File>
             <File>
-              <FileName>cli_utils_cmds.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\cli_utils_cmds.c</FilePath>
-            </File>
-            <File>
               <FileName>crc16.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\libraries\crc16\crc16.c</FilePath>
@@ -1397,26 +1357,6 @@
               <FileName>nrf_balloc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\components\libraries\balloc\nrf_balloc.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\nrf_cli.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli_cdc_acm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\cdc_acm\nrf_cli_cdc_acm.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli_rtt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\rtt\nrf_cli_rtt.c</FilePath>
-            </File>
-            <File>
-              <FileName>nrf_cli_uart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\components\libraries\cli\uart\nrf_cli_uart.c</FilePath>
             </File>
             <File>
               <FileName>nrf_fprintf.c</FileName>
