@@ -1929,7 +1929,7 @@
  
 
 #ifndef NRF_CLI_CDC_ACM_ENABLED
-#define NRF_CLI_CDC_ACM_ENABLED 1
+#define NRF_CLI_CDC_ACM_ENABLED 0
 #endif
 
 // <o> NRF_CLI_CDC_ACM_COMM_INTERFACE - COMM interface number. 
