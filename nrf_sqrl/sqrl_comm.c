@@ -25,7 +25,7 @@ static sqrl_comm_evt_handler_t      m_evt_handler;
 static void handle_cmd(char* buffer);
 
 
-void sqrl_comm_handle_input(char c)
+void sqrl_comm_handle_input(char* in_buffer, size_t in_len)
 {
     static char     s_buffer[2048]; // TODO: Find proper size
     static uint32_t s_bufidx = 0;
@@ -35,37 +35,42 @@ void sqrl_comm_handle_input(char c)
         return; // TODO: Report error somehow
     }
 
-    if (m_state == sqrl_comm_state_initial)
+    for (size_t i = 0; i < in_len; i++) // TODO: Is this really the best way? And also, we discard any trailing garbage here. Maybe that's what we want?
     {
-        if (c == STX)
+        char c = in_buffer[i];
+
+        if (m_state == sqrl_comm_state_initial)
         {
-            s_bufidx = 0;
-            m_state = sqrl_comm_state_find_end;
+            if (c == STX)
+            {
+                s_bufidx = 0;
+                m_state = sqrl_comm_state_find_end;
+            }
+            // Ignore all other characters untill STX
         }
-        // Ignore all other characters untill STX
-    }
-    else if (m_state == sqrl_comm_state_find_end)
-    {
-        s_buffer[s_bufidx++] = c;
-
-        if (s_bufidx > sizeof(s_buffer))
+        else if (m_state == sqrl_comm_state_find_end)
         {
-            m_state = sqrl_comm_state_initial;
-            // TODO: Report error somehow
-        }
+            s_buffer[s_bufidx++] = c;
 
-        if (c == '\0')
-        {
-            m_state = sqrl_comm_state_initial;
-            // TODO: Report error somehow
-        }
+            if (s_bufidx > sizeof(s_buffer))
+            {
+                m_state = sqrl_comm_state_initial;
+                // TODO: Report error somehow
+            }
 
-        if (c == ETX)
-        {
-            m_state = sqrl_comm_state_handle_cmd;
-            s_buffer[s_bufidx-1] = '\0';
+            if (c == '\0')
+            {
+                m_state = sqrl_comm_state_initial;
+                // TODO: Report error somehow
+            }
 
-            handle_cmd(s_buffer);
+            if (c == ETX)
+            {
+                m_state = sqrl_comm_state_handle_cmd;
+                s_buffer[s_bufidx-1] = '\0';
+
+                handle_cmd(s_buffer);
+            }
         }
     }
 }

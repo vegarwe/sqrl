@@ -23,7 +23,7 @@ static void uart_evt_handler(nrf_drv_uart_event_t * p_event, void * p_context)
     {
         (void)nrf_drv_uart_rx(&m_uart, m_rx_buffer, 1);
 
-        sqrl_comm_handle_input(p_event->data.rxtx.p_data[0]);
+        sqrl_comm_handle_input(&p_event->data.rxtx.p_data[0], 1);
     }
     else if (p_event->type == NRF_DRV_UART_EVT_ERROR)
     {

@@ -1,42 +1,3 @@
-/**
- * Copyright (c) 2016 - 2019, Nordic Semiconductor ASA
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form, except as embedded into a Nordic
- *    Semiconductor ASA integrated circuit in a product or a software update for
- *    such product, must reproduce the above copyright notice, this list of
- *    conditions and the following disclaimer in the documentation and/or other
- *    materials provided with the distribution.
- *
- * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
- *    contributors may be used to endorse or promote products derived from this
- *    software without specific prior written permission.
- *
- * 4. This software, with or without modification, must only be used with a
- *    Nordic Semiconductor ASA integrated circuit.
- *
- * 5. Any software provided in binary form under this license must not be reverse
- *    engineered, decompiled, modified and/or disassembled.
- *
- * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- */
 #include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -69,6 +30,8 @@
 #include "app_usbd_string_desc.h"
 #include "app_usbd_cdc_acm.h"
 
+#include "sqrl_comm.h"
+
 /* If enabled then CYCCNT (high resolution) timestamp is used for the logger. */
 #define USE_CYCCNT_TIMESTAMP_FOR_LOG 0
 
@@ -79,6 +42,8 @@ NRF_LOG_BACKEND_FLASHLOG_DEF(m_flash_log_backend);
 #if NRF_LOG_BACKEND_CRASHLOG_ENABLED
 NRF_LOG_BACKEND_CRASHLOG_DEF(m_crash_log_backend);
 #endif
+
+static sqrl_cmd_t* mp_cmd;
 
 /* Counter timer. */
 APP_TIMER_DEF(m_timer_0);
@@ -218,6 +183,8 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             ASSERT(size == qsize);
             UNUSED_VARIABLE(qsize);
 
+            sqrl_comm_handle_input(m_rx_buffer, size);
+
             /*Setup next transfer*/
             cdc_acm_process_and_prepare_buffer(p_cdc_acm);
             break;
@@ -326,6 +293,15 @@ uint32_t cyccnt_get(void)
 }
 
 
+static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
+{
+    if (p_evt->evt_type == SQRL_COMM_EVT_COMMAND)
+    {
+        mp_cmd = p_evt->evt.p_cmd;
+    }
+}
+
+
 int main(void)
 {
     ret_code_t ret;
@@ -355,6 +331,7 @@ int main(void)
     ret = app_timer_start(m_timer_0, APP_TIMER_TICKS(1000), NULL);
     APP_ERROR_CHECK(ret);
 
+    sqrl_comm_init(on_sqrl_comm_evt);
     usbd_init();
 
     ret = fds_init();
@@ -377,18 +354,24 @@ int main(void)
         }
 #endif
 
-        char fisken[] = "cd";
-        char fjaser[] = "ul";
+        char fisken[] = "\x02log\x1e Hello my name is doctor green thumb\x03\n";
         size_t cnt;
-        if (!nrf_queue_is_empty(&m_rx_queue))
-        {
-            cdc_acm_write(fjaser, sizeof(fjaser) - 1, &cnt);
-        }
-        else
-        {
+        //if (!nrf_queue_is_empty(&m_rx_queue))
+        //{
+        //    cdc_acm_write(fjaser, sizeof(fjaser) - 1, &cnt);
+        //}
+        //else
+        //{
+        //    cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
+        //}
+        //nrf_delay_ms(500);
+
+        if (mp_cmd != NULL) {
             cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
+
+            mp_cmd = NULL;
+            sqrl_comm_command_handled();
         }
-        nrf_delay_ms(500);
     }
 }
 

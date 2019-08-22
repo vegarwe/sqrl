@@ -54,7 +54,7 @@ uint32_t sqrl_comm_init(sqrl_comm_evt_handler_t evt_handler);
 
 
 /**@brief Handle single character building an SQRL command. */
-void sqrl_comm_handle_input(char c);
+void sqrl_comm_handle_input(char* in_buffer, size_t in_len);
 
 /**@brief Signal that a command event has been handled (so we can start parsing the next). */
 void sqrl_comm_command_handled(void);
