@@ -257,12 +257,6 @@ static ret_code_t cdc_acm_write(void const* p_data, size_t length, size_t* p_cnt
 static void timer_handle(void * p_context)
 {
     UNUSED_PARAMETER(p_context);
-
-    //if (m_counter_active)
-    //{
-    //    m_counter++;
-    //    NRF_LOG_RAW_INFO("counter = %d\n", m_counter);
-    //}
 }
 
 static void usbd_init(void)
@@ -373,9 +367,6 @@ int main(void)
 
     stack_guard_init();
 
-    NRF_LOG_RAW_INFO("Command Line Interface example started.\n");
-    NRF_LOG_RAW_INFO("Please press the Tab key to see all available commands.\n");
-
     while (true)
     {
         UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
@@ -386,9 +377,17 @@ int main(void)
         }
 #endif
 
-        char fisken[] = "ab";
+        char fisken[] = "cd";
+        char fjaser[] = "ul";
         size_t cnt;
-        cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
+        if (!nrf_queue_is_empty(&m_rx_queue))
+        {
+            cdc_acm_write(fjaser, sizeof(fjaser) - 1, &cnt);
+        }
+        else
+        {
+            cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
+        }
         nrf_delay_ms(500);
     }
 }
