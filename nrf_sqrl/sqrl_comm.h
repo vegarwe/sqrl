@@ -2,6 +2,7 @@
 #define _SQRL_COMM_H_
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /**@brief SQRL command type. */
