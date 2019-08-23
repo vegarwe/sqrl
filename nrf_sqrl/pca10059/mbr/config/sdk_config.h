@@ -2001,7 +2001,7 @@
 // <e> NRF_LOG_BACKEND_FLASHLOG_ENABLED - Enable flashlog backend.
 //==========================================================
 #ifndef NRF_LOG_BACKEND_FLASHLOG_ENABLED
-#define NRF_LOG_BACKEND_FLASHLOG_ENABLED 1
+#define NRF_LOG_BACKEND_FLASHLOG_ENABLED 0
 #endif
 // <o> NRF_LOG_BACKEND_FLASHLOG_QUEUE_SIZE - Logger messages queue size. 
 // <i> Queue holds log messages pending to be written to flash.
@@ -2017,7 +2017,7 @@
 // <e> NRF_LOG_BACKEND_CRASHLOG_ENABLED - Enable crashlog backend.
 //==========================================================
 #ifndef NRF_LOG_BACKEND_CRASHLOG_ENABLED
-#define NRF_LOG_BACKEND_CRASHLOG_ENABLED 1
+#define NRF_LOG_BACKEND_CRASHLOG_ENABLED 0
 #endif
 // <o> NRF_LOG_BACKEND_CRASHLOG_FIFO_SIZE - Number of log messages held to be flushed in panic. 
 // <i> Crashlog FIFO always keeps a defined number of the most

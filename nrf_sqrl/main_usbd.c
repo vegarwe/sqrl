@@ -2,18 +2,17 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "app_error.h"
+#include "app_util.h"
+#include "fds.h"
+
+#include "boards.h"
+
 #include "nrf.h"
 #include "nrf_drv_clock.h"
 #include "nrf_gpio.h"
 #include "nrf_delay.h"
 #include "nrf_queue.h"
-
-#include "app_timer.h"
-#include "fds.h"
-#include "app_error.h"
-#include "app_util.h"
-
-#include "boards.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -44,9 +43,6 @@ NRF_LOG_BACKEND_CRASHLOG_DEF(m_crash_log_backend);
 #endif
 
 static sqrl_cmd_t* mp_cmd;
-
-/* Counter timer. */
-APP_TIMER_DEF(m_timer_0);
 
 
 /**
@@ -84,19 +80,12 @@ static void usbd_user_ev_handler(app_usbd_event_type_t event)
 }
 
 
-
-
 #define SQRL_CDC_ACM_COMM_INTERFACE 0
 #define SQRL_CDC_ACM_DATA_INTERFACE 1
 #define SQRL_CDC_ACM_COMM_EPIN NRF_DRV_USBD_EPIN2
 #define SQRL_CDC_ACM_DATA_EPIN NRF_DRV_USBD_EPIN1
 #define SQRL_CDC_ACM_DATA_EPOUT NRF_DRV_USBD_EPOUT1
 
-
-NRF_QUEUE_DEF(uint8_t,
-              m_rx_queue,
-              2*NRF_DRV_USBD_EPSIZE,
-              NRF_QUEUE_MODE_OVERFLOW);
 
 static char m_rx_buffer[NRF_DRV_USBD_EPSIZE];
 static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
@@ -127,19 +116,14 @@ static void cdc_acm_process_and_prepare_buffer(app_usbd_cdc_acm_t const * p_cdc_
 {
     for (;;)
     {
-        if (!nrf_queue_is_empty(&m_rx_queue))
-        {
-            //mp_internal->p_cb->handler(NRF_CLI_TRANSPORT_EVT_RX_RDY, mp_internal->p_cb->p_context);
-        }
-        ret_code_t ret = app_usbd_cdc_acm_read_any(&m_cdc_acm,
-                                                   m_rx_buffer,
-                                                   sizeof(m_rx_buffer));
+        ret_code_t ret = app_usbd_cdc_acm_read_any(&m_cdc_acm, m_rx_buffer, sizeof(m_rx_buffer));
+
         if (ret == NRF_SUCCESS)
         {
+            /* Get amount of data transfered */
             size_t size = app_usbd_cdc_acm_rx_size(p_cdc_acm);
-            size_t qsize = nrf_queue_in(&m_rx_queue, m_rx_buffer, size);
-            ASSERT(size == qsize);
-            UNUSED_VARIABLE(qsize);
+
+            sqrl_comm_handle_input(m_rx_buffer, size);
         }
         else if (ret == NRF_ERROR_IO_PENDING)
         {
@@ -153,9 +137,10 @@ static void cdc_acm_process_and_prepare_buffer(app_usbd_cdc_acm_t const * p_cdc_
     }
 }
 
+
 /**
  * @brief User event handler.
- * */
+ */
 static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
                                     app_usbd_cdc_acm_user_event_t event)
 {
@@ -166,26 +151,17 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
     {
         case APP_USBD_CDC_ACM_USER_EVT_PORT_OPEN:
         {
-            /*Setup first transfer*/
+            /* Setup first transfer */
             cdc_acm_process_and_prepare_buffer(p_cdc_acm);
             break;
         }
         case APP_USBD_CDC_ACM_USER_EVT_PORT_CLOSE:
             break;
         case APP_USBD_CDC_ACM_USER_EVT_TX_DONE:
-            //mp_internal->p_cb->handler(NRF_CLI_TRANSPORT_EVT_TX_RDY, mp_internal->p_cb->p_context);
             break;
         case APP_USBD_CDC_ACM_USER_EVT_RX_DONE:
         {
-            /*Get amount of data transfered*/
-            size_t size = app_usbd_cdc_acm_rx_size(p_cdc_acm);
-            size_t qsize = nrf_queue_in(&m_rx_queue, m_rx_buffer, size);
-            ASSERT(size == qsize);
-            UNUSED_VARIABLE(qsize);
-
-            sqrl_comm_handle_input(m_rx_buffer, size);
-
-            /*Setup next transfer*/
+            /* Setup next transfer */
             cdc_acm_process_and_prepare_buffer(p_cdc_acm);
             break;
         }
@@ -193,6 +169,7 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             break;
     }
 }
+
 
 static ret_code_t cdc_acm_write(void const* p_data, size_t length, size_t* p_cnt)
 {
@@ -218,13 +195,6 @@ static ret_code_t cdc_acm_write(void const* p_data, size_t length, size_t* p_cnt
     return ret;
 }
 
-
-
-
-static void timer_handle(void * p_context)
-{
-    UNUSED_PARAMETER(p_context);
-}
 
 static void usbd_init(void)
 {
@@ -322,15 +292,6 @@ int main(void)
     APP_ERROR_CHECK(ret);
     nrf_drv_clock_lfclk_request(NULL);
 
-    ret = app_timer_init();
-    APP_ERROR_CHECK(ret);
-
-    ret = app_timer_create(&m_timer_0, APP_TIMER_MODE_REPEATED, timer_handle);
-    APP_ERROR_CHECK(ret);
-
-    ret = app_timer_start(m_timer_0, APP_TIMER_TICKS(1000), NULL);
-    APP_ERROR_CHECK(ret);
-
     sqrl_comm_init(on_sqrl_comm_evt);
     usbd_init();
 
@@ -356,16 +317,6 @@ int main(void)
 
         char fisken[] = "\x02log\x1e Hello my name is doctor green thumb\x03\n";
         size_t cnt;
-        //if (!nrf_queue_is_empty(&m_rx_queue))
-        //{
-        //    cdc_acm_write(fjaser, sizeof(fjaser) - 1, &cnt);
-        //}
-        //else
-        //{
-        //    cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
-        //}
-        //nrf_delay_ms(500);
-
         if (mp_cmd != NULL) {
             cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
 
