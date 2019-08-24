@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "app_timer.h"
 #include "app_error.h"
 #include "app_util.h"
 #include "fds.h"
@@ -150,17 +151,20 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
     switch (event)
     {
         case APP_USBD_CDC_ACM_USER_EVT_PORT_OPEN:
-        {
             /* Setup first transfer */
             cdc_acm_process_and_prepare_buffer(p_cdc_acm);
             break;
-        }
         case APP_USBD_CDC_ACM_USER_EVT_PORT_CLOSE:
             break;
         case APP_USBD_CDC_ACM_USER_EVT_TX_DONE:
             break;
         case APP_USBD_CDC_ACM_USER_EVT_RX_DONE:
         {
+            /* Get amount of data transfered, send to comm module */
+            size_t size = app_usbd_cdc_acm_rx_size(p_cdc_acm);
+
+            sqrl_comm_handle_input(m_rx_buffer, size);
+
             /* Setup next transfer */
             cdc_acm_process_and_prepare_buffer(p_cdc_acm);
             break;
@@ -231,6 +235,7 @@ static void usbd_init(void)
 
 static void flashlog_init(void)
 {
+#if NRF_MODULE_ENABLED(NRF_LOG_BACKEND_FLASH)
     ret_code_t ret;
     int32_t backend_id;
 
@@ -248,6 +253,7 @@ static void flashlog_init(void)
     APP_ERROR_CHECK_BOOL(backend_id >= 0);
 
     nrf_log_backend_enable(&m_crash_log_backend);
+#endif
 #endif
 }
 
@@ -315,7 +321,7 @@ int main(void)
         }
 #endif
 
-        char fisken[] = "\x02log\x1e Hello my name is doctor green thumb\x03\n";
+        char fisken[] = "\x02log\x1e Hello my name is Dr. Green Thumb\x03\n";
         size_t cnt;
         if (mp_cmd != NULL) {
             cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);

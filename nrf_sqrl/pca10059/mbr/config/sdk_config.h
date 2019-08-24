@@ -1989,7 +1989,7 @@
 // <e> NRF_LOG_BACKEND_FLASH_ENABLED - nrf_log_backend_flash - Log flash backend
 //==========================================================
 #ifndef NRF_LOG_BACKEND_FLASH_ENABLED
-#define NRF_LOG_BACKEND_FLASH_ENABLED 1
+#define NRF_LOG_BACKEND_FLASH_ENABLED 0
 #endif
 // <q> NRF_LOG_BACKEND_FLASH_CLI_CMDS  - Enable CLI commands for this module.
  
