@@ -7,6 +7,7 @@
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
+
 #include "sqrl_client.h"
 #include "sqrl_comm.h"
 #include "sqrl_crypto.h"
