@@ -107,7 +107,7 @@ def login_procedure(url_str, com=None):
     if com:
         command = "\x02ident\x1e%s\x1e%s\x1e%s\x1e%s\x03" % (
                 url.get_sks(), server.decode(),
-                records.get(b'sin', "").decode(),
+                records.get(b'sin', b"").decode(),
                 'true' if b'suk' not in records else 'false')
         com.write(command.encode())
 
@@ -262,5 +262,5 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1:
         pass
     else:
-        com_port = serial.Serial('com9', baudrate=115200, timeout=1)
+        com_port = serial.Serial('com7', baudrate=115200, timeout=1)
         main()
