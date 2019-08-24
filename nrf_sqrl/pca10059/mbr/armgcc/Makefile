@@ -68,16 +68,23 @@ SRC_FILES += \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_usbd.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
-  $(PROJ_DIR)/main_usbd.c \
-  $(PROJ_DIR)/sqrl_comm.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52840.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
+  $(SDK_ROOT)/external/mbedtls/library/base64.c \
+  $(PROJ_DIR)/sqrl_client.c \
+  $(PROJ_DIR)/sqrl_comm.c \
+  $(PROJ_DIR)/sqrl_conv.c \
+  $(PROJ_DIR)/sqrl_crypto.c \
+  $(PROJ_DIR)/main_usbd.c
+
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  ../config \
+  $(PROJ_DIR) \
   $(SDK_ROOT)/components \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/modules/nrfx \
@@ -91,7 +98,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/libraries/util \
   $(SDK_ROOT)/components/libraries/hardfault \
-  ../config \
   $(SDK_ROOT)/components/libraries/usbd/class/cdc \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ringbuf \
@@ -106,7 +112,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/usbd \
   $(SDK_ROOT)/components/libraries/usbd/class/cdc/acm \
   $(SDK_ROOT)/components/libraries/mutex \
-  $(PROJ_DIR) \
   $(SDK_ROOT)/components/libraries/delay \
   $(SDK_ROOT)/external/segger_rtt \
   $(SDK_ROOT)/components/libraries/atomic_fifo \
@@ -124,9 +129,15 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/fprintf \
   $(SDK_ROOT)/components/libraries/stack_guard \
   $(SDK_ROOT)/components/libraries/log/src \
+  $(SDK_ROOT)/external/mbedtls/include \
+  $(SDK_ROOT)/external/nrf_oberon \
+  $(SDK_ROOT)/external/nrf_oberon/include \
+
 
 # Libraries common to all targets
 LIB_FILES += \
+  $(SDK_ROOT)/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_2.0.7.a \
+
 
 # Optimization flags
 OPT = -O3 -g3

@@ -30,7 +30,9 @@
 #include "app_usbd_string_desc.h"
 #include "app_usbd_cdc_acm.h"
 
+#include "sqrl_client.h"
 #include "sqrl_comm.h"
+#include "sqrl_crypto.h"
 
 /* If enabled then CYCCNT (high resolution) timestamp is used for the logger. */
 #define USE_CYCCNT_TIMESTAMP_FOR_LOG 0
@@ -311,6 +313,23 @@ int main(void)
 
     stack_guard_init();
 
+
+    // Start out with hard coded test keys
+    uint8_t iuk[] = {0xa2,0x43,0xbf,0xb0,0xed,0x04,0x56,0x5d,0x04,0x61,0xa7,0x73,0x1a,0x8f,0xad,0x18,0xde,0x4b,0xdd,0xf8,0xe3,0x83,0x38,0x53,0x92,0x6c,0xcf,0xaf,0x2e,0x2e,0x04,0xa6};
+    uint8_t imk[] = {0x21,0xd7,0x08,0x94,0x57,0x5e,0x6b,0x6e,0xfe,0x99,0x1f,0xb8,0x6a,0x98,0x68,0xa4,0x9f,0x3a,0x72,0x04,0x0e,0x88,0x25,0x2d,0x82,0xbe,0x5a,0x3a,0xc6,0xc3,0xaa,0x23};
+
+    uint8_t ilk[32];
+    sqrl_get_ilk_from_iuk(ilk, iuk);
+
+    (void)iuk;
+    (void)imk;
+    (void)ilk;
+
+    char outputbuffer[2048];
+    //sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");
+    //serial_tx(outputbuffer, strlen(outputbuffer));
+    //cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
+
     while (true)
     {
         UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
@@ -321,14 +340,54 @@ int main(void)
         }
 #endif
 
-        char fisken[] = "\x02log\x1e Hello my name is Dr. Green Thumb\x03\n";
-        size_t cnt;
-        if (mp_cmd != NULL) {
-            cdc_acm_write(fisken, sizeof(fisken) - 1, &cnt);
-
-            mp_cmd = NULL;
-            sqrl_comm_command_handled();
+        if (mp_cmd == NULL) {
+            // TODO: sleep
+            continue;
         }
+
+        client_response_t resp;
+
+        size_t cnt;
+
+        if (mp_cmd->type == SQRL_CMD_QUERY)
+        {
+            sqrl_query(&resp, mp_cmd, imk);
+
+            //sprintf(outputbuffer, "\x02log\x1e cmd:    '%s'\x03\n", "query"); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e sks:    '%s'\x03\n", mp_cmd->sks); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e client: '%s'\x03\n", resp.client); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e server: '%s'\x03\n", mp_cmd->server); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e ids:    '%s'\x03\n", resp.ids);    serial_tx(outputbuffer, strlen(outputbuffer));
+
+            sprintf(outputbuffer, "\x02resp\x1equery\x1e%s\x1e%s\x1e%s\x03\n", resp.client, mp_cmd->server, resp.ids);
+            cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
+        }
+        else if (mp_cmd->type == SQRL_CMD_IDENT)
+        {
+            // TODO: Create random 32 bytes
+            uint8_t rlk[] = {0xca,0x5a,0x7b,0x6e,0xa8,0xbc,0x75,0xb3,0x94,0xd1,0xdf,0x20,0xbc,0xd9,0xcf,0x4d,0x31,0x1d,0xb0,0x67,0xd8,0x77,0xd9,0xb6,0xa7,0xda,0x74,0xd6,0x1b,0x6a,0x8d,0x69};
+            sqrl_ident(&resp, mp_cmd, ilk, imk, rlk);
+
+            //sprintf(outputbuffer, "\x02log\x1e cmd:    '%s'\x03\n", "ident"); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e sks:    '%s'\x03\n", mp_cmd->sks); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e client: '%s'\x03\n", resp.client); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e server: '%s'\x03\n", mp_cmd->server); serial_tx(outputbuffer, strlen(outputbuffer));
+            //sprintf(outputbuffer, "\x02log\x1e ids:    '%s'\x03\n", resp.ids);    serial_tx(outputbuffer, strlen(outputbuffer));
+
+            sprintf(outputbuffer, "\x02resp\x1eident\x1e%s\x1e%s\x1e%s\x03\n", resp.client, mp_cmd->server, resp.ids);
+            cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
+        }
+        else
+        {
+            sprintf(outputbuffer, "err: Invalid command\n");
+            cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
+        }
+
+        free(resp.client);
+        free(resp.ids);
+        memset(&resp, 0, sizeof(resp));
+        mp_cmd = NULL;
+        sqrl_comm_command_handled();
     }
 }
 

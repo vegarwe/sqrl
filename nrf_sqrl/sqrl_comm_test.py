@@ -1,6 +1,7 @@
 import serial
 import time
 import sys
+from datetime import datetime
 
 serial_port = sys.argv[1]
 
@@ -23,12 +24,12 @@ with serial.Serial(port=serial_port, baudrate=115200, timeout=.3) as ser:
 
         if a == b'\x02':
             resp = a
-        elif a == b'\x03':
+        elif resp and a == b'\x03':
             resp += a
             resp_parts = resp[1:-1].split(b'\x1e')
             if resp_parts[0] == b'log':
                 log = b' '.join(resp_parts[1:]).strip()
-                print('log:', log.decode())
+                print('%s log: %s' % (datetime.now(), log.decode()))
             elif resp_parts[0] == b'resp':
                 print('Found command response')
                 print('  cmd    ', resp_parts[1])
@@ -36,11 +37,11 @@ with serial.Serial(port=serial_port, baudrate=115200, timeout=.3) as ser:
                 print('  server ', resp_parts[3])
                 print('  ids    ', resp_parts[4])
             else:
-                print('err: unknown resp: ', repr(resp.decode()))
+                print(b'err: unknown resp: %r' % resp)
             resp = None
         elif resp:
             resp += a
         else:
             if a != b'\n':
-                print('garbage: %r' % a.decode())
+                print(b'garbage: %r' % a)
 

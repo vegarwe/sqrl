@@ -33,6 +33,7 @@ void sqrl_query(client_response_t* resp, sqrl_cmd_t* p_cmd, const uint8_t imk[32
     idx += append_string(&client[idx], "cmd=query\r\n");
     idx += append_string(&client[idx], "idk=");
     int ret = sqrl_base64_encode(&client[idx], &encoded_len, (char*)idk, sizeof(idk));
+    (void) ret; // TODO: Check?
     //NRF_LOG_RAW_INFO("ret %d, encoded_len %d\n", ret, encoded_len);
     idx += encoded_len;
     idx += append_string(&client[idx], "\r\n");
@@ -74,6 +75,7 @@ void sqrl_ident(client_response_t* resp, sqrl_cmd_t* p_cmd,
     idx += append_string(&client[idx], "cmd=ident\r\n");
     idx += append_string(&client[idx], "idk=");
     int ret = sqrl_base64_encode(&client[idx], &encoded_len, (char*)idk, sizeof(idk));
+    (void) ret; // TODO: Check?
     //NRF_LOG_RAW_INFO("ret %d, encoded_len %d\n", ret, encoded_len);
     idx += encoded_len;
     idx += append_string(&client[idx], "\r\n");
