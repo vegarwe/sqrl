@@ -16,3 +16,4 @@ _build/
 *.dfu
 *.elf
 *.ihex
+.obj
