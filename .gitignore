@@ -11,3 +11,8 @@ JLinkLog.txt
 JLinkSettings.ini
 _build/
 *.uvguix.*
+
+*.bin
+*.dfu
+*.elf
+*.ihex
