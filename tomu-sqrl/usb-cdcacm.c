@@ -399,7 +399,7 @@ int main(void)
 
         if (mp_cmd->type == SQRL_CMD_QUERY)
         {
-            usb_puts("\x02resp\x1eident\x1e");
+            usb_puts("\x02resp\x1equery\x1e");
             serial_tx(mp_cmd->sks, strlen(mp_cmd->sks));
             usb_puts("\x1e");
             serial_tx(mp_cmd->server, strlen(mp_cmd->server));
@@ -408,7 +408,7 @@ int main(void)
         }
         else if (mp_cmd->type == SQRL_CMD_IDENT)
         {
-            usb_puts("\x02resp\x1equery\x1e");
+            usb_puts("\x02resp\x1eident\x1e");
             serial_tx(mp_cmd->sks, strlen(mp_cmd->sks));
             usb_puts("\x1e");
             serial_tx(mp_cmd->server, strlen(mp_cmd->server));

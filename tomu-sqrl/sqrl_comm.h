@@ -1,0 +1,1 @@
+../nrf_sqrl/sqrl_comm.h
