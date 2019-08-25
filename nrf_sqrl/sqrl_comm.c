@@ -27,8 +27,8 @@ static void handle_cmd(char* buffer);
 
 void sqrl_comm_handle_input(char* in_buffer, size_t in_len)
 {
-    static char     s_buffer[2048]; // TODO: Find proper size
-    static uint32_t s_bufidx = 0;
+    static volatile char    s_buffer[2048]; // TODO: Find proper size
+    static uint32_t         s_bufidx = 0;
 
     if (m_evt_handler == NULL)
     {
@@ -75,7 +75,7 @@ void sqrl_comm_handle_input(char* in_buffer, size_t in_len)
     }
 }
 
-static char *strsep(char ** p_s)
+static char *strseparator(char ** p_s)
 {
     char * ret = *p_s;
 
@@ -113,7 +113,7 @@ static void handle_cmd(char* buffer)
     uint32_t    token_cnt = 0;
 
     // Split into tokens
-    while ((tokens[token_cnt] = strsep(&buffer)) != NULL)
+    while ((tokens[token_cnt] = strseparator(&buffer)) != NULL)
     {
         token_cnt++;
         if (token_cnt >= MAX_TOKENS)

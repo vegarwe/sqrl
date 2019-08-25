@@ -45,7 +45,7 @@ NRF_LOG_BACKEND_FLASHLOG_DEF(m_flash_log_backend);
 NRF_LOG_BACKEND_CRASHLOG_DEF(m_crash_log_backend);
 #endif
 
-static sqrl_cmd_t* mp_cmd;
+static volatile sqrl_cmd_t* mp_cmd;
 
 
 /**
@@ -379,7 +379,7 @@ int main(void)
         }
         else
         {
-            sprintf(outputbuffer, "err: Invalid command\n");
+            sprintf(outputbuffer, "\x02log\x1e err: Invalid command\x03\n");
             cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
         }
 

@@ -13,10 +13,10 @@
 #include "sqrl_crypto.h"
 
 
-static nrf_drv_uart_t   m_uart = NRF_DRV_UART_INSTANCE(0);
-static volatile bool    m_xfer_done;
-static uint8_t          m_rx_buffer[1];
-static sqrl_cmd_t*      mp_cmd;
+static nrf_drv_uart_t       m_uart = NRF_DRV_UART_INSTANCE(0);
+static volatile bool        m_xfer_done;
+static uint8_t              m_rx_buffer[1];
+static volatile sqrl_cmd_t* mp_cmd;
 
 
 static void uart_evt_handler(nrf_drv_uart_event_t * p_event, void * p_context)
@@ -138,7 +138,7 @@ static void sqrl_client_loop(void)
         }
         else
         {
-            sprintf(outputbuffer, "err: Invalid command\n"); serial_tx(outputbuffer, strlen(outputbuffer));
+            sprintf(outputbuffer, "\x02log\x1e err: Invalid command\x03\n"); serial_tx(outputbuffer, strlen(outputbuffer));
         }
 
         free(resp.client);
