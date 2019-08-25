@@ -1,1 +1,1 @@
-include ../Makefile.common
+include ../tomu-quickstart/Makefile.sqrl.common

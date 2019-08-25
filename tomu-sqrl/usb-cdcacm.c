@@ -19,17 +19,6 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * \addtogroup Examples
- *
- * This example implements a USB CDC-ACM device (aka Virtual Serial Port)
- * to demonstrate the use of the USB device stack.
- *
- * When data is recieved, it will toggle the green LED and echo the data.
- * The red LED is toggled constantly and a string is sent over USB every
- * time the LED changes state as a heartbeat.
- */
-
 #include <libopencm3/cm3/common.h>
 #include <libopencm3/cm3/vector.h>
 #include <libopencm3/cm3/scb.h>
@@ -47,6 +36,8 @@
 //#include "toboot.h"
 //TOBOOT_CONFIGURATION(0);
 
+#include "sqrl_comm.h"
+
 /* Default AHB (core clock) frequency of Tomu board */
 #define AHB_FREQUENCY 14000000
 
@@ -59,8 +50,12 @@
 #define PRODUCT_ID                0x70b1    /* Assigned to Tomu project */
 #define DEVICE_VER                0x0101    /* Program version */
 
-static volatile bool g_usbd_is_connected = false;
-static usbd_device *g_usbd_dev = 0;
+
+static volatile bool        g_usbd_is_connected = false;
+static usbd_device*         g_usbd_dev = 0;
+static volatile bool        m_tx_done = false;
+static volatile sqrl_cmd_t* mp_cmd = NULL;
+
 
 static const struct usb_device_descriptor dev = {
     .bLength = USB_DT_DEVICE_SIZE,
@@ -238,7 +233,7 @@ static enum usbd_request_return_codes cdcacm_control_request(usbd_device *usbd_d
             gpio_clear(LED_GREEN_PORT, LED_GREEN_PIN);
         return USBD_REQ_HANDLED;
         }
-    case USB_CDC_REQ_SET_LINE_CODING: 
+    case USB_CDC_REQ_SET_LINE_CODING:
         if(*len < sizeof(struct usb_cdc_line_coding))
             return 0;
 
@@ -255,23 +250,25 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
     char buf[64];
     int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, sizeof(buf));
 
-    if (len) {
-        if (buf[0] == '\r') {
-            buf[1] = '\n';
-            buf[2] = '\0';
-            len++;
-        }
-        usbd_ep_write_packet(usbd_dev, 0x82, buf, len);
-        buf[len] = 0;
-    }
+    sqrl_comm_handle_input(buf, len);
 }
+
+
+static void cdcacm_data_tx_cb(usbd_device *usbd_dev, uint8_t ep)
+{
+    (void)usbd_dev;
+    (void)ep;
+
+    m_tx_done = true;
+}
+
 
 static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 {
     (void)wValue;
 
     usbd_ep_setup(usbd_dev, 0x01, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_rx_cb);
-    usbd_ep_setup(usbd_dev, 0x82, USB_ENDPOINT_ATTR_BULK, 64, 0);
+    usbd_ep_setup(usbd_dev, 0x82, USB_ENDPOINT_ATTR_BULK, 64, cdcacm_data_tx_cb);
     usbd_ep_setup(usbd_dev, 0x83, USB_ENDPOINT_ATTR_INTERRUPT, 16, 0);
 
     usbd_register_control_callback(
@@ -281,9 +278,49 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
                 cdcacm_control_request);
 }
 
-static void usb_puts(char *s) {
-    if (g_usbd_is_connected) {
-        usbd_ep_write_packet(g_usbd_dev, 0x82, s, strnlen(s, 64));
+
+static void usb_puts(char *s)
+{
+    if (! g_usbd_is_connected) {
+        return;
+    }
+
+    usbd_ep_write_packet(g_usbd_dev, 0x82, s, strnlen(s, 64));
+    udelay_busy(200); // Why is this needed?
+
+    /* wait for completion */
+    while (m_tx_done == false)
+    {
+    }
+}
+
+
+static void serial_tx(char const * p_buffer, size_t len)
+{
+    if (! g_usbd_is_connected) {
+        return;
+    }
+
+    while (len > 0)
+    {
+        uint8_t len8 = (uint8_t)(len & 0xFF);
+
+        if (len > 64)
+        {
+            len8 = 64;
+        }
+
+        m_tx_done = false;
+        usbd_ep_write_packet(g_usbd_dev, 0x82, p_buffer, len8);
+        udelay_busy(200); // Why is this needed?
+
+        /* wait for completion */
+        while (m_tx_done == false)
+        {
+        }
+
+        len -= len8;
+        p_buffer = &p_buffer[len8];
     }
 }
 
@@ -296,6 +333,16 @@ void hard_fault_handler(void)
 {
     while(1);
 }
+
+
+static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
+{
+    if (p_evt->evt_type == SQRL_COMM_EVT_COMMAND)
+    {
+        mp_cmd = p_evt->evt.p_cmd;
+    }
+}
+
 
 int main(void)
 {
@@ -311,6 +358,10 @@ int main(void)
     gpio_mode_setup(LED_RED_PORT, GPIO_MODE_WIRED_AND, LED_RED_PIN);
     gpio_mode_setup(LED_GREEN_PORT, GPIO_MODE_WIRED_AND, LED_GREEN_PIN);
 
+    gpio_set(LED_GREEN_PORT, LED_GREEN_PIN);
+    gpio_set(LED_RED_PORT, LED_RED_PIN);
+    gpio_clear(LED_RED_PORT, LED_RED_PIN); // TODO: Just for 'unplug - program' cycle
+
     /* Configure the USB core & stack */
     g_usbd_dev = usbd_init(&efm32hg_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
     usbd_register_set_config_callback(g_usbd_dev, cdcacm_set_config);
@@ -324,18 +375,56 @@ int main(void)
     /* Enable USB IRQs */
     nvic_enable_irq(NVIC_USB_IRQ);
 
+    sqrl_comm_init(on_sqrl_comm_evt);
+
     while(1) {
         if (line_was_connected != g_usbd_is_connected) {
-            if (g_usbd_is_connected) {
-                udelay_busy(2000);
-                usb_puts("\r\nHello world!\r\n");
-                udelay_busy(2000);
-            }
-            line_was_connected = g_usbd_is_connected;
+            //if (g_usbd_is_connected) {
+            //    //udelay_busy(2000);
+            //    //usb_puts("\r\nHello world!\r\n");
+            //    //udelay_busy(2000);
+            //}
+            line_was_connected = g_usbd_is_connected; // TODO: Why the fuck is this needed?
         }
 
-        usb_puts("toggling LED\n\r");            
-        gpio_toggle(LED_RED_PORT, LED_RED_PIN);  
-        udelay_busy(300000);
+        if (! g_usbd_is_connected || mp_cmd == NULL) {
+            // TODO: sleep?
+            continue;
+        }
+
+        gpio_clear(LED_RED_PORT, LED_RED_PIN);
+        usb_puts("\x02log\x1e asdf asdf sadf\x03\n");
+
+        //client_response_t resp = {0};
+
+        if (mp_cmd->type == SQRL_CMD_QUERY)
+        {
+            usb_puts("\x02resp\x1eident\x1e");
+            serial_tx(mp_cmd->sks, strlen(mp_cmd->sks));
+            usb_puts("\x1e");
+            serial_tx(mp_cmd->server, strlen(mp_cmd->server));
+            usb_puts("\x1e<... resp.ids ...>");
+            usb_puts("\x03\n");
+        }
+        else if (mp_cmd->type == SQRL_CMD_IDENT)
+        {
+            usb_puts("\x02resp\x1equery\x1e");
+            serial_tx(mp_cmd->sks, strlen(mp_cmd->sks));
+            usb_puts("\x1e");
+            serial_tx(mp_cmd->server, strlen(mp_cmd->server));
+            usb_puts("\x1e<... resp.ids ...>");
+            usb_puts("\x03\n");
+        }
+        else
+        {
+            usb_puts("\x02log\x1e err: Invalid command\x03\n");
+        }
+
+        //free(resp.client);
+        //free(resp.ids);
+        mp_cmd = NULL;
+        sqrl_comm_command_handled();
+        //gpio_set(LED_RED_PORT, LED_RED_PIN); // TODO: Uncommented just for 'unplug - program' cycle
     }
 }
+
