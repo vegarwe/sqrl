@@ -25,7 +25,7 @@ int sqrl_base64_encode(char* encoded, size_t* encoded_len, const char* input, si
         return retval;
     }
 
-    for (int i = 0; i < *encoded_len; i++)
+    for (size_t i = 0; i < *encoded_len; i++)
     {
         if (encoded[i] == '+')
         {
