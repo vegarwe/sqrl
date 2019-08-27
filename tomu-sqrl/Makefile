@@ -1,12 +1,18 @@
-SDK_DIR    = ../tomu-quickstart/
-NRF_ROOT   = ../../../../
+SDK_DIR    = ../tomu-quickstart
+NRF_ROOT   = ../../../..
 
 CSOURCES   = ./usb-cdcacm.c
 CSOURCES  += ../nrf_sqrl/sqrl_comm.c
+CSOURCES  += ../nrf_sqrl/sqrl_conv.c
+#CSOURCES  += ./base64.c
+CSOURCES  += $(NRF_ROOT)/external/mbedtls/library/base64.c
 CPPSOURCES =
 
+INC_DIRS  += -I.
 INC_DIRS   = -I../nrf_sqrl
-INC_DIRS  += -I../nrf_sqrl
+INC_DIRS  += -I$(NRF_ROOT)/external/mbedtls/include
+INC_DIRS  += -I$(NRF_ROOT)/external/mbedtls/include/mbedtls
+#INC_DIRS  += -I$(NRF_ROOT)/external/nrf_tls/mbedtls/nrf_crypto/config
 INC_DIRS  += -I$(NRF_ROOT)/external/nrf_oberon
 INC_DIRS  += -I$(NRF_ROOT)/external/nrf_oberon/include
 
@@ -15,7 +21,6 @@ OPENCM3   ?= $(SDK_DIR)/libopencm3
 ADD_CFLAGS = -I$(OPENCM3)/include -I$(SDK_DIR)/include -DEFM32HG $(INC_DIRS)
 ADD_LFLAGS = -L$(OPENCM3)/lib -lopencm3_efm32hg \
              -L$(NRF_ROOT)/external/nrf_oberon/lib/cortex-m0 -loberon_2.0.7
-# ../../../../external/nrf_oberon/lib/cortex-m0/liboberon_2.0.7.a
 
 GIT_VERSION := $(shell git describe --tags)
 TRGT      ?= arm-none-eabi-
@@ -43,6 +48,7 @@ CFLAGS    += -ffunction-sections -fdata-sections -fno-common
 #CFLAGS    += -fno-strict-aliasing -fno-builtin -fshort-enums
 CFLAGS    += -fomit-frame-pointer -Os
 CFLAGS    += -DGIT_VERSION=u\"$(GIT_VERSION)\" -std=gnu11
+CFLAGS    += -DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\"
 
 CXXFLAGS   = $(CFLAGS) -std=c++11 -fno-rtti -fno-exceptions
 LFLAGS     = $(ADD_LFLAGS) $(CFLAGS) \

@@ -39,6 +39,7 @@
 //TOBOOT_CONFIGURATION(0);
 
 #include "occ_hmac_sha256.h"
+#include "sqrl_conv.h"
 #include "sqrl_comm.h"
 
 /* Default AHB (core clock) frequency of Tomu board */
@@ -327,6 +328,47 @@ static void serial_tx(char const * p_buffer, size_t len)
     }
 }
 
+static void serial_tx_hex(char const * p_buffer, size_t len)
+{
+    static char const hex_chars[16] = "0123456789ABCDEF";
+    char buf[64];
+
+    if (! g_usbd_is_connected) {
+        return;
+    }
+
+    while (len > 0)
+    {
+        uint8_t len8 = (uint8_t)(len & 0xFF);
+
+        if (len > 32)
+        {
+            len8 = 32;
+        }
+
+        for (size_t i = 0; i < len; ++i)
+        {
+            char const byte = p_buffer[i];
+
+            buf[(i*2)+0] = hex_chars[(byte & 0xF0) >> 4];
+            buf[(i*2)+1] = hex_chars[(byte & 0x0F) >> 0];
+        }
+
+        m_tx_done = false;
+        usbd_ep_write_packet(g_usbd_dev, 0x82, buf, len8*2);
+        udelay_busy(200); // Why is this needed?
+
+        /* wait for completion */
+        while (m_tx_done == false)
+        {
+        }
+
+        len -= len8;
+        p_buffer = &p_buffer[len8];
+    }
+
+}
+
 void usb_isr(void)
 {
     usbd_poll(g_usbd_dev);
@@ -413,10 +455,6 @@ int main(void)
             serial_tx(mp_cmd->server, strlen(mp_cmd->server));
             usb_puts("\x1e<... resp.ids ...>");
             usb_puts("\x03\n");
-
-            char sks[] = "www.grc.com";
-            uint8_t ssk[32];
-            occ_hmac_sha256(ssk, imk, 32, (uint8_t *)sks, strlen(sks));
         }
         else if (mp_cmd->type == SQRL_CMD_IDENT)
         {
@@ -426,11 +464,30 @@ int main(void)
             serial_tx(mp_cmd->server, strlen(mp_cmd->server));
             usb_puts("\x1e<... resp.ids ...>");
             usb_puts("\x03\n");
+
+            //
+            char sks[] = "www.grc.com";
+            uint8_t ssk[32];
+            occ_hmac_sha256(ssk, imk, 32, (uint8_t *)sks, strlen(sks));
+            serial_tx_hex(sks, 32);
+
+            // Test url safe base64 encode
+            char somedata[] = {0x60,0x78,0x13,0x41,0xb4,0x36,0x30,0xfb,0x6d,0x21,0x4d,0x20,0xed,0x4b,0xf8,0x77,0xaf,0xed,0x40,0xf3,0x7c,0x87,0x1c,0x06,0x13,0x89,0xbc,0xb7,0xd0,0xbe,0xe4,0x2d};
+            size_t encoded_len = sqrl_base64_size_calc(somedata, sizeof(somedata));
+            //NRF_LOG_RAW_INFO("encoded_len %d, needed? %d\n", encoded_len, (sizeof(somedata) / 3 * 4) + 4);
+            char encoded[encoded_len];
+            int ret = sqrl_base64_encode(encoded, &encoded_len, somedata, sizeof(somedata));
+            (void)ret;
+            usb_puts("\x02log\x1e sqrl_base64_encode: ");
+            serial_tx(encoded, encoded_len);
+            usb_puts("\x03\n");
         }
         else
         {
             usb_puts("\x02log\x1e err: Invalid command\x03\n");
         }
+
+        usb_puts("\x02log\x1e asdf asdf sadf\x03\n");
 
         //free(resp.client);
         //free(resp.ids);
