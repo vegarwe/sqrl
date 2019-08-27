@@ -33,9 +33,12 @@
 #include <stdio.h>
 #include <string.h>
 
+//#include <cmsis_armcc.h>
+
 //#include "toboot.h"
 //TOBOOT_CONFIGURATION(0);
 
+#include "occ_hmac_sha256.h"
 #include "sqrl_comm.h"
 
 /* Default AHB (core clock) frequency of Tomu board */
@@ -331,6 +334,8 @@ void usb_isr(void)
 
 void hard_fault_handler(void)
 {
+    gpio_clear(LED_RED_PORT, LED_RED_PIN);
+    gpio_clear(LED_GREEN_PORT, LED_GREEN_PIN);
     while(1);
 }
 
@@ -346,8 +351,6 @@ static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
 
 int main(void)
 {
-    bool line_was_connected = false;
-
     /* Disable the watchdog that the bootloader started. */
     WDOG_CTRL = 0;
 
@@ -377,15 +380,20 @@ int main(void)
 
     sqrl_comm_init(on_sqrl_comm_evt);
 
+    // Start out with hard coded test keys
+    //uint8_t iuk[] = {0xa2,0x43,0xbf,0xb0,0xed,0x04,0x56,0x5d,0x04,0x61,0xa7,0x73,0x1a,0x8f,0xad,0x18,0xde,0x4b,0xdd,0xf8,0xe3,0x83,0x38,0x53,0x92,0x6c,0xcf,0xaf,0x2e,0x2e,0x04,0xa6};
+    uint8_t imk[] = {0x21,0xd7,0x08,0x94,0x57,0x5e,0x6b,0x6e,0xfe,0x99,0x1f,0xb8,0x6a,0x98,0x68,0xa4,0x9f,0x3a,0x72,0x04,0x0e,0x88,0x25,0x2d,0x82,0xbe,0x5a,0x3a,0xc6,0xc3,0xaa,0x23};
+
+    //uint8_t ilk[32];
+    //sqrl_get_ilk_from_iuk(ilk, iuk);
+    //PRINT_HEX("ilk ", ilk, 32);
+    //NRF_LOG_RAW_INFO("ilk  00d3a56b500bca7908eb89a6f5fe0931388797d42930798d2ffe88d436c94878\n\n");
+
     while(1) {
-        if (line_was_connected != g_usbd_is_connected) {
-            //if (g_usbd_is_connected) {
-            //    //udelay_busy(2000);
-            //    //usb_puts("\r\nHello world!\r\n");
-            //    //udelay_busy(2000);
-            //}
-            line_was_connected = g_usbd_is_connected; // TODO: Why the fuck is this needed?
-        }
+        asm("nop"); // TODO: Why the fuck is this needed???
+        asm ("wfe");
+        //__asm ("wfi");
+        //__WFE();
 
         if (! g_usbd_is_connected || mp_cmd == NULL) {
             // TODO: sleep?
@@ -405,6 +413,10 @@ int main(void)
             serial_tx(mp_cmd->server, strlen(mp_cmd->server));
             usb_puts("\x1e<... resp.ids ...>");
             usb_puts("\x03\n");
+
+            char sks[] = "www.grc.com";
+            uint8_t ssk[32];
+            occ_hmac_sha256(ssk, imk, 32, (uint8_t *)sks, strlen(sks));
         }
         else if (mp_cmd->type == SQRL_CMD_IDENT)
         {

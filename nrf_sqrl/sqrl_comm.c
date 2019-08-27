@@ -27,8 +27,8 @@ static void handle_cmd(char* buffer);
 
 void sqrl_comm_handle_input(char* in_buffer, size_t in_len)
 {
-    static volatile char    s_buffer[2048]; // TODO: Find proper size
-    static uint32_t         s_bufidx = 0;
+    static char     s_buffer[2048]; // TODO: Find proper size
+    static uint32_t s_bufidx = 0;
 
     if (m_evt_handler == NULL)
     {

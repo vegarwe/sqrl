@@ -1,10 +1,21 @@
 SDK_DIR    = ../tomu-quickstart/
+NRF_ROOT   = ../../../../
+
+CSOURCES   = ./usb-cdcacm.c
+CSOURCES  += ../nrf_sqrl/sqrl_comm.c
+CPPSOURCES =
+
+INC_DIRS   = -I../nrf_sqrl
+INC_DIRS  += -I../nrf_sqrl
+INC_DIRS  += -I$(NRF_ROOT)/external/nrf_oberon
+INC_DIRS  += -I$(NRF_ROOT)/external/nrf_oberon/include
 
 PACKAGE    = $(notdir $(realpath .))
 OPENCM3   ?= $(SDK_DIR)/libopencm3
-ADD_CFLAGS = -I$(OPENCM3)/include -I$(SDK_DIR)/include -DEFM32HG \
-             -I../nrf_sqrl
-ADD_LFLAGS = -L$(OPENCM3)/lib -lopencm3_efm32hg
+ADD_CFLAGS = -I$(OPENCM3)/include -I$(SDK_DIR)/include -DEFM32HG $(INC_DIRS)
+ADD_LFLAGS = -L$(OPENCM3)/lib -lopencm3_efm32hg \
+             -L$(NRF_ROOT)/external/nrf_oberon/lib/cortex-m0 -loberon_2.0.7
+# ../../../../external/nrf_oberon/lib/cortex-m0/liboberon_2.0.7.a
 
 GIT_VERSION := $(shell git describe --tags)
 TRGT      ?= arm-none-eabi-
@@ -25,12 +36,14 @@ endif
 LDSCRIPT   = $(SDK_DIR)/tomu-efm32hg309.ld
 DBG_CFLAGS = -ggdb -g -DDEBUG -Wall
 DBG_LFLAGS = -ggdb -g -Wall
-CFLAGS     = $(ADD_CFLAGS) \
-             -Wall -Wextra \
-             -mcpu=cortex-m0plus -mfloat-abi=soft -mthumb \
-             -ffunction-sections -fdata-sections -fno-common \
-             -fomit-frame-pointer -Os \
-             -DGIT_VERSION=u\"$(GIT_VERSION)\" -std=gnu11
+CFLAGS     = $(ADD_CFLAGS)
+CFLAGS    += -Wall -Wextra
+CFLAGS    += -mcpu=cortex-m0plus -mfloat-abi=soft -mthumb -mabi=aapcs
+CFLAGS    += -ffunction-sections -fdata-sections -fno-common
+#CFLAGS    += -fno-strict-aliasing -fno-builtin -fshort-enums
+CFLAGS    += -fomit-frame-pointer -Os
+CFLAGS    += -DGIT_VERSION=u\"$(GIT_VERSION)\" -std=gnu11
+
 CXXFLAGS   = $(CFLAGS) -std=c++11 -fno-rtti -fno-exceptions
 LFLAGS     = $(ADD_LFLAGS) $(CFLAGS) \
              -nostartfiles \
@@ -39,9 +52,6 @@ LFLAGS     = $(ADD_LFLAGS) $(CFLAGS) \
 
 OBJ_DIR    = .obj
 
-CSOURCES   = ./usb-cdcacm.c \
-            ../nrf_sqrl/sqrl_comm.c
-CPPSOURCES =
 ASOURCES   = $(wildcard *.S)
 COBJS      = $(addprefix $(OBJ_DIR)/, $(notdir $(CSOURCES:.c=.o)))
 CXXOBJS    = $(addprefix $(OBJ_DIR)/, $(notdir $(CPPSOURCES:.cpp=.o)))
