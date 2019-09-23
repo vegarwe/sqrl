@@ -345,7 +345,8 @@ int main(void)
             continue;
         }
 
-        client_response_t resp;
+        client_response_t resp = {0};
+        memset(&resp, 0, sizeof(resp));
 
         size_t cnt;
 
