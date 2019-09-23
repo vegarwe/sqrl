@@ -1,4 +1,5 @@
 import struct
+import binascii
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 from .sqrl_crypto import *
@@ -50,32 +51,32 @@ class Identity():
         ret_str = ''
         ret_str += 'Type1: user access password protected data\n  %s' % (
                 ',\n  '.join(map(str, (
-                        'magic:                         %s' % (self.magic.decode('utf-8')),
-                        'length:                        %s' % (self.type1_length),
-                        'type:                          %s' % (self.type1_type),
-                        'pt_length:                     %s' % (self.type1_pt_length),
-                        'aes_gcm_iv:                    %s' % (self.type1_aes_gcm_iv),
-                        'scrypt_random_salt:            %s' % (self.type1_scrypt_random_salt),
-                        'scrypt_log_n_factor:           %s' % (self.type1_scrypt_log_n_factor),
-                        'scrypt_iteration_count:        %s' % (self.type1_scrypt_iteration_count),
-                        'option_flags:                  %s' % (self.type1_option_flags),
-                        'hint_length:                   %s' % (self.type1_hint_length),
-                        'pw_verify_sec:                 %s' % (self.type1_pw_verify_sec),
-                        'idle_timeout_min:              %s' % (self.type1_idle_timeout_min),
-                        'encrypted_identity_master_key: %s' % (self.type1_encrypted_identity_master_key),
-                        'encrypted_identity_lock_key:   %s' % (self.type1_encrypted_identity_lock_key),
-                        'verification_tag:              %s' % (self.type1_verification_tag))
+                    'magic:                            %s' % (self.magic.decode('utf-8')),
+                    'length:                           %s' %                 (self.type1_length),
+                    'type:                             %s' %                 (self.type1_type),
+                    'pt_length:                        %s' %                 (self.type1_pt_length),
+                    'aes_gcm_iv:                       %s' % binascii.hexlify(self.type1_aes_gcm_iv),
+                    'scrypt_random_salt:               %s' % binascii.hexlify(self.type1_scrypt_random_salt),
+                    'scrypt_log_n_factor:              %s' %                 (self.type1_scrypt_log_n_factor),
+                    'scrypt_iteration_count:           %s' %                 (self.type1_scrypt_iteration_count),
+                    'option_flags:                     %s' %                 (self.type1_option_flags),
+                    'hint_length:                      %s' %                 (self.type1_hint_length),
+                    'pw_verify_sec:                    %s' %                 (self.type1_pw_verify_sec),
+                    'idle_timeout_min:                 %s' %                 (self.type1_idle_timeout_min),
+                    'encrypted_identity_master_key:    %s' % binascii.hexlify(self.type1_encrypted_identity_master_key),
+                    'encrypted_identity_lock_key:      %s' % binascii.hexlify(self.type1_encrypted_identity_lock_key),
+                    'verification_tag:                 %s' % binascii.hexlify(self.type1_verification_tag))
                     ))
                 )
         ret_str += '\nType2: rescue code data\n  %s' % (
                 ',\n  '.join(map(str, (
-                        'length:                        %s' % (self.type2_length),
-                        'type:                          %s' % (self.type2_type),
-                        'scrypt_random_salt:            %s' % (self.type2_scrypt_random_salt),
-                        'scrypt_log_n_factor:           %s' % (self.type2_scrypt_log_n_factor),
-                        'scrypt_iteration_count:        %s' % (self.type2_scrypt_iteration_count),
-                        'encrypted_identity_unlock_key: %s' % (self.type2_encrypted_identity_unlock_key),
-                        'verification_tag:              %s' % (self.type2_verification_tag))
+                    'length:                           %s' %                 (self.type2_length),
+                    'type:                             %s' %                 (self.type2_type),
+                    'scrypt_random_salt:               %s' % binascii.hexlify(self.type2_scrypt_random_salt),
+                    'scrypt_log_n_factor:              %s' %                 (self.type2_scrypt_log_n_factor),
+                    'scrypt_iteration_count:           %s' %                 (self.type2_scrypt_iteration_count),
+                    'encrypted_identity_unlock_key:    %s' % binascii.hexlify(self.type2_encrypted_identity_unlock_key),
+                    'verification_tag:                 %s' % binascii.hexlify(self.type2_verification_tag))
                     ))
                 )
         return ret_str
