@@ -23,15 +23,16 @@
 /*
 These test cases exercises the sqrl_crypto library.
 
-g++ -o TestCurve25519 SqrlClient/sqrl_crypto.cpp                    \
-        tests/TestCurve25519.cpp tests/RNG_mock.cpp                 \
+g++ -o TestCurve25519 tests/TestCurve25519.cpp tests/RNG_mock.cpp   \
+        SqrlClient/sqrl_crypto.cpp                                  \
         ~/Documents/Arduino/libraries/Crypto/src/BigNumberUtil.cpp  \
+        ~/Documents/Arduino/libraries/Crypto/src/AuthenticatedCipher.cpp    \
         ~/Documents/Arduino/libraries/Crypto/src/Crypto.cpp         \
         ~/Documents/Arduino/libraries/Crypto/src/Curve25519.cpp     \
         ~/Documents/Arduino/libraries/Crypto/src/Ed25519.cpp        \
         ~/Documents/Arduino/libraries/Crypto/src/SHA512.cpp         \
         ~/Documents/Arduino/libraries/Crypto/src/SHA256.cpp         \
-        ~/Documents/Arduino/libraries/Crypto/src/Hashcpp            \
+        ~/Documents/Arduino/libraries/Crypto/src/Hash.cpp           \
     -I  ~/Documents/Arduino/libraries/Crypto/src                    \
     -I  ~/Documents/Arduino/libraries/base64/src                    \
     -I  SqrlClient                                                  \
