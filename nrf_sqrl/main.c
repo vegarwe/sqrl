@@ -104,6 +104,7 @@ static void sqrl_client_loop(void)
     sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");    serial_tx(outputbuffer, strlen(outputbuffer));
 
     client_response_t resp = {0};
+    memset(&resp, 0, sizeof(resp));
     while (true)
     {
         while (mp_cmd == NULL) { }
