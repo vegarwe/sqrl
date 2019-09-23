@@ -51,17 +51,12 @@ static void handle_command(sqrl_cmd_t* p_cmd)
         inStream->printf("\x02resp\x1equery\x1e%s\x1e%s\x1e%s\x03\n",
                 resp.client.c_str(), p_cmd->server, resp.ids.c_str());
 
-        if (debugger) debugger->println(p_cmd->sks);
-        if (debugger) debugger->print( "resp.client ");
-        if (debugger) debugger->println(resp.client.c_str());
-
-        //inStream->print("\x02resp\x1equery\x1e");
-        //inStream->print(resp.client);
-        //inStream->print("\x1e");
-        //inStream->print(p_cmd->server);
-        //inStream->print("\x1e");
-        //inStream->print(resp.ids);
-        //inStream->print("\x03\n");
+        if (debugger)
+        {
+            debugger->println(p_cmd->sks);
+            debugger->print( "resp.client ");
+            debugger->println(resp.client.c_str());
+        }
     }
     else if (p_cmd->type == SQRL_CMD_IDENT)
     {
@@ -78,10 +73,6 @@ static void handle_command(sqrl_cmd_t* p_cmd)
 
         inStream->printf("\x02resp\x1eident\x1e%s\x1e%s\x1e%s\x03\n",
                 resp.client.c_str(), p_cmd->server, resp.ids.c_str());
-
-        if (debugger) debugger->println(p_cmd->sks);
-        if (debugger) debugger->print( "resp.client ");
-        if (debugger) debugger->println(resp.client.c_str());
     }
     else
     {
@@ -111,10 +102,6 @@ void setup() {
     //RNG.addNoiseSource(noise); // TODO: Need noise source!!!
 
     sqrl_get_ilk_from_iuk(ilk, iuk);
-
-	if (debugger) debugger->println("Started");
-    //if (debugger) debugger->print( "SERIAL_TX_BUFFER_SIZE ");
-    //if (debugger) debugger->println(SERIAL_TX_BUFFER_SIZE);
 
     sqrl_comm_init(on_sqrl_comm_evt);
 }
