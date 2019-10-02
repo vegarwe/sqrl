@@ -4,8 +4,6 @@
 
 #include "sqrl_s4.h"
 
-#include <AES.h>
-#include "GCM.h"
 #include "repr.h"
 
 /*
@@ -115,37 +113,12 @@ void sqrl_test_suite()
 
     // Output from sqrl_s4.py:get_imk_ilk_from_password
     uint8_t key[] = {0x44,0xb6,0xb3,0xea,0x66,0x01,0x59,0x82,0xe5,0x5f,0xe8,0xf0,0xea,0x5c,0x11,0xe0,0x10,0x67,0x61,0x59,0xfe,0x02,0xed,0x70,0xd6,0xfb,0xf6,0x87,0x6b,0x49,0x77,0x4d};
-
-    GCM<AES256> gcmaes256;
-    //gcmaes256.clear();
-    if (!gcmaes256.setKey(key, sizeof(key)))
-    {
-        printf("setKey failed\n");
-        return;
-    }
-
-    if (!gcmaes256.setIV(identity.type1_aes_gcm_iv, sizeof(identity.type1_aes_gcm_iv)))
-    {
-        printf("setIV failed\n");
-        return;
-    }
-
-    gcmaes256.addAuthData(&sqrlbinary[8], identity.type1_pt_length);
-    //gcmaes256.addAuthData(identity.type1_pt, sizeof(identity.type1_encrypted_identity_master_key));
-
-    //gcmaes256.addAuthData(identity.type1_encrypted_identity_master_key, sizeof(identity.type1_encrypted_identity_master_key));
-    //gcmaes256.addAuthData(identity.type1_encrypted_identity_lock_key, sizeof(identity.type1_encrypted_identity_lock_key));
-    //gcmaes256.addAuthData(identity.type1_encrypted_identity_lock_key, sizeof(identity.type1_encrypted_identity_lock_key));
-
     uint8_t imk[32];
     uint8_t ilk[32];
 
-    gcmaes256.decrypt(imk, (uint8_t*)&identity.type1_encrypted_identity_master_key, sizeof(identity.type1_encrypted_identity_master_key));
-    gcmaes256.decrypt(ilk, (uint8_t*)&identity.type1_encrypted_identity_lock_key,   sizeof(identity.type1_encrypted_identity_lock_key));
-
-    if (!gcmaes256.checkTag((uint8_t*)&identity.type1_verification_tag, sizeof(identity.type1_verification_tag)))
+    if (! get_imk_ilk_from_scryptpassword(&identity, key, imk, ilk))
     {
-        printf("check tag failed\n");
+        printf("decryption failed\n");
         return;
     }
 

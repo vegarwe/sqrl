@@ -5,12 +5,16 @@
 #define __INLINE
 #endif
 
+#include <stdint.h>
+#include <AES.h>
+#include "GCM.h"
 
 typedef struct {
     uint8_t     header[8];
     uint16_t    type1_length;
     uint16_t    type1_type;
     uint16_t    type1_pt_length;
+    //uint8_t     type1_add_data[45]; // TODO: Make dynamic?
     uint8_t     type1_aes_gcm_iv[12];
     uint8_t     type1_scrypt_random_salt[16];
     uint8_t     type1_scrypt_log_n_factor;
@@ -31,6 +35,11 @@ typedef struct {
     uint8_t     type2_verification_tag[16];
     // data = struct.unpack('<8s HHH12s16s BIHBBH32s 32s16s HH16sB I32s16s', sqrlbinary)
 } sqrl_s4_identity_t;
+
+uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity);
+bool get_imk_ilk_from_scryptpassword(sqrl_s4_identity_t* p_identity, uint8_t key[32], uint8_t imk[32], uint8_t ilk[32]);
+
+
 
 
 static __INLINE uint16_t uint16_decode(const void * p_encoded_data)
@@ -123,7 +132,37 @@ uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity)
     return 0;
 }
 
-uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity)
-uint32_t get_imk_ilk_from_scryptpassword(uint8_t key[32]):
+bool get_imk_ilk_from_scryptpassword(sqrl_s4_identity_t* p_identity, uint8_t key[32], uint8_t imk[32], uint8_t ilk[32])
+{
+    GCM<AES256> gcmaes256;
+    if (!gcmaes256.setKey(key, 32))
+    {
+        printf("setKey failed\n");
+        return false;
+    }
+
+    if (!gcmaes256.setIV(p_identity->type1_aes_gcm_iv, sizeof(p_identity->type1_aes_gcm_iv)))
+    {
+        printf("setIV failed\n");
+        return false;
+    }
+
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_length,                          sizeof(p_identity->type1_length));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_type,                            sizeof(p_identity->type1_type));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_pt_length,                       sizeof(p_identity->type1_pt_length));
+    gcmaes256.addAuthData(           p_identity->type1_aes_gcm_iv,                      sizeof(p_identity->type1_aes_gcm_iv));
+    gcmaes256.addAuthData(           p_identity->type1_scrypt_random_salt,              sizeof(p_identity->type1_scrypt_random_salt));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_scrypt_log_n_factor,             sizeof(p_identity->type1_scrypt_log_n_factor));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_scrypt_iteration_count,          sizeof(p_identity->type1_scrypt_iteration_count));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_option_flags,                    sizeof(p_identity->type1_option_flags));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_hint_length,                     sizeof(p_identity->type1_hint_length));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_pw_verify_sec,                   sizeof(p_identity->type1_pw_verify_sec));
+    gcmaes256.addAuthData((uint8_t*)&p_identity->type1_idle_timeout_min,                sizeof(p_identity->type1_idle_timeout_min));
+
+    gcmaes256.decrypt(imk, (uint8_t*)&p_identity->type1_encrypted_identity_master_key,  sizeof(p_identity->type1_encrypted_identity_master_key));
+    gcmaes256.decrypt(ilk, (uint8_t*)&p_identity->type1_encrypted_identity_lock_key,    sizeof(p_identity->type1_encrypted_identity_lock_key));
+
+    return gcmaes256.checkTag((uint8_t*)&p_identity->type1_verification_tag,            sizeof(p_identity->type1_verification_tag));
+}
 
 #endif//_SQRL_S4_H_

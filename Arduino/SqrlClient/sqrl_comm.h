@@ -10,16 +10,26 @@ typedef enum {
     SQRL_CMD_INVALID = 0,
     SQRL_CMD_QUERY,
     SQRL_CMD_IDENT,
+    SQRL_CMD_UNLOCK,
 } sqrl_cmd_type_t;
 
 
 /**@brief SQRL command. */
 typedef struct {
     sqrl_cmd_type_t type;                                       //<< Type of SQRL command
-    char* sks;                                                  //<< Site Key String
-    char* server;                                               //<< Server response
-    char* sin;                                                  //<< Secret index
-    bool create_suk;                                            //<< Whether to create Server Unlock Key (or not)
+    union {
+        struct
+        {
+            char* sks;                                                  //<< Site Key String
+            char* server;                                               //<< Server response
+            char* sin;                                                  //<< Secret index
+            bool create_suk;                                            //<< Whether to create Server Unlock Key (or not)
+        } sqrl_cmd;
+        struct
+        {
+            char* scrypt;                                               //<< Site Key String
+        } unlock;
+    } params;
 } sqrl_cmd_t;
 
 
