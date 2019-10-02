@@ -102,12 +102,14 @@ static void sqrl_client_loop(void)
     sqrl_get_ilk_from_iuk(ilk, iuk);
 
     sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");    serial_tx(outputbuffer, strlen(outputbuffer));
+    NRF_LOG_INFO("sqrl_client_loop");
 
     client_response_t resp = {0};
     memset(&resp, 0, sizeof(resp));
     while (true)
     {
-        while (mp_cmd == NULL) { }
+        while (mp_cmd == NULL) { } // TODO: Add sleep (wfe_ or wfi_)
+        NRF_LOG_INFO("sqrl_client_loop: command received");
 
         if (mp_cmd->type == SQRL_CMD_QUERY)
         {
