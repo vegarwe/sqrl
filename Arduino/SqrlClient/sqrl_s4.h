@@ -2,7 +2,7 @@
 #define _SQRL_S4_H_
 
 #ifndef __INLINE
-#define __INLINE
+#define __INLINE inline
 #endif
 
 #include <stdint.h>
@@ -14,7 +14,6 @@ typedef struct {
     uint16_t    type1_length;
     uint16_t    type1_type;
     uint16_t    type1_pt_length;
-    //uint8_t     type1_add_data[45]; // TODO: Make dynamic?
     uint8_t     type1_aes_gcm_iv[12];
     uint8_t     type1_scrypt_random_salt[16];
     uint8_t     type1_scrypt_log_n_factor;
@@ -33,8 +32,8 @@ typedef struct {
     uint32_t    type2_scrypt_iteration_count;
     uint8_t     type2_encrypted_identity_unlock_key[32];
     uint8_t     type2_verification_tag[16];
-    // data = struct.unpack('<8s HHH12s16s BIHBBH32s 32s16s HH16sB I32s16s', sqrlbinary)
 } sqrl_s4_identity_t;
+
 
 uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity);
 bool get_imk_ilk_from_scryptpassword(sqrl_s4_identity_t* p_identity, uint8_t key[32], uint8_t imk[32], uint8_t ilk[32]);
@@ -64,7 +63,6 @@ uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity)
     // Parse block header
     if (memcmp(sqrlbinary, "sqrldata", 8) != 0)
     {
-        printf("0\n");
         return 1;
     }
 
@@ -77,14 +75,12 @@ uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity)
 
     if (p_identity->type1_type != 1)
     {
-        printf("1\n");
         // Only supports format version 1
         return 1;
     }
 
     if (p_identity->type1_length != 125)
     {
-        printf("2\n");
         // Only supports fixed length type1 section
         return 1;
     }
@@ -110,14 +106,12 @@ uint32_t sqrl_s4_decode(uint8_t* sqrlbinary, sqrl_s4_identity_t* p_identity)
 
     if (p_identity->type2_type != 2)
     {
-        printf("3\n");
         // Only supports format version 2
         return 1;
     }
 
     if (p_identity->type2_length != 73)
     {
-        printf("4\n");
         // Only supports fixed length type2 section
         return 1;
     }
@@ -137,13 +131,11 @@ bool get_imk_ilk_from_scryptpassword(sqrl_s4_identity_t* p_identity, uint8_t key
     GCM<AES256> gcmaes256;
     if (!gcmaes256.setKey(key, 32))
     {
-        printf("setKey failed\n");
         return false;
     }
 
     if (!gcmaes256.setIV(p_identity->type1_aes_gcm_iv, sizeof(p_identity->type1_aes_gcm_iv)))
     {
-        printf("setIV failed\n");
         return false;
     }
 
