@@ -21,7 +21,7 @@ void sqrl_query(client_response_t* resp, volatile sqrl_cmd_t* p_cmd, const uint8
 {
     uint8_t idk[32];
     uint8_t ssk[32];
-    sqrl_get_idk_for_site(idk, ssk, imk, p_cmd->sks);
+    sqrl_get_idk_for_site(idk, ssk, imk, p_cmd->params.sqrl_cmd.sks);
 
     static char client[2048];
 
@@ -45,8 +45,8 @@ void sqrl_query(client_response_t* resp, volatile sqrl_cmd_t* p_cmd, const uint8
     //NRF_LOG_RAW_INFO("ret %d, encoded_len %d\n", ret, encoded_len);
 
     memcpy(&client[0], resp->client, encoded_len);
-    size_t server_len = strlen(p_cmd->server);
-    memcpy(&client[encoded_len], p_cmd->server, server_len);
+    size_t server_len = strlen(p_cmd->params.sqrl_cmd.server);
+    memcpy(&client[encoded_len], p_cmd->params.sqrl_cmd.server, server_len);
 
     uint8_t signature[64];
     occ_ed25519_sign(signature, (uint8_t*)client, encoded_len + server_len, ssk, idk);
@@ -63,7 +63,7 @@ void sqrl_ident(client_response_t* resp, volatile sqrl_cmd_t* p_cmd,
 {
     uint8_t idk[32];
     uint8_t ssk[32];
-    sqrl_get_idk_for_site(idk, ssk, imk, p_cmd->sks);
+    sqrl_get_idk_for_site(idk, ssk, imk, p_cmd->params.sqrl_cmd.sks);
 
     static char client[2048];
 
@@ -80,9 +80,9 @@ void sqrl_ident(client_response_t* resp, volatile sqrl_cmd_t* p_cmd,
     idx += encoded_len;
     idx += append_string(&client[idx], "\r\n");
 
-    if (p_cmd->sin && strlen(p_cmd->sin) > 0) {
+    if (p_cmd->params.sqrl_cmd.sin && strlen(p_cmd->params.sqrl_cmd.sin) > 0) {
         uint8_t ins[32];
-        sqrl_get_ins_from_sin(ins, ssk, p_cmd->sin);
+        sqrl_get_ins_from_sin(ins, ssk, p_cmd->params.sqrl_cmd.sin);
 
         idx += append_string(&client[idx], "ins=");
         encoded_len = 2048; // TODO: Truce is somewhat smaller
@@ -92,7 +92,7 @@ void sqrl_ident(client_response_t* resp, volatile sqrl_cmd_t* p_cmd,
         idx += append_string(&client[idx], "\r\n");
     }
 
-    if (p_cmd->create_suk) {
+    if (p_cmd->params.sqrl_cmd.create_suk) {
         uint8_t suk[32];
         uint8_t vuk[32];
         sqrl_idlock_keys(suk, vuk, rlk, ilk);
@@ -121,8 +121,8 @@ void sqrl_ident(client_response_t* resp, volatile sqrl_cmd_t* p_cmd,
     //NRF_LOG_RAW_INFO("ret %d, encoded_len %d\n", ret, encoded_len);
 
     memcpy(&client[0], resp->client, encoded_len);
-    size_t server_len = strlen(p_cmd->server);
-    memcpy(&client[encoded_len], p_cmd->server, server_len);
+    size_t server_len = strlen(p_cmd->params.sqrl_cmd.server);
+    memcpy(&client[encoded_len], p_cmd->params.sqrl_cmd.server, server_len);
 
     uint8_t signature[64];
     occ_ed25519_sign(signature, (uint8_t*)client, encoded_len + server_len, ssk, idk);

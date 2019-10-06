@@ -129,20 +129,19 @@ static void handle_cmd(char* buffer)
     //    printf("  tokens: '%s'\n", tokens[i]);
     //}
 
-    // Handle invalid (too short) command
-    if (token_cnt < 3)
-    {
-        return; // TODO: Report error somehow
-    }
-
-    // Assign fixed params
-    s_cmd.sks = tokens[1];
-    s_cmd.server = tokens[2];
-
     // Check command type, handle variable params
     if (strcmp(tokens[0], "query") == 0)
     {
         s_cmd.type = SQRL_CMD_QUERY;
+
+        // Handle invalid (too short) command
+        if (token_cnt < 3)
+        {
+            return; // TODO: Report error somehow
+        }
+
+        s_cmd.params.sqrl_cmd.sks = tokens[1];
+        s_cmd.params.sqrl_cmd.server = tokens[2];
 
         evt.evt_type = SQRL_COMM_EVT_COMMAND;
         evt.evt.p_cmd = &s_cmd;
@@ -157,8 +156,25 @@ static void handle_cmd(char* buffer)
             return; // TODO: Report error somehow
         }
 
-        s_cmd.sin = tokens[3];
-        s_cmd.create_suk = strcmp(tokens[4], "true") == 0;
+        s_cmd.params.sqrl_cmd.sks = tokens[1];
+        s_cmd.params.sqrl_cmd.server = tokens[2];
+        s_cmd.params.sqrl_cmd.sin = tokens[3];
+        s_cmd.params.sqrl_cmd.create_suk = strcmp(tokens[4], "true") == 0;
+
+        evt.evt_type = SQRL_COMM_EVT_COMMAND;
+        evt.evt.p_cmd = &s_cmd;
+        m_evt_handler(&evt);
+    }
+    else if (strcmp(tokens[0], "unlock") == 0)
+    {
+        s_cmd.type = SQRL_CMD_UNLOCK;
+
+        if (token_cnt < 2)
+        {
+            return; // TODO: Report error somehow
+        }
+
+        s_cmd.params.unlock.scrypt = tokens[1];
 
         evt.evt_type = SQRL_COMM_EVT_COMMAND;
         evt.evt.p_cmd = &s_cmd;
