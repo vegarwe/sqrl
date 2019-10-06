@@ -73,13 +73,16 @@ SRC_FILES += \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52840.c \
   $(SDK_ROOT)/external/utf_converter/utf.c \
+  $(SDK_ROOT)/external/mbedtls/library/aes.c \
   $(SDK_ROOT)/external/mbedtls/library/base64.c \
+  $(SDK_ROOT)/external/mbedtls/library/gcm.c \
+  $(SDK_ROOT)/external/mbedtls/library/cipher.c \
+  $(SDK_ROOT)/external/mbedtls/library/cipher_wrap.c \
   $(PROJ_DIR)/sqrl_client.c \
   $(PROJ_DIR)/sqrl_comm.c \
   $(PROJ_DIR)/sqrl_conv.c \
   $(PROJ_DIR)/sqrl_crypto.c \
   $(PROJ_DIR)/main_usbd.c
-
 
 # Include folders common to all targets
 INC_FOLDERS += \
@@ -130,6 +133,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/stack_guard \
   $(SDK_ROOT)/components/libraries/log/src \
   $(SDK_ROOT)/external/mbedtls/include \
+  $(SDK_ROOT)/external/mbedtls/include/mbedtls \
   $(SDK_ROOT)/external/nrf_oberon \
   $(SDK_ROOT)/external/nrf_oberon/include \
 
@@ -162,6 +166,7 @@ CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # keep every function in a separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin -fshort-enums
+CFLAGS += -DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\"
 
 # C++ flags common to all targets
 CXXFLAGS += $(OPT)
