@@ -288,48 +288,12 @@ static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
 }
 
 
-int main(void)
+static void sqrl_client_loop(void)
 {
-    ret_code_t ret;
-
-    if (USE_CYCCNT_TIMESTAMP_FOR_LOG)
-    {
-        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-        DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-        DWT->CYCCNT = 0;
-        APP_ERROR_CHECK(NRF_LOG_INIT(cyccnt_get, 64000000));
-    }
-    else
-    {
-        APP_ERROR_CHECK(NRF_LOG_INIT(app_timer_cnt_get));
-    }
-
-    ret = nrf_drv_clock_init();
-    APP_ERROR_CHECK(ret);
-    nrf_drv_clock_lfclk_request(NULL);
-
-    sqrl_comm_init(on_sqrl_comm_evt);
-    usbd_init();
-
-    ret = fds_init();
-    APP_ERROR_CHECK(ret);
-
-
-    UNUSED_RETURN_VALUE(nrf_log_config_load());
-
-    flashlog_init();
-
-    stack_guard_init();
-
-
+    char outputbuffer[2048];
     uint8_t ilk[32];
     sqrl_get_ilk_from_iuk(ilk, iuk);
 
-    (void)iuk;
-    (void)imk;
-    (void)ilk;
-
-    char outputbuffer[2048];
     //sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");
     //serial_tx(outputbuffer, strlen(outputbuffer));
     //cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
@@ -345,14 +309,13 @@ int main(void)
 #endif
 
         if (mp_cmd == NULL) {
-            // TODO: sleep
+            // TODO: sleep // TODO: Add sleep (wfe_ or wfi_)
             continue;
         }
 
+        size_t cnt;
         client_response_t resp = {0};
         memset(&resp, 0, sizeof(resp));
-
-        size_t cnt;
 
         if (mp_cmd->type == SQRL_CMD_QUERY)
         {
@@ -413,6 +376,49 @@ int main(void)
         memset(&resp, 0, sizeof(resp));
         mp_cmd = NULL;
         sqrl_comm_command_handled();
+    }
+}
+
+/** @brief Function for the application main entry. */
+int main(void)
+{
+    ret_code_t ret;
+
+    mp_cmd = NULL;
+
+    if (USE_CYCCNT_TIMESTAMP_FOR_LOG)
+    {
+        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+        DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+        DWT->CYCCNT = 0;
+        APP_ERROR_CHECK(NRF_LOG_INIT(cyccnt_get, 64000000));
+    }
+    else
+    {
+        APP_ERROR_CHECK(NRF_LOG_INIT(app_timer_cnt_get));
+    }
+
+    ret = nrf_drv_clock_init();
+    APP_ERROR_CHECK(ret);
+    nrf_drv_clock_lfclk_request(NULL);
+
+    sqrl_comm_init(on_sqrl_comm_evt);
+    usbd_init();
+
+    ret = fds_init();
+    APP_ERROR_CHECK(ret);
+
+
+    UNUSED_RETURN_VALUE(nrf_log_config_load());
+
+    flashlog_init();
+
+    stack_guard_init();
+
+    sqrl_client_loop();
+
+    for (;;)
+    {
     }
 }
 
