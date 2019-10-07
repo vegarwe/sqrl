@@ -367,6 +367,9 @@ static void sqrl_client_loop(void)
 
             sprintf(outputbuffer, "\x02idresp\x1eunlock\x1esuccess\x1epass\x03\n");
             cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
+
+            sprintf(outputbuffer, "\x02log\x1e Worked like a charm...\x03\n");
+            cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
         }
         else
         {

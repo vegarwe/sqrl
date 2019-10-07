@@ -48,6 +48,7 @@ static void uart_evt_handler(nrf_drv_uart_event_t * p_event, void * p_context)
 }
 
 
+/* Initialize transport */
 static void comm_uart_init(void)
 {
     nrf_drv_uart_config_t config = NRF_DRV_UART_DEFAULT_CONFIG;
@@ -64,6 +65,7 @@ static void comm_uart_init(void)
 }
 
 
+/* Write data back to PC */
 static void serial_tx(char const * p_buffer, size_t len)
 {
     while (len > 0)
@@ -89,6 +91,16 @@ static void serial_tx(char const * p_buffer, size_t len)
     }
 }
 
+/** Initilize logging module. */
+static void log_init(void)
+{
+    ret_code_t err_code = NRF_LOG_INIT(NULL);
+    APP_ERROR_CHECK(err_code);
+
+    NRF_LOG_DEFAULT_BACKENDS_INIT();
+}
+
+
 
 static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
 {
@@ -102,19 +114,25 @@ static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
 static void sqrl_client_loop(void)
 {
     char outputbuffer[2048];
-
     uint8_t ilk[32];
     sqrl_get_ilk_from_iuk(ilk, iuk);
 
-    sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");    serial_tx(outputbuffer, strlen(outputbuffer));
+    sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");
+    serial_tx(outputbuffer, strlen(outputbuffer));
     NRF_LOG_INFO("sqrl_client_loop");
 
-    client_response_t resp = {0};
-    memset(&resp, 0, sizeof(resp));
     while (true)
     {
-        while (mp_cmd == NULL) { } // TODO: Add sleep (wfe_ or wfi_)
+
+        if (mp_cmd == NULL) {
+            // TODO: sleep // TODO: Add sleep (wfe_ or wfi_)
+            continue;
+        }
+
         NRF_LOG_INFO("sqrl_client_loop: command received");
+
+        client_response_t resp = {0};
+        memset(&resp, 0, sizeof(resp));
 
         if (mp_cmd->type == SQRL_CMD_QUERY)
         {
@@ -149,22 +167,25 @@ static void sqrl_client_loop(void)
             int res = sqrl_s4_decode((uint8_t*)sqrlbinary, &identity);
             if (res != 0)
             {
-                sprintf(outputbuffer, "\x02idresp\x1eunlock\x1e""failed\x1eUnable to parse identity\x03\n"); serial_tx(outputbuffer, strlen(outputbuffer));
-                return;
+                sprintf(outputbuffer, "\x02idresp\x1eunlock\x1e""failed\x1eUnable to parse identity\x03\n");
+                serial_tx(outputbuffer, strlen(outputbuffer));
+                continue;
             }
 
             if (! get_imk_ilk_from_scryptpassword(&identity, key, tmpimk, tmpilk))
             {
                 sprintf(outputbuffer, "\x02idresp\x1eunlock\x1e""failed\x1eIdentity decryption failed\x03\n");
                 serial_tx(outputbuffer, strlen(outputbuffer));
-                return;
+                continue;
             }
 
-            sprintf(outputbuffer, "\x02idresp\x1eunlock\x1esuccess\x1epass\x03\n"); serial_tx(outputbuffer, strlen(outputbuffer));
+            sprintf(outputbuffer, "\x02idresp\x1eunlock\x1esuccess\x1epass\x03\n");
+            serial_tx(outputbuffer, strlen(outputbuffer));
         }
         else
         {
-            sprintf(outputbuffer, "\x02log\x1e err: Invalid command\x03\n"); serial_tx(outputbuffer, strlen(outputbuffer));
+            sprintf(outputbuffer, "\x02log\x1e err: Invalid command\x03\n");
+            serial_tx(outputbuffer, strlen(outputbuffer));
         }
 
         free(resp.client);
@@ -173,16 +194,6 @@ static void sqrl_client_loop(void)
         mp_cmd = NULL;
         sqrl_comm_command_handled();
     }
-}
-
-
-/** @brief Function for initializing the nrf log module. */
-static void log_init(void)
-{
-    ret_code_t err_code = NRF_LOG_INIT(NULL);
-    APP_ERROR_CHECK(err_code);
-
-    NRF_LOG_DEFAULT_BACKENDS_INIT();
 }
 
 

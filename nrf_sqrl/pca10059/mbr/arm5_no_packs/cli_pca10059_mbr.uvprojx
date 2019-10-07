@@ -80,9 +80,9 @@
             <nStopB2X>0</nStopB2X>
           </BeforeMake>
           <AfterMake>
-            <RunUserProg1>0</RunUserProg1>
+            <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name></UserProg1Name>
+            <UserProg1Name>nrfutil pkg generate --hw-version 52 --sd-req 0x00 --debug-mode --application _build\nrf52840_xxaa.hex _build\dfu.zip</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -129,8 +129,8 @@
         </DebugOption>
         <Utilities>
           <Flash1>
-            <UseTargetDll>1</UseTargetDll>
-            <UseExternalTool>0</UseExternalTool>
+            <UseTargetDll>0</UseTargetDll>
+            <UseExternalTool>1</UseExternalTool>
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
@@ -138,7 +138,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>Segger\JL2CM3.dll</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"nrfutil" (dfu usb-serial -pkg _build/dfu.zip -p COM4 -b 115200)</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -334,9 +334,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--reduce_paths</MiscControls>
-              <Define>APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10059 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD MBR_PRESENT NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192</Define>
+              <Define>APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10059 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD MBR_PRESENT NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192 MBEDTLS_CONFIG_FILE=&lt;mbedtls_config.h&gt;</Define>
               <Undefine></Undefine>
-              <IncludePath>..\config;..\..\..;..\..\..\..\..\..\..\components;..\..\..\..\..\..\..\components\boards;..\..\..\..\..\..\..\components\drivers_nrf\nrf_soc_nosd;..\..\..\..\..\..\..\components\libraries\atomic;..\..\..\..\..\..\..\components\libraries\atomic_fifo;..\..\..\..\..\..\..\components\libraries\balloc;..\..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\..\components\libraries\cli;..\..\..\..\..\..\..\components\libraries\cli\cdc_acm;..\..\..\..\..\..\..\components\libraries\cli\rtt;..\..\..\..\..\..\..\components\libraries\cli\uart;..\..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\..\components\libraries\delay;..\..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\..\components\libraries\fds;..\..\..\..\..\..\..\components\libraries\fstorage;..\..\..\..\..\..\..\components\libraries\hardfault;..\..\..\..\..\..\..\components\libraries\hardfault\nrf52;..\..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\..\components\libraries\memobj;..\..\..\..\..\..\..\components\libraries\mpu;..\..\..\..\..\..\..\components\libraries\mutex;..\..\..\..\..\..\..\components\libraries\pwr_mgmt;..\..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\..\components\libraries\ringbuf;..\..\..\..\..\..\..\components\libraries\sortlist;..\..\..\..\..\..\..\components\libraries\stack_guard;..\..\..\..\..\..\..\components\libraries\strerror;..\..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\..\components\libraries\timer\experimental;..\..\..\..\..\..\..\components\libraries\usbd;..\..\..\..\..\..\..\components\libraries\usbd\class\cdc;..\..\..\..\..\..\..\components\libraries\usbd\class\cdc\acm;..\..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\..\components\softdevice\mbr\nrf52840\headers;..\..\..\..\..\..\..\external\fnmatch;..\..\..\..\..\..\..\external\fprintf;..\..\..\..\..\..\..\external\segger_rtt;..\..\..\..\..\..\..\external\utf_converter;..\..\..\..\..\..\..\integration\nrfx;..\..\..\..\..\..\..\integration\nrfx\legacy;..\..\..\..\..\..\..\modules\nrfx;..\..\..\..\..\..\..\modules\nrfx\drivers\include;..\..\..\..\..\..\..\modules\nrfx\hal;..\..\..\..\..\..\..\modules\nrfx\mdk</IncludePath>
+              <IncludePath>..\config;..\..\..;..\..\..\..\..\..\..\components;..\..\..\..\..\..\..\components\boards;..\..\..\..\..\..\..\components\drivers_nrf\nrf_soc_nosd;..\..\..\..\..\..\..\components\libraries\atomic;..\..\..\..\..\..\..\components\libraries\atomic_fifo;..\..\..\..\..\..\..\components\libraries\balloc;..\..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\..\components\libraries\cli;..\..\..\..\..\..\..\components\libraries\cli\cdc_acm;..\..\..\..\..\..\..\components\libraries\cli\rtt;..\..\..\..\..\..\..\components\libraries\cli\uart;..\..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\..\components\libraries\delay;..\..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\..\components\libraries\fds;..\..\..\..\..\..\..\components\libraries\fstorage;..\..\..\..\..\..\..\components\libraries\hardfault;..\..\..\..\..\..\..\components\libraries\hardfault\nrf52;..\..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\..\components\libraries\memobj;..\..\..\..\..\..\..\components\libraries\mpu;..\..\..\..\..\..\..\components\libraries\mutex;..\..\..\..\..\..\..\components\libraries\pwr_mgmt;..\..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\..\components\libraries\ringbuf;..\..\..\..\..\..\..\components\libraries\sortlist;..\..\..\..\..\..\..\components\libraries\stack_guard;..\..\..\..\..\..\..\components\libraries\strerror;..\..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\..\components\libraries\timer\experimental;..\..\..\..\..\..\..\components\libraries\usbd;..\..\..\..\..\..\..\components\libraries\usbd\class\cdc;..\..\..\..\..\..\..\components\libraries\usbd\class\cdc\acm;..\..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\..\components\softdevice\mbr\nrf52840\headers;..\..\..\..\..\..\..\external\fnmatch;..\..\..\..\..\..\..\external\fprintf;..\..\..\..\..\..\..\external\segger_rtt;..\..\..\..\..\..\..\external\utf_converter;..\..\..\..\..\..\..\integration\nrfx;..\..\..\..\..\..\..\integration\nrfx\legacy;..\..\..\..\..\..\..\modules\nrfx;..\..\..\..\..\..\..\modules\nrfx\drivers\include;..\..\..\..\..\..\..\modules\nrfx\hal;..\..\..\..\..\..\..\modules\nrfx\mdk;..\..\..\..\..\..\..\external\mbedtls\include;..\..\..\..\..\..\..\external\mbedtls\include\mbedtls;..\..\..\..\..\..\..\external\nrf_oberon;..\..\..\..\..\..\..\external\nrf_oberon\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -381,19 +381,34 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>sdk_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\config\sdk_config.h</FilePath>
-            </File>
-            <File>
               <FileName>main_usbd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\main_usbd.c</FilePath>
             </File>
             <File>
+              <FileName>sdk_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\config\sdk_config.h</FilePath>
+            </File>
+            <File>
               <FileName>sqrl_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\sqrl_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_crypto.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_crypto.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_conv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_conv.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -739,6 +754,46 @@
               <FileName>SEGGER_RTT_printf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\external\segger_rtt\SEGGER_RTT_printf.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>mbedtls</GroupName>
+          <Files>
+            <File>
+              <FileName>aes.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>base64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\base64.c</FilePath>
+            </File>
+            <File>
+              <FileName>cipher.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\cipher.c</FilePath>
+            </File>
+            <File>
+              <FileName>cipher_wrap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\cipher_wrap.c</FilePath>
+            </File>
+            <File>
+              <FileName>gcm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\gcm.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Oberon</GroupName>
+          <Files>
+            <File>
+              <FileName>oberon_2.0.7.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\nrf_oberon\lib\cortex-m4\hard-float\short-wchar\oberon_2.0.7.lib</FilePath>
             </File>
           </Files>
         </Group>
@@ -1077,7 +1132,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--reduce_paths</MiscControls>
-              <Define> APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10059 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD MBR_PRESENT NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192</Define>
+              <Define>APP_TIMER_V2 APP_TIMER_V2_RTC1_ENABLED BOARD_PCA10059 CONFIG_GPIO_AS_PINRESET DEBUG DEBUG_NRF FLOAT_ABI_HARD MBR_PRESENT NRF52840_XXAA __HEAP_SIZE=8192 __STACK_SIZE=8192  MBEDTLS_CONFIG_FILE=mbedtls_config.h</Define>
               <Undefine></Undefine>
               <IncludePath>..\..\..;..\config;..\..\..\..\..\..\..\components;..\..\..\..\..\..\..\components\boards;..\..\..\..\..\..\..\components\drivers_nrf\nrf_soc_nosd;..\..\..\..\..\..\..\components\libraries\atomic;..\..\..\..\..\..\..\components\libraries\atomic_fifo;..\..\..\..\..\..\..\components\libraries\balloc;..\..\..\..\..\..\..\components\libraries\bsp;..\..\..\..\..\..\..\components\libraries\button;..\..\..\..\..\..\..\components\libraries\cli;..\..\..\..\..\..\..\components\libraries\cli\cdc_acm;..\..\..\..\..\..\..\components\libraries\cli\rtt;..\..\..\..\..\..\..\components\libraries\cli\uart;..\..\..\..\..\..\..\components\libraries\crc16;..\..\..\..\..\..\..\components\libraries\delay;..\..\..\..\..\..\..\components\libraries\experimental_section_vars;..\..\..\..\..\..\..\components\libraries\fds;..\..\..\..\..\..\..\components\libraries\fstorage;..\..\..\..\..\..\..\components\libraries\hardfault;..\..\..\..\..\..\..\components\libraries\hardfault\nrf52;..\..\..\..\..\..\..\components\libraries\log;..\..\..\..\..\..\..\components\libraries\log\src;..\..\..\..\..\..\..\components\libraries\memobj;..\..\..\..\..\..\..\components\libraries\mpu;..\..\..\..\..\..\..\components\libraries\mutex;..\..\..\..\..\..\..\components\libraries\pwr_mgmt;..\..\..\..\..\..\..\components\libraries\queue;..\..\..\..\..\..\..\components\libraries\ringbuf;..\..\..\..\..\..\..\components\libraries\sortlist;..\..\..\..\..\..\..\components\libraries\stack_guard;..\..\..\..\..\..\..\components\libraries\strerror;..\..\..\..\..\..\..\components\libraries\timer;..\..\..\..\..\..\..\components\libraries\timer\experimental;..\..\..\..\..\..\..\components\libraries\usbd;..\..\..\..\..\..\..\components\libraries\usbd\class\cdc;..\..\..\..\..\..\..\components\libraries\usbd\class\cdc\acm;..\..\..\..\..\..\..\components\libraries\util;..\..\..\..\..\..\..\components\softdevice\mbr\nrf52840\headers;..\..\..\..\..\..\..\external\fnmatch;..\..\..\..\..\..\..\external\fprintf;..\..\..\..\..\..\..\external\segger_rtt;..\..\..\..\..\..\..\external\utf_converter;..\..\..\..\..\..\..\integration\nrfx;..\..\..\..\..\..\..\integration\nrfx\legacy;..\..\..\..\..\..\..\modules\nrfx;..\..\..\..\..\..\..\modules\nrfx\drivers\include;..\..\..\..\..\..\..\modules\nrfx\hal;..\..\..\..\..\..\..\modules\nrfx\mdk</IncludePath>
             </VariousControls>
@@ -1124,19 +1179,34 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
-              <FileName>sdk_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\config\sdk_config.h</FilePath>
-            </File>
-            <File>
               <FileName>main_usbd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\main_usbd.c</FilePath>
             </File>
             <File>
+              <FileName>sdk_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\config\sdk_config.h</FilePath>
+            </File>
+            <File>
               <FileName>sqrl_comm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\sqrl_comm.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_crypto.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_crypto.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>sqrl_conv.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\sqrl_conv.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1482,6 +1552,46 @@
               <FileName>SEGGER_RTT_printf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\..\..\external\segger_rtt\SEGGER_RTT_printf.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>mbedtls</GroupName>
+          <Files>
+            <File>
+              <FileName>aes.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>base64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\base64.c</FilePath>
+            </File>
+            <File>
+              <FileName>cipher.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\cipher.c</FilePath>
+            </File>
+            <File>
+              <FileName>cipher_wrap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\cipher_wrap.c</FilePath>
+            </File>
+            <File>
+              <FileName>gcm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\mbedtls\library\gcm.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Oberon</GroupName>
+          <Files>
+            <File>
+              <FileName>oberon_2.0.7.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\..\..\..\..\..\..\external\nrf_oberon\lib\cortex-m4\hard-float\short-wchar\oberon_2.0.7.lib</FilePath>
             </File>
           </Files>
         </Group>
