@@ -185,31 +185,7 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
 }
 
 
-static ret_code_t cdc_acm_write(void const* p_data, size_t length, size_t* p_cnt)
-{
-    ASSERT(p_cnt);
-    ret_code_t ret;
-
-    ret = app_usbd_cdc_acm_write(&m_cdc_acm, p_data, length);
-    if (ret == NRF_SUCCESS || ret == NRF_ERROR_INVALID_STATE)
-    {
-        *p_cnt = length;
-        ret = NRF_SUCCESS;
-    }
-    else if (ret == NRF_ERROR_BUSY)
-    {
-        *p_cnt = 0;
-        ret = NRF_SUCCESS;
-    }
-    else
-    {
-        /* Nothing to do */
-    }
-
-    return ret;
-}
-
-
+/* Initialize transport */
 static void usbd_init(void)
 {
     ret_code_t ret;
@@ -243,6 +219,44 @@ static void usbd_init(void)
 }
 
 
+/* Write data back to PC */
+static ret_code_t cdc_acm_write(void const* p_data, size_t length, size_t* p_cnt)
+{
+    ASSERT(p_cnt);
+    ret_code_t ret;
+
+    ret = app_usbd_cdc_acm_write(&m_cdc_acm, p_data, length);
+    if (ret == NRF_SUCCESS || ret == NRF_ERROR_INVALID_STATE)
+    {
+        *p_cnt = length;
+        ret = NRF_SUCCESS;
+    }
+    else if (ret == NRF_ERROR_BUSY)
+    {
+        *p_cnt = 0;
+        ret = NRF_SUCCESS;
+    }
+    else
+    {
+        /* Nothing to do */
+    }
+
+    return ret;
+}
+
+
+static inline void stack_guard_init(void)
+{
+    APP_ERROR_CHECK(nrf_mpu_lib_init());
+    APP_ERROR_CHECK(nrf_stack_guard_init());
+}
+
+uint32_t cyccnt_get(void)
+{
+    return DWT->CYCCNT;
+}
+
+/** Initilize logging module. */
 static void flashlog_init(void)
 {
 #if NRF_MODULE_ENABLED(NRF_LOG_BACKEND_FLASH)
@@ -267,16 +281,6 @@ static void flashlog_init(void)
 #endif
 }
 
-static inline void stack_guard_init(void)
-{
-    APP_ERROR_CHECK(nrf_mpu_lib_init());
-    APP_ERROR_CHECK(nrf_stack_guard_init());
-}
-
-uint32_t cyccnt_get(void)
-{
-    return DWT->CYCCNT;
-}
 
 
 static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
@@ -290,13 +294,13 @@ static void on_sqrl_comm_evt(sqrl_comm_evt_t * p_evt)
 
 static void sqrl_client_loop(void)
 {
+    size_t cnt;
     char outputbuffer[2048];
     uint8_t ilk[32];
     sqrl_get_ilk_from_iuk(ilk, iuk);
 
-    //sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");
-    //serial_tx(outputbuffer, strlen(outputbuffer));
-    //cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
+    sprintf(outputbuffer, "\n\nlog: sqrl_client_loop\n");
+    cdc_acm_write(outputbuffer, strlen(outputbuffer), &cnt);
 
     while (true)
     {
@@ -313,7 +317,6 @@ static void sqrl_client_loop(void)
             continue;
         }
 
-        size_t cnt;
         client_response_t resp = {0};
         memset(&resp, 0, sizeof(resp));
 
@@ -379,6 +382,7 @@ static void sqrl_client_loop(void)
     }
 }
 
+
 /** @brief Function for the application main entry. */
 int main(void)
 {
@@ -407,7 +411,6 @@ int main(void)
 
     ret = fds_init();
     APP_ERROR_CHECK(ret);
-
 
     UNUSED_RETURN_VALUE(nrf_log_config_load());
 
