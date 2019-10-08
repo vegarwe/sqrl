@@ -8,16 +8,11 @@ project(tomu-sqrl)
 set(SDK_DIR "../tomu-quickstart")
 set(OPENCM3 "${SDK_DIR}/libopencm3")
 set(NRF_ROOT "../../../..")
-#set(GIT_VERSION} "<todo-fix-git>")
-#GIT_VERSION := $(shell git describe --tags)
 # git rev-parse --short HEAD
 execute_process(COMMAND git describe --tags
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
-    #ERROR_STRIP_TRAILING_WHITESPACE
-    #ERROR_VARIABLE stderr
-    #RESULT_VARIABLE return_code
 )
 
 # select linker script
@@ -39,6 +34,8 @@ add_compile_options(
     #$<$<COMPILE_LANGUAGE:CXX>:-fms-extensions>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wold-style-cast>
+    $<$<COMPILE_LANGUAGE:CXX>:-Wsuggest-override>
     #$<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>
     #$<$<COMPILE_LANGUAGE:CXX>:-fno-threadsafe-statics>
     #-fno-threadsafe-statics
@@ -49,8 +46,6 @@ add_compile_options(
     -fomit-frame-pointer
     -mabi=aapcs
 
-    #-D__FPU_PRESENT=1
-
     -DGIT_VERSION=u\"${GIT_VERSION}\"
     -DMBEDTLS_CONFIG_FILE=\"mbedtls_config.h\"
     -DEFM32HG
@@ -58,16 +53,14 @@ add_compile_options(
     #-Werror
     -Wall
     -Wextra
-    #-Wcast-align
-    #-Wconversion
-    #-Wsign-conversion
-    #-Wold-style-cast
-    #-Wshadow
-    #-Wlogical-op
-    #-Wsuggest-override
-    #-Wsuggest-final-types
-    #-Wsuggest-final-methods
-    #-pedantic
+    -Wcast-align
+    -Wconversion
+    -Wsign-conversion
+    -Wshadow
+    -Wlogical-op
+    -Wsuggest-final-types
+    -Wsuggest-final-methods
+    -pedantic
 )
 
 include_directories(
@@ -99,12 +92,18 @@ add_executable(${PROJECT_NAME}
     ${NRF_ROOT}/external/mbedtls/library/base64.c
 )
 
+# In case we need to build .S files...:
+#$(OBJ_DIR)/%.o: %.S
+#	$(QUIET) echo "  AS       $<	$(notdir $@)"
+#	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@ -MMD
+
 target_link_libraries(${PROJECT_NAME}
     ${CPU_OPTIONS}
     -T${LINKER_SCRIPT}
     -nostartfiles
-    #m
+    m                       # TODO: What does this do?
     # -nostdlib
+
     -Wl,--gc-sections
     -Wl,--no-warn-mismatch
     #--build-id=none

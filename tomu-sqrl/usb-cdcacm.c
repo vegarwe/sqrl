@@ -252,7 +252,7 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
     (void)ep;
 
     char buf[64];
-    int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, sizeof(buf));
+    size_t len = usbd_ep_read_packet(usbd_dev, 0x01, buf, sizeof(buf));
 
     sqrl_comm_handle_input(buf, len);
 }
@@ -289,7 +289,7 @@ static void usb_puts(char *s)
         return;
     }
 
-    usbd_ep_write_packet(g_usbd_dev, 0x82, s, strnlen(s, 64));
+    usbd_ep_write_packet(g_usbd_dev, 0x82, s, (uint16_t)strnlen(s, 64));
     udelay_busy(200); // Why is this needed?
 
     /* wait for completion */
@@ -355,7 +355,7 @@ static void serial_tx_hex(char const * p_buffer, size_t len)
         }
 
         m_tx_done = false;
-        usbd_ep_write_packet(g_usbd_dev, 0x82, buf, len8*2);
+        usbd_ep_write_packet(g_usbd_dev, 0x82, buf, (uint16_t)(len8*2));
         udelay_busy(200); // Why is this needed?
 
         /* wait for completion */
@@ -431,37 +431,36 @@ int main(void)
     //PRINT_HEX("ilk ", ilk, 32);
     //NRF_LOG_RAW_INFO("ilk  00d3a56b500bca7908eb89a6f5fe0931388797d42930798d2ffe88d436c94878\n\n");
 
-    while(1) {
+    while (1) {
         asm("nop"); // TODO: Why the fuck is this needed???
-        asm ("wfe");
         //__asm ("wfi");
         //__WFE();
 
         if (! g_usbd_is_connected || mp_cmd == NULL) {
-            // TODO: sleep?
+            asm ("wfe"); // TODO: wfe or wfi?
             continue;
         }
 
         gpio_clear(LED_RED_PORT, LED_RED_PIN);
-        usb_puts("\x02log\x1e asdf asdf sadf\x03\n");
+        usb_puts("\x02log\x1e Start of while\x03\n");
 
         //client_response_t resp = {0};
 
         if (mp_cmd->type == SQRL_CMD_QUERY)
         {
             usb_puts("\x02resp\x1equery\x1e");
-            serial_tx(mp_cmd->sks, strlen(mp_cmd->sks));
+            serial_tx(mp_cmd->params.sqrl_cmd.sks, strlen(mp_cmd->params.sqrl_cmd.sks));
             usb_puts("\x1e");
-            serial_tx(mp_cmd->server, strlen(mp_cmd->server));
+            serial_tx(mp_cmd->params.sqrl_cmd.server, strlen(mp_cmd->params.sqrl_cmd.server));
             usb_puts("\x1e<... resp.ids ...>");
             usb_puts("\x03\n");
         }
         else if (mp_cmd->type == SQRL_CMD_IDENT)
         {
             usb_puts("\x02resp\x1eident\x1e");
-            serial_tx(mp_cmd->sks, strlen(mp_cmd->sks));
+            serial_tx(mp_cmd->params.sqrl_cmd.sks, strlen(mp_cmd->params.sqrl_cmd.sks));
             usb_puts("\x1e");
-            serial_tx(mp_cmd->server, strlen(mp_cmd->server));
+            serial_tx(mp_cmd->params.sqrl_cmd.server, strlen(mp_cmd->params.sqrl_cmd.server));
             usb_puts("\x1e<... resp.ids ...>");
             usb_puts("\x03\n");
 
@@ -469,7 +468,9 @@ int main(void)
             char sks[] = "www.grc.com";
             uint8_t ssk[32];
             occ_hmac_sha256(ssk, imk, 32, (uint8_t *)sks, strlen(sks));
+            usb_puts("\x02log\x1e sks: ");
             serial_tx_hex(sks, 32);
+            usb_puts("\x03\n");
 
             // Test url safe base64 encode
             char somedata[] = {0x60,0x78,0x13,0x41,0xb4,0x36,0x30,0xfb,0x6d,0x21,0x4d,0x20,0xed,0x4b,0xf8,0x77,0xaf,0xed,0x40,0xf3,0x7c,0x87,0x1c,0x06,0x13,0x89,0xbc,0xb7,0xd0,0xbe,0xe4,0x2d};
