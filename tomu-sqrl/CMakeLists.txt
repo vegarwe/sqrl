@@ -97,6 +97,15 @@ add_executable(${PROJECT_NAME}
 #	$(QUIET) echo "  AS       $<	$(notdir $@)"
 #	$(QUIET) $(CC) -x assembler-with-cpp -c $< $(CFLAGS) -o $@ -MMD
 
+add_custom_command(TARGET ${PROJECT_NAME}
+  PRE_BUILD
+  COMMAND ${CMAKE_COMMAND}
+    -Dlocal_source_dir="${CMAKE_SOURCE_DIR}"
+    -Dlocal_binary_dir="${CMAKE_BINARY_DIR}"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/gitversion.cmake"
+)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}) # for git version header file
+
 target_link_libraries(${PROJECT_NAME}
     ${CPU_OPTIONS}
     -T${LINKER_SCRIPT}
