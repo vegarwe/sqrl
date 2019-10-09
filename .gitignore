@@ -1,6 +1,6 @@
 dist/
 build/
-*.swp
+*.sw[op]
 *.pyc
 sqrl.egg-info/
 *.sqlite
@@ -17,3 +17,10 @@ _build/
 *.elf
 *.ihex
 .obj
+dfu.zip
+
+.vscode/
+
+RTE/
+tmp/
+tomu-quickstart/
