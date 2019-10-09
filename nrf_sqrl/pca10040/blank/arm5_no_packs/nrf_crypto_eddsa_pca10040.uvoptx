@@ -271,8 +271,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\sqrl_comm.c</PathWithFileName>
-      <FilenameWithoutPath>sqrl_comm.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\sqrl_client.c</PathWithFileName>
+      <FilenameWithoutPath>sqrl_client.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -283,8 +283,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\sqrl_client.c</PathWithFileName>
-      <FilenameWithoutPath>sqrl_client.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\..\common\sqrl\src\sqrl_comm.c</PathWithFileName>
+      <FilenameWithoutPath>sqrl_comm.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -624,7 +624,7 @@
 
   <Group>
     <GroupName>nRF_Crypto backend mbed TLS</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1300,7 +1300,7 @@
 
   <Group>
     <GroupName>nRF_TLS</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

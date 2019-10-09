@@ -325,7 +325,7 @@
 
   <Group>
     <GroupName>Application</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -360,7 +360,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\sqrl_comm.c</PathWithFileName>
+      <PathWithFileName>..\..\..\..\common\sqrl\src\sqrl_comm.c</PathWithFileName>
       <FilenameWithoutPath>sqrl_comm.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -372,8 +372,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\sqrl_crypto.c</PathWithFileName>
-      <FilenameWithoutPath>sqrl_crypto.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\sqrl_conv.c</PathWithFileName>
+      <FilenameWithoutPath>sqrl_conv.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -396,8 +396,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\sqrl_conv.c</PathWithFileName>
-      <FilenameWithoutPath>sqrl_conv.c</FilenameWithoutPath>
+      <PathWithFileName>..\..\..\sqrl_crypto.c</PathWithFileName>
+      <FilenameWithoutPath>sqrl_crypto.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
