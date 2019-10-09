@@ -66,6 +66,7 @@ add_compile_options(
 include_directories(
     ${CMAKE_SOURCE_DIR}
     ../nrf_sqrl
+    ../common/sqrl/src
 )
 
 include_directories(
@@ -87,7 +88,7 @@ link_directories(
 # list of modules to build final firmware (without extension .c or .cpp)
 add_executable(${PROJECT_NAME}
     usb-cdcacm.c
-    ../nrf_sqrl/sqrl_comm.c
+    ../common/sqrl/src/sqrl_comm.c
     ../nrf_sqrl/sqrl_conv.c
     ${NRF_ROOT}/external/mbedtls/library/base64.c
 )

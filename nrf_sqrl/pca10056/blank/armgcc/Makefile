@@ -4,6 +4,7 @@ OUTPUT_DIRECTORY := _build
 
 SDK_ROOT := ../../../../../../..
 PROJ_DIR := ../../..
+COMM_DIR := ../../../../common
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
   LINKER_SCRIPT  := nrf_crypto_eddsa_gcc_nrf52.ld
@@ -164,22 +165,23 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/crypto/backend/oberon/oberon_backend_eddsa.c \
   $(SDK_ROOT)/components/libraries/crypto/backend/oberon/oberon_backend_hash.c \
   $(SDK_ROOT)/components/libraries/crypto/backend/oberon/oberon_backend_hmac.c \
+  $(COMM_DIR)/sqrl/src/sqrl_comm.c \
   $(PROJ_DIR)/sqrl_client.c \
-  $(PROJ_DIR)/sqrl_comm.c \
   $(PROJ_DIR)/sqrl_conv.c \
   $(PROJ_DIR)/sqrl_crypto.c \
   $(PROJ_DIR)/main.c
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  ../config \
+  $(PROJ_DIR) \
+  $(COMM_DIR)/sqrl/src \
   $(SDK_ROOT)/components/libraries/crypto/backend/cc310 \
   $(SDK_ROOT)/components/libraries/crypto/backend/cifra \
   $(SDK_ROOT)/external/fprintf \
-  $(PROJ_DIR) \
   $(SDK_ROOT)/components/libraries/experimental_section_vars \
   $(SDK_ROOT)/external/nrf_cc310/include \
   $(SDK_ROOT)/components/libraries/atomic \
-  ../config \
   $(SDK_ROOT)/components/libraries/delay \
   $(SDK_ROOT)/external/nrf_oberon/include \
   $(SDK_ROOT)/components/libraries/crypto \

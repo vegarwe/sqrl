@@ -4,6 +4,7 @@ OUTPUT_DIRECTORY := _build
 
 SDK_ROOT := ../../../../../../..
 PROJ_DIR := ../../..
+COMM_DIR := ../../../../common
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
   LINKER_SCRIPT  := cli_gcc_nrf52.ld
@@ -78,8 +79,8 @@ SRC_FILES += \
   $(SDK_ROOT)/external/mbedtls/library/gcm.c \
   $(SDK_ROOT)/external/mbedtls/library/cipher.c \
   $(SDK_ROOT)/external/mbedtls/library/cipher_wrap.c \
+  $(COMM_DIR)/sqrl/src/sqrl_comm.c \
   $(PROJ_DIR)/sqrl_client.c \
-  $(PROJ_DIR)/sqrl_comm.c \
   $(PROJ_DIR)/sqrl_conv.c \
   $(PROJ_DIR)/sqrl_crypto.c \
   $(PROJ_DIR)/main_usbd.c
@@ -88,6 +89,7 @@ SRC_FILES += \
 INC_FOLDERS += \
   ../config \
   $(PROJ_DIR) \
+  $(COMM_DIR)/sqrl/src \
   $(SDK_ROOT)/components \
   $(SDK_ROOT)/modules/nrfx/mdk \
   $(SDK_ROOT)/modules/nrfx \
