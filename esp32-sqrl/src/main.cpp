@@ -119,7 +119,7 @@ void setup() {
 		debugger->begin(115200);
 		while (!debugger);
 		debugger->println("");
-		debugger->println("Staring");
+		debugger->println("Starting");
 	}
 
     inStream->begin(115200);
@@ -138,7 +138,7 @@ void loop() {
     RNG.loop();
 
     int numBytes = 0;
-	if (numBytes = inStream->available())
+	if ((numBytes = inStream->available()) > 0)
 	{
         while (numBytes--)
         {
