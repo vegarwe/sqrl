@@ -5,6 +5,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**@brief SQRL command type. */
 typedef enum {
     SQRL_CMD_INVALID = 0,
@@ -70,5 +74,9 @@ void sqrl_comm_handle_input(char* in_buffer, size_t in_len);
 /**@brief Signal that a command event has been handled (so we can start parsing the next). */
 void sqrl_comm_command_handled(void);
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif//_SQRL_COMM_H_
