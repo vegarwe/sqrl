@@ -11,8 +11,8 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-from sqrl import sqrl_conv
-from sqrl.server import SqrlHandler
+from pysqrl import sqrl_conv
+from pysqrl.server import SqrlHandler
 
 #PORT = 8080
 #SCHEME = 'http'

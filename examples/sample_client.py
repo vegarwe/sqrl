@@ -9,9 +9,9 @@ import sys, os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(SCRIPT_DIR, '..'))
 
-from sqrl.sqrl_conv import sqrl_decode_response, sqrl_base64_decode, sqrl_base64_encode
-from sqrl.sqrl_url import SqrlUrl
-from sqrl.sqrl_client import sqrl_query, sqrl_ident, sqrl_disable
+from pysqrl.sqrl_conv import sqrl_decode_response, sqrl_base64_decode, sqrl_base64_encode
+from pysqrl.sqrl_url import SqrlUrl
+from pysqrl.sqrl_client import sqrl_query, sqrl_ident, sqrl_disable
 
 # Computer\HKEY_CURRENT_USER\Software\Classes\sqrl\shell\open\command
 # "C:\Program Files\Python37\pythonw.exe" "C:\Users\vegar.westerlund\devel\sqrl\examples\sample_client.py" "%1"
