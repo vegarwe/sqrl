@@ -1,0 +1,11 @@
+[package]
+name = "rustsqrl"
+version = "0.1.0"
+authors = ["Vegar Westerlund <vegarwe@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+extfmt = "0.1.1"
+byte = "0.2"
