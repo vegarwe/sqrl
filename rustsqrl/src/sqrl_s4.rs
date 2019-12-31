@@ -3,104 +3,114 @@ use std::str;
 use extfmt::Hexlify;
 
 use byte::*;
+use byte::ctx::{Str, Bytes, Endian};
 //use byte::ctx::*;
 
+
 #[derive(Debug, Default)]
-pub struct SqrlS4Identity {
-    header:                                 [u8;  8],
-    type1_length:                           u16,
-    type1_type:                             u16,
-    type1_pt_length:                        u16,
-    type1_aes_gcm_iv:                       [u8; 12],
-    type1_scrypt_random_salt:               [u8; 16],
-    type1_scrypt_log_n_factor:              u8,
-    type1_scrypt_iteration_count:           u32,
-    type1_option_flags:                     u16,
-    type1_hint_length:                      u8,
-    type1_pw_verify_sec:                    u8,
-    type1_idle_timeout_min:                 u16,
-    type1_encrypted_identity_master_key:    [u8; 32],
-    type1_encrypted_identity_lock_key:      [u8; 32],
-    type1_verification_tag:                 [u8; 16],
-    type2_length:                           u16,
-    type2_type:                             u16,
-    type2_scrypt_random_salt:               [u8; 16],
-    type2_scrypt_log_n_factor:              u8,
-    type2_scrypt_iteration_count:           u32,
-    type2_encrypted_identity_unlock_key:    [u8; 32],
-    type2_verification_tag:                 [u8; 16],
+pub struct SqrlS4Identity<'a> {
+    pub header:                                 &'a str,
+    pub type1_length:                           u16,
+    pub type1_type:                             u16,
+    pub type1_pt_length:                        u16,
+    pub type1_aes_gcm_iv:                       &'a[u8],
+    pub type1_scrypt_random_salt:               &'a[u8],
+    pub type1_scrypt_log_n_factor:              u8,
+    pub type1_scrypt_iteration_count:           u32,
+    pub type1_option_flags:                     u16,
+    pub type1_hint_length:                      u8,
+    pub type1_pw_verify_sec:                    u8,
+    pub type1_idle_timeout_min:                 u16,
+    pub type1_encrypted_identity_master_key:    &'a[u8],
+    pub type1_encrypted_identity_lock_key:      &'a[u8],
+    pub type1_verification_tag:                 &'a[u8],
+    pub type2_length:                           u16,
+    pub type2_type:                             u16,
+    pub type2_scrypt_random_salt:               &'a[u8],
+    pub type2_scrypt_log_n_factor:              u8,
+    pub type2_scrypt_iteration_count:           u32,
+    pub type2_encrypted_identity_unlock_key:    &'a[u8],
+    pub type2_verification_tag:                 &'a[u8],
 }
 
 
-impl fmt::Display for SqrlS4Identity {
+impl<'a> fmt::Display for SqrlS4Identity<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Err(_) = f.write_str("Type1: user access password protected data\n")                                                 { return Ok(()); }
-        if let Ok(s) = str::from_utf8(&self.header) { if let Err(_) = write!(f, "  magic:                            {}\n", s)      { return Ok(()); }}
-        if let Err(_) = write!(f, "  length:                           {}\n", self.type1_length)                                    { return Ok(()); }
-        if let Err(_) = write!(f, "  type:                             {}\n", self.type1_type)                                      { return Ok(()); }
-        if let Err(_) = write!(f, "  pt_length:                        {}\n", self.type1_pt_length)                                 { return Ok(()); }
-        if let Err(_) = write!(f, "  aes_gcm_iv:                       {}\n", Hexlify(&self.type1_aes_gcm_iv))                      { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_random_salt:               {}\n", Hexlify(&self.type1_scrypt_random_salt))              { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_log_n_factor:              {}\n", self.type1_scrypt_log_n_factor)                       { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_iteration_count:           {}\n", self.type1_scrypt_iteration_count)                    { return Ok(()); }
-        if let Err(_) = write!(f, "  option_flags:                     {}\n", self.type1_option_flags)                              { return Ok(()); }
-        if let Err(_) = write!(f, "  hint_length:                      {}\n", self.type1_hint_length)                               { return Ok(()); }
-        if let Err(_) = write!(f, "  pw_verify_sec:                    {}\n", self.type1_pw_verify_sec)                             { return Ok(()); }
-        if let Err(_) = write!(f, "  idle_timeout_min:                 {}\n", self.type1_idle_timeout_min)                          { return Ok(()); }
-        if let Err(_) = write!(f, "  encrypted_identity_master_key:    {}\n", Hexlify(&self.type1_encrypted_identity_master_key))   { return Ok(()); }
-        if let Err(_) = write!(f, "  encrypted_identity_lock_key:      {}\n", Hexlify(&self.type1_encrypted_identity_lock_key))     { return Ok(()); }
-        if let Err(_) = write!(f, "  verification_tag:                 {}\n", Hexlify(&self.type1_verification_tag))                { return Ok(()); }
+        if let Err(_) = write!(f, "Type1: user access password protected data\n")                                                   { return Ok(()); }
+        if let Err(_) = write!(f, "  header:                          {}\n", self.header)                                           { return Ok(()); }
+        if let Err(_) = write!(f, "  length:                          {}\n", self.type1_length)                                     { return Ok(()); }
+        if let Err(_) = write!(f, "  type:                            {}\n", self.type1_type)                                       { return Ok(()); }
+        if let Err(_) = write!(f, "  pt_length:                       {}\n", self.type1_pt_length)                                  { return Ok(()); }
+        if let Err(_) = write!(f, "  aes_gcm_iv:                      {}\n", Hexlify(&self.type1_aes_gcm_iv))                       { return Ok(()); }
+        if let Err(_) = write!(f, "  scrypt_random_salt:              {}\n", Hexlify(&self.type1_scrypt_random_salt))               { return Ok(()); }
+        if let Err(_) = write!(f, "  scrypt_log_n_factor:             {}\n", self.type1_scrypt_log_n_factor)                        { return Ok(()); }
+        if let Err(_) = write!(f, "  scrypt_iteration_count:          {}\n", self.type1_scrypt_iteration_count)                     { return Ok(()); }
+        if let Err(_) = write!(f, "  option_flags:                    {}\n", self.type1_option_flags)                               { return Ok(()); }
+        if let Err(_) = write!(f, "  hint_length:                     {}\n", self.type1_hint_length)                                { return Ok(()); }
+        if let Err(_) = write!(f, "  pw_verify_sec:                   {}\n", self.type1_pw_verify_sec)                              { return Ok(()); }
+        if let Err(_) = write!(f, "  idle_timeout_min:                {}\n", self.type1_idle_timeout_min)                           { return Ok(()); }
+        if let Err(_) = write!(f, "  encrypted_identity_master_key:   {}\n", Hexlify(&self.type1_encrypted_identity_master_key))    { return Ok(()); }
+        if let Err(_) = write!(f, "  encrypted_identity_lock_key:     {}\n", Hexlify(&self.type1_encrypted_identity_lock_key))      { return Ok(()); }
+        if let Err(_) = write!(f, "  verification_tag:                {}\n", Hexlify(&self.type1_verification_tag))                 { return Ok(()); }
 
-        if let Err(_) = f.write_str("\nType2: rescue code data\n")                                                                  { return Ok(()); }
-        if let Err(_) = write!(f, "  length:                           {}\n", self.type2_length)                                    { return Ok(()); }
-        if let Err(_) = write!(f, "  type:                             {}\n", self.type2_type)                                      { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_random_salt:               {}\n", Hexlify(&self.type2_scrypt_random_salt))              { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_log_n_factor:              {}\n", self.type2_scrypt_log_n_factor)                       { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_iteration_count:           {}\n", self.type2_scrypt_iteration_count)                    { return Ok(()); }
-        if let Err(_) = write!(f, "  encrypted_identity_unlock_key:    {}\n", Hexlify(&self.type2_encrypted_identity_unlock_key))   { return Ok(()); }
-        if let Err(_) = write!(f, "  verification_tag:                 {}\n", Hexlify(&self.type2_verification_tag))                { return Ok(()); }
+        if let Err(_) = write!(f, "\nType2: rescue code data\n")                                                                    { return Ok(()); }
+        if let Err(_) = write!(f, "  length:                          {}\n", self.type2_length)                                     { return Ok(()); }
+        if let Err(_) = write!(f, "  type:                            {}\n", self.type2_type)                                       { return Ok(()); }
+        if let Err(_) = write!(f, "  scrypt_random_salt:              {}\n", Hexlify(&self.type2_scrypt_random_salt))               { return Ok(()); }
+        if let Err(_) = write!(f, "  scrypt_log_n_factor:             {}\n", self.type2_scrypt_log_n_factor)                        { return Ok(()); }
+        if let Err(_) = write!(f, "  scrypt_iteration_count:          {}\n", self.type2_scrypt_iteration_count)                     { return Ok(()); }
+        if let Err(_) = write!(f, "  encrypted_identity_unlock_key:   {}\n", Hexlify(&self.type2_encrypted_identity_unlock_key))    { return Ok(()); }
+        if let Err(_) = write!(f, "  verification_tag:                {}\n", Hexlify(&self.type2_verification_tag))                 { return Ok(()); }
 
         Ok(())
     }
 }
 
-fn read_u8_array(dest: &mut [u8], sqrlbinary: &[u8], offset: &mut usize, length: i32) {
-    for i in 0..length as usize {
-        dest[i] = sqrlbinary[*offset];
-        *offset += 1;
+
+impl<'a> TryRead<'a, Endian> for SqrlS4Identity<'a> {
+    fn try_read(sqrlbinary: &'a [u8], endian: Endian) -> Result<(Self, usize)> {
+        assert!(sqrlbinary.len() >= 206);
+        assert!(sqrlbinary.len() == 206, "Identity with pidk data not supported"); // TODO: implement
+
+        let offset = &mut 0;
+        let identity = SqrlS4Identity {
+                header:                                 sqrlbinary.read_with(offset, Str::Len(8))?,
+                type1_length:                           sqrlbinary.read_with(offset, endian)?,
+                type1_type:                             sqrlbinary.read_with(offset, endian)?,
+                type1_pt_length:                        sqrlbinary.read_with(offset, endian)?,
+                type1_aes_gcm_iv:                       sqrlbinary.read_with(offset, Bytes::Len(12))?,
+                type1_scrypt_random_salt:               sqrlbinary.read_with(offset, Bytes::Len(16))?,
+                type1_scrypt_log_n_factor:              sqrlbinary.read_with(offset, endian)?,
+                type1_scrypt_iteration_count:           sqrlbinary.read_with(offset, endian)?,
+                type1_option_flags:                     sqrlbinary.read_with(offset, endian)?,
+                type1_hint_length:                      sqrlbinary.read_with(offset, endian)?,
+                type1_pw_verify_sec:                    sqrlbinary.read_with(offset, endian)?,
+                type1_idle_timeout_min:                 sqrlbinary.read_with(offset, endian)?,
+                type1_encrypted_identity_master_key:    sqrlbinary.read_with(offset, Bytes::Len(32))?,
+                type1_encrypted_identity_lock_key:      sqrlbinary.read_with(offset, Bytes::Len(32))?,
+                type1_verification_tag:                 sqrlbinary.read_with(offset, Bytes::Len(16))?,
+                type2_length:                           sqrlbinary.read_with(offset, endian)?,
+                type2_type:                             sqrlbinary.read_with(offset, endian)?,
+                type2_scrypt_random_salt:               sqrlbinary.read_with(offset, Bytes::Len(16))?,
+                type2_scrypt_log_n_factor:              sqrlbinary.read_with(offset, endian)?,
+                type2_scrypt_iteration_count:           sqrlbinary.read_with(offset, endian)?,
+                type2_encrypted_identity_unlock_key:    sqrlbinary.read_with(offset, Bytes::Len(32))?,
+                type2_verification_tag:                 sqrlbinary.read_with(offset, Bytes::Len(16))?,
+        };
+
+        assert!(identity.header == "sqrldata");
+        assert!(identity.type1_length == 125);
+        assert!(identity.type2_length == 73);
+
+        Ok((identity, *offset))
     }
 }
 
-impl SqrlS4Identity {
+
+impl<'a> SqrlS4Identity<'a> {
     pub fn from_binary(sqrlbinary: &[u8]) -> SqrlS4Identity {
-        let offset = &mut 0;
-        //let header = sqrlbinary.read_with::<&str>(offset, Str::Len(8));
-
-        let mut identity = SqrlS4Identity::default();
-        read_u8_array(&mut identity.header, sqrlbinary, offset, 8);
-        identity.type1_length =                          sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        identity.type1_type =                            sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        identity.type1_pt_length =                       sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        read_u8_array(&mut identity.type1_aes_gcm_iv, sqrlbinary, offset, 12);
-        read_u8_array(&mut identity.type1_scrypt_random_salt, sqrlbinary, offset, 16);
-        identity.type1_scrypt_log_n_factor =             sqrlbinary.read_with::<u8>(offset, LE).unwrap();
-        identity.type1_scrypt_iteration_count =          sqrlbinary.read_with::<u32>(offset, LE).unwrap();
-        identity.type1_option_flags =                    sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        identity.type1_hint_length =                     sqrlbinary.read_with::<u8>(offset, LE).unwrap();
-        identity.type1_pw_verify_sec =                   sqrlbinary.read_with::<u8>(offset, LE).unwrap();
-        identity.type1_idle_timeout_min =                sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        read_u8_array(&mut identity.type1_encrypted_identity_master_key, sqrlbinary, offset, 32);
-        read_u8_array(&mut identity.type1_encrypted_identity_lock_key, sqrlbinary, offset, 32);
-        read_u8_array(&mut identity.type1_verification_tag, sqrlbinary, offset, 16);
-        identity.type2_length =                          sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        identity.type2_type =                            sqrlbinary.read_with::<u16>(offset, LE).unwrap();
-        read_u8_array(&mut identity.type2_scrypt_random_salt, sqrlbinary, offset, 16);
-        identity.type2_scrypt_log_n_factor =             sqrlbinary.read_with::<u8>(offset, LE).unwrap();
-        identity.type2_scrypt_iteration_count =          sqrlbinary.read_with::<u32>(offset, LE).unwrap();
-        read_u8_array(&mut identity.type2_encrypted_identity_unlock_key, sqrlbinary, offset, 32);
-        read_u8_array(&mut identity.type2_verification_tag, sqrlbinary, offset, 16);
-
-        identity
+        // TODO: Consider returning Result<SqrlS4Identity>
+        sqrlbinary.read_with::<SqrlS4Identity>(&mut 0, LE).unwrap()
     }
 }
 
@@ -147,11 +157,11 @@ mod tests {
         println!("{}", identity);
     }
 
-    //#[test]
-    //#[should_panic]
-    //fn test_from_binary_invalid_header() {
-    //    let sqrlbinary = b"invalid_}\x00\x01\x00-\x00\"wQ\x122\x0e\xb5\x891\xfep\x97\xef\xf2e]\xf6\x0fg\x07\x8c_\xda\xd4\xe0Z\xe0\xb8\t\x96\x00\x00\x00\xf3\x01\x04\x05\x0f\x00\x023\x88\xcd\xa0\xd7WN\xf7\x8a\xd19\xf8\x1c]\x13\x87\x06\xc6\xe8\xf8\xb08\xf6\x14\xd9m\x9e\xf6|\x94\xa4\x1fF\xab}\x0e\xd3\xbf\xa3r\xa3^\xb4\xfb\xcc\xe7\x8cQ\x8d\x8dyRl\x05\xf1\x19|\x90\x03\x06\t\xe0\xb3\x85H\x8c\xe0\xa6\x0fQm\xf6\x94q6-\xee\xe0\xe9I\x00\x02\x00\xea\xde\x04q\xa1\xfaO\x8f\x1c\xf5e\xea\xb3)-^\t\xa5\x00\x00\x00\xf9o$\"\x9e\x91\xa6\xa9k\xde\xe2z^&j\xa6\x15\xb5\x04\xf4P\x01e\xcc\xfa\xa8V\xd7\xf4\x94L\xea\xea\xdd><\xcbC\xc5+\xeb\xaf\x18\x88\xf9\xa6\xd4\xce";
-    //    let identity = SqrlS4Identity::from_binary(sqrlbinary);
-    //    println!("{}", identity);
-    //}
+    #[test]
+    #[should_panic]
+    fn test_from_binary_invalid_header() {
+        let sqrlbinary = b"invalid_}\x00\x01\x00-\x00\"wQ\x122\x0e\xb5\x891\xfep\x97\xef\xf2e]\xf6\x0fg\x07\x8c_\xda\xd4\xe0Z\xe0\xb8\t\x96\x00\x00\x00\xf3\x01\x04\x05\x0f\x00\x023\x88\xcd\xa0\xd7WN\xf7\x8a\xd19\xf8\x1c]\x13\x87\x06\xc6\xe8\xf8\xb08\xf6\x14\xd9m\x9e\xf6|\x94\xa4\x1fF\xab}\x0e\xd3\xbf\xa3r\xa3^\xb4\xfb\xcc\xe7\x8cQ\x8d\x8dyRl\x05\xf1\x19|\x90\x03\x06\t\xe0\xb3\x85H\x8c\xe0\xa6\x0fQm\xf6\x94q6-\xee\xe0\xe9I\x00\x02\x00\xea\xde\x04q\xa1\xfaO\x8f\x1c\xf5e\xea\xb3)-^\t\xa5\x00\x00\x00\xf9o$\"\x9e\x91\xa6\xa9k\xde\xe2z^&j\xa6\x15\xb5\x04\xf4P\x01e\xcc\xfa\xa8V\xd7\xf4\x94L\xea\xea\xdd><\xcbC\xc5+\xeb\xaf\x18\x88\xf9\xa6\xd4\xce";
+        let identity = SqrlS4Identity::from_binary(sqrlbinary);
+        println!("{}", identity);
+    }
 }
