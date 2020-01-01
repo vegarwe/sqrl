@@ -4,7 +4,7 @@
 
 #include "sqrl_s4.h"
 
-#include "repr.h"
+//#include "repr.h"
 
 /*
 These test cases exercises the sqrl_crypto library.
