@@ -1,6 +1,8 @@
 mod sqrl_s4;
+mod sqrl_crypto;
 
 use sqrl_s4::SqrlS4Identity;
+use sqrl_crypto::en_scrypt;
 
 fn main() {
     //let identity = SqrlS4Identity{type1_length: 34, ..Default::default()};
@@ -13,29 +15,6 @@ fn main() {
     identity.type1_length = 125;
     println!("identity.type1_length {}", identity.type1_length);
 
+    println!("{:?}", en_scrypt(b"", b"", 64,  1));
 }
 
-//Type1: user access password protected data
-//  magic:                            sqrldata,
-//  length:                           125,
-//  type:                             1,
-//  pt_length:                        45,
-//  aes_gcm_iv:                       b'22775112320eb58931fe7097',
-//  scrypt_random_salt:               b'eff2655df60f67078c5fdad4e05ae0b8',
-//  scrypt_log_n_factor:              9,
-//  scrypt_iteration_count:           150,
-//  option_flags:                     499,
-//  hint_length:                      4,
-//  pw_verify_sec:                    5,
-//  idle_timeout_min:                 15,
-//  encrypted_identity_master_key:    b'023388cda0d7574ef78ad139f81c5d138706c6e8f8b038f614d96d9ef67c94a4',
-//  encrypted_identity_lock_key:      b'1f46ab7d0ed3bfa372a35eb4fbcce78c518d8d79526c05f1197c90030609e0b3',
-//  verification_tag:                 b'85488ce0a60f516df69471362deee0e9'
-//Type2: rescue code data
-//  length:                           73,
-//  type:                             2,
-//  scrypt_random_salt:               b'eade0471a1fa4f8f1cf565eab3292d5e',
-//  scrypt_log_n_factor:              9,
-//  scrypt_iteration_count:           165,
-//  encrypted_identity_unlock_key:    b'f96f24229e91a6a96bdee27a5e266aa615b504f4500165ccfaa856d7f4944cea',
-//  verification_tag:                 b'eadd3e3ccb43c52bebaf1888f9a6d4ce'
