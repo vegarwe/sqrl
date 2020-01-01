@@ -119,7 +119,7 @@ void setup() {
 		debugger->begin(115200);
 		while (!debugger);
 		debugger->println("");
-		debugger->println("Starting");
+		debugger->println("Starting...");
 	}
 
     inStream->begin(115200);
