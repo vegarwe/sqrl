@@ -4,11 +4,11 @@ sys.path.append(os.path.join(SCRIPT_DIR, '..'))
 
 import sys
 import binascii
-from sqrl.sqrl_s4 import Identity
-from sqrl.sqrl_url import SqrlUrl
-from sqrl.sqrl_crypto import *
-from sqrl.sqrl_conv import sqrl_base64_encode, sqrl_base64_decode
-from sqrl.sqrl_client import sqrl_query, sqrl_ident
+from pysqrl.sqrl_s4 import Identity
+from pysqrl.sqrl_url import SqrlUrl
+from pysqrl.sqrl_crypto import *
+from pysqrl.sqrl_conv import sqrl_base64_encode, sqrl_base64_decode
+from pysqrl.sqrl_client import sqrl_query, sqrl_ident
 
 def get_keys_from_binary_data():
     # Documents/SQRL/vegarwe_test5.sqrl
