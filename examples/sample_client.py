@@ -5,9 +5,13 @@ import serial
 import sys
 import time
 
+import http.server
+import socketserver
+from urllib.parse import urlparse
+
 import sys, os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(SCRIPT_DIR, '..'))
+sys.path.append(os.path.join(SCRIPT_DIR, '..', 'pysqrl'))
 
 from pysqrl.sqrl_conv import sqrl_decode_response, sqrl_base64_decode, sqrl_base64_encode
 from pysqrl.sqrl_url import SqrlUrl
@@ -15,8 +19,6 @@ from pysqrl.sqrl_client import sqrl_query, sqrl_ident, sqrl_disable
 
 # Computer\HKEY_CURRENT_USER\Software\Classes\sqrl\shell\open\command
 # "C:\Program Files\Python37\pythonw.exe" "C:\Users\vegar.westerlund\devel\sqrl\examples\sample_client.py" "%1"
-
-com_port = None
 
 # Hard code identity (for now) (only needed if com is None)
 #imk = binascii.unhexlify(b'f3b73842da1245f3e7b2b8a1142f72bbc897f8ddba598362b4930de2bb460f1f') # vegarwe-testing
@@ -180,14 +182,8 @@ def disable_procedure(url_str, com=None):
     return redirect
 
 
-import http.server
-import socketserver
-from urllib.parse import urlparse
-
-import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
 class Handler(http.server.SimpleHTTPRequestHandler):
+    com_port = None
 
     def do_GET(self):
         print('do_GET', repr(self.path))
@@ -201,7 +197,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Connection', 'close')
             self.send_header('Sqrl-Process', '12345')
             self.end_headers()
-            self.wfile.write(open(os.path.join(SCRIPT_DIR, '..', 'onepixel.gif'), 'rb').read())
+            self.wfile.write(open(os.path.join(SCRIPT_DIR, 'onepixel.gif'), 'rb').read())
             return
 
         if self.path in [ '/sqrl.ico', '/favicon.ico']:
@@ -210,7 +206,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'image/x-icon')
             self.send_header('Connection', 'close')
             self.end_headers()
-            self.wfile.write(open(os.path.join(SCRIPT_DIR, '..', 'favicon.ico'), 'rb').read())
+            self.wfile.write(open(os.path.join(SCRIPT_DIR, 'favicon.ico'), 'rb').read())
             return
 
         #'/c3FybDovL3d3dy5ncmMuY29tL3Nxcmw_bnV0PVdUVjBOZjZBajlQRjdrUDZzdEF6MHcmY2FuPWFIUjBjSE02THk5M2QzY3VaM0pqTG1OdmJTOXpjWEpzTDJScFlXY3VhSFJ0'
@@ -262,5 +258,5 @@ if __name__ == "__main__":
     elif len(sys.argv) > 1:
         pass
     else:
-        com_port = serial.Serial('com7', baudrate=115200, timeout=1)
+        #Handler.com_port = serial.Serial('com7', baudrate=115200, timeout=1)
         main()
