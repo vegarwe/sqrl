@@ -36,31 +36,31 @@ pub struct SqrlS4Identity<'a> {
 
 impl<'a> fmt::Display for SqrlS4Identity<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Err(_) = write!(f, "Type1: user access password protected data\n")                                                   { return Ok(()); }
-        if let Err(_) = write!(f, "  header:                          {}\n", self.header)                                           { return Ok(()); }
-        if let Err(_) = write!(f, "  length:                          {}\n", self.type1_length)                                     { return Ok(()); }
-        if let Err(_) = write!(f, "  type:                            {}\n", self.type1_type)                                       { return Ok(()); }
-        if let Err(_) = write!(f, "  pt_length:                       {}\n", self.type1_pt_length)                                  { return Ok(()); }
-        if let Err(_) = write!(f, "  aes_gcm_iv:                      {}\n", Hexlify(&self.type1_aes_gcm_iv))                       { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_random_salt:              {}\n", Hexlify(&self.type1_scrypt_random_salt))               { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_log_n_factor:             {}\n", self.type1_scrypt_log_n_factor)                        { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_iteration_count:          {}\n", self.type1_scrypt_iteration_count)                     { return Ok(()); }
-        if let Err(_) = write!(f, "  option_flags:                    {}\n", self.type1_option_flags)                               { return Ok(()); }
-        if let Err(_) = write!(f, "  hint_length:                     {}\n", self.type1_hint_length)                                { return Ok(()); }
-        if let Err(_) = write!(f, "  pw_verify_sec:                   {}\n", self.type1_pw_verify_sec)                              { return Ok(()); }
-        if let Err(_) = write!(f, "  idle_timeout_min:                {}\n", self.type1_idle_timeout_min)                           { return Ok(()); }
-        if let Err(_) = write!(f, "  encrypted_identity_master_key:   {}\n", Hexlify(&self.type1_encrypted_identity_master_key))    { return Ok(()); }
-        if let Err(_) = write!(f, "  encrypted_identity_lock_key:     {}\n", Hexlify(&self.type1_encrypted_identity_lock_key))      { return Ok(()); }
-        if let Err(_) = write!(f, "  verification_tag:                {}\n", Hexlify(&self.type1_verification_tag))                 { return Ok(()); }
+        write!(f, "Type1: user access password protected data\n")?;
+        write!(f, "  header:                          {}\n", self.header)?;
+        write!(f, "  length:                          {}\n", self.type1_length)?;
+        write!(f, "  type:                            {}\n", self.type1_type)?;
+        write!(f, "  pt_length:                       {}\n", self.type1_pt_length)?;
+        write!(f, "  aes_gcm_iv:                      {}\n", Hexlify(&self.type1_aes_gcm_iv))?;
+        write!(f, "  scrypt_random_salt:              {}\n", Hexlify(&self.type1_scrypt_random_salt))?;
+        write!(f, "  scrypt_log_n_factor:             {}\n", self.type1_scrypt_log_n_factor)?;
+        write!(f, "  scrypt_iteration_count:          {}\n", self.type1_scrypt_iteration_count)?;
+        write!(f, "  option_flags:                    {}\n", self.type1_option_flags)?;
+        write!(f, "  hint_length:                     {}\n", self.type1_hint_length)?;
+        write!(f, "  pw_verify_sec:                   {}\n", self.type1_pw_verify_sec)?;
+        write!(f, "  idle_timeout_min:                {}\n", self.type1_idle_timeout_min)?;
+        write!(f, "  encrypted_identity_master_key:   {}\n", Hexlify(&self.type1_encrypted_identity_master_key))?;
+        write!(f, "  encrypted_identity_lock_key:     {}\n", Hexlify(&self.type1_encrypted_identity_lock_key))?;
+        write!(f, "  verification_tag:                {}\n", Hexlify(&self.type1_verification_tag))?;
 
-        if let Err(_) = write!(f, "\nType2: rescue code data\n")                                                                    { return Ok(()); }
-        if let Err(_) = write!(f, "  length:                          {}\n", self.type2_length)                                     { return Ok(()); }
-        if let Err(_) = write!(f, "  type:                            {}\n", self.type2_type)                                       { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_random_salt:              {}\n", Hexlify(&self.type2_scrypt_random_salt))               { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_log_n_factor:             {}\n", self.type2_scrypt_log_n_factor)                        { return Ok(()); }
-        if let Err(_) = write!(f, "  scrypt_iteration_count:          {}\n", self.type2_scrypt_iteration_count)                     { return Ok(()); }
-        if let Err(_) = write!(f, "  encrypted_identity_unlock_key:   {}\n", Hexlify(&self.type2_encrypted_identity_unlock_key))    { return Ok(()); }
-        if let Err(_) = write!(f, "  verification_tag:                {}\n", Hexlify(&self.type2_verification_tag))                 { return Ok(()); }
+        write!(f, "\nType2: rescue code data\n")?;
+        write!(f, "  length:                          {}\n", self.type2_length)?;
+        write!(f, "  type:                            {}\n", self.type2_type)?;
+        write!(f, "  scrypt_random_salt:              {}\n", Hexlify(&self.type2_scrypt_random_salt))?;
+        write!(f, "  scrypt_log_n_factor:             {}\n", self.type2_scrypt_log_n_factor)?;
+        write!(f, "  scrypt_iteration_count:          {}\n", self.type2_scrypt_iteration_count)?;
+        write!(f, "  encrypted_identity_unlock_key:   {}\n", Hexlify(&self.type2_encrypted_identity_unlock_key))?;
+        write!(f, "  verification_tag:                {}\n", Hexlify(&self.type2_verification_tag))?;
 
         Ok(())
     }
@@ -100,6 +100,7 @@ impl<'a> TryRead<'a, Endian> for SqrlS4Identity<'a> {
 
         assert!(identity.header == "sqrldata");
         assert!(identity.type1_length == 125);
+        assert!(identity.type1_scrypt_iteration_count > 0);
         assert!(identity.type2_length == 73);
 
         Ok((identity, *offset))
